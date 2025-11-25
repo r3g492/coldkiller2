@@ -1,6 +1,11 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	"fmt"
+	"time"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
 
 func main() {
 	rl.InitWindow(800, 450, "raylib [core] example - basic window")
@@ -8,7 +13,17 @@ func main() {
 
 	rl.SetTargetFPS(60)
 
+	lastLog := time.Now()
+
 	for !rl.WindowShouldClose() {
+		dt := rl.GetFrameTime()
+		mouseLocation := rl.GetMousePosition()
+		if time.Since(lastLog) >= 1000*time.Millisecond {
+			msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
+			fmt.Println(msg)
+			lastLog = time.Now()
+		}
+
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.RayWhite)
