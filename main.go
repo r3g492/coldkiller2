@@ -9,11 +9,12 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+var lastLog = time.Now()
+
 func main() {
-	rl.InitWindow(800, 450, "my new game")
+	rl.InitWindow(1600, 900, "my new game")
 	defer rl.CloseWindow()
 	rl.SetTargetFPS(60)
-	lastLog := time.Now()
 	player := killer.Init()
 	defer player.Unload()
 	keyMap := input.DefaultWASD()
@@ -21,7 +22,7 @@ func main() {
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
-		log(lastLog, mouseLocation, dt)
+		log(mouseLocation, dt)
 		player.Control(input.ReadInput(keyMap), dt)
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
@@ -33,7 +34,7 @@ func main() {
 	}
 }
 
-func log(lastLog time.Time, mouseLocation rl.Vector2, dt float32) {
+func log(mouseLocation rl.Vector2, dt float32) {
 	if time.Since(lastLog) >= 1000*time.Millisecond {
 		msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
 		fmt.Println(msg)

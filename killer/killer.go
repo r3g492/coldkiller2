@@ -8,16 +8,17 @@ import (
 )
 
 type Killer struct {
-	model                 rl.Model
+	Model                 rl.Model
 	ModelDirection        rl.Vector3
-	animation             []rl.ModelAnimation
-	animationIdx          int
-	animationCurrentFrame int32
-	animationFrameCounter float32
-	animationFrameSpeed   float32
-	direction             rl.Vector3
+	Animation             []rl.ModelAnimation
+	AnimationIdx          int
+	AnimationCurrentFrame int32
+	AnimationFrameCounter float32
+	AnimationFrameSpeed   float32
+	Direction             rl.Vector3
 	Position              rl.Vector3
 	Size                  float32
+	MoveSpeed             float32
 }
 
 func Init() *Killer {
@@ -25,27 +26,28 @@ func Init() *Killer {
 	playerModel := rl.LoadModel("resources/robot.glb")
 	playerAnimation := rl.LoadModelAnimations("resources/robot.glb")
 	return &Killer{
-		model:                 playerModel,
+		Model:                 playerModel,
 		ModelDirection:        rl.Vector3{X: 0, Y: 0, Z: 0},
-		animation:             playerAnimation,
-		animationIdx:          0,
-		animationCurrentFrame: 0,
-		animationFrameCounter: 0,
-		animationFrameSpeed:   0.1,
-		direction:             rl.Vector3{X: 0, Y: 0, Z: 0},
+		Animation:             playerAnimation,
+		AnimationIdx:          0,
+		AnimationCurrentFrame: 0,
+		AnimationFrameCounter: 0,
+		AnimationFrameSpeed:   0.1,
+		Direction:             rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:              rl.Vector3{X: 0, Y: 0, Z: 0},
 		Size:                  2,
+		MoveSpeed:             10.0,
 	}
 }
 
 func (k *Killer) Unload() {
-	rl.UnloadModel(k.model)
-	rl.UnloadModelAnimations(k.animation)
+	rl.UnloadModel(k.Model)
+	rl.UnloadModelAnimations(k.Animation)
 }
 
 func (k *Killer) Draw3D() {
-	anim := k.animation[k.animationIdx]
-	rl.UpdateModelAnimation(k.model, anim, k.animationCurrentFrame)
+	anim := k.Animation[k.AnimationIdx]
+	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
 
 	rl.PushMatrix()
 	rl.Translatef(k.Position.X, k.Position.Y, k.Position.Z)
@@ -57,7 +59,7 @@ func (k *Killer) Draw3D() {
 	rl.Rotatef(yaw, 0, 1, 0)
 	rl.Rotatef(-pitch, 1, 0, 0)
 
-	rl.DrawModel(k.model, rl.NewVector3(0, -k.Size, 0), 0.7, rl.White)
+	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.7, rl.White)
 	rl.PopMatrix()
 }
 
@@ -72,20 +74,22 @@ func (k *Killer) GetCamera() rl.Camera3D {
 }
 
 func (k *Killer) Control(input input.Input, dt float32) {
-
+	k.Direction = rl.Vector3{}
 	if input.MoveUp {
-		k.Position.Z -= 0.1
+		k.Direction.Z -= 1
 	}
-
 	if input.MoveDown {
-		k.Position.Z += 0.1
+		k.Direction.Z += 1
 	}
-
 	if input.MoveLeft {
-		k.Position.X -= 0.1
+		k.Direction.X -= 1
 	}
-
 	if input.MoveRight {
-		k.Position.X += 0.1
+		k.Direction.X += 1
 	}
+	if rl.Vector3LengthSqr(k.Direction) > 0 {
+		k.Direction = rl.Vector3Normalize(k.Direction)
+	}
+	moveAmount := rl.Vector3Scale(k.Direction, k.MoveSpeed*dt)
+	k.Position = rl.Vector3Add(k.Position, moveAmount)
 }
