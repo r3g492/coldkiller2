@@ -18,15 +18,15 @@ func main() {
 	player := killer.Init()
 	defer player.Unload()
 	keyMap := input.DefaultWASD()
-	camera3d := player.GetCamera()
+	rl.InitAudioDevice()
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
-		log(mouseLocation, dt)
-		player.Control(input.ReadInput(keyMap), dt)
+		log(mouseLocation, dt, player)
+		player.Mutate(input.ReadInput(keyMap), dt)
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
-		rl.BeginMode3D(camera3d)
+		rl.BeginMode3D(player.Camera)
 		rl.DrawGrid(1000, 1)
 		player.Draw3D()
 		rl.EndMode3D()
@@ -34,10 +34,11 @@ func main() {
 	}
 }
 
-func log(mouseLocation rl.Vector2, dt float32) {
+func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 	if time.Since(lastLog) >= 1000*time.Millisecond {
 		msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
 		fmt.Println(msg)
+		fmt.Println(player.MoveDirection)
 		lastLog = time.Now()
 	}
 }
