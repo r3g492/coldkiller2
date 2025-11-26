@@ -24,6 +24,7 @@ func main() {
 
 	player := killer.Init(
 		model,
+		rl.Vector3{X: 0, Y: 10, Z: 0},
 		animation,
 		0,
 		0,
