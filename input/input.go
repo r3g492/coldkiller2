@@ -36,6 +36,6 @@ func ReadInput(keyMap KeyMap) Input {
 		MoveLeft:      rl.IsKeyDown(keyMap.Left),
 		MoveRight:     rl.IsKeyDown(keyMap.Right),
 		MouseLocation: rl.GetMousePosition(),
-		Fire:          rl.IsMouseButtonDown(keyMap.Fire),
+		Fire:          rl.IsMouseButtonPressed(keyMap.Fire),
 	}
 }

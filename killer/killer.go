@@ -23,7 +23,19 @@ type Killer struct {
 	MoveSpeed             float32
 	Camera                rl.Camera3D
 	ShotGunSound          rl.Sound
+	ActionTimeLeft        float32
+	State                 State
 }
+
+type State int
+
+const (
+	StateIdle   State = iota // 0
+	StateMove                // 1
+	StateAttack              // 2: Stationary shooting
+	StateDash                // 3: Fast uncontrolled movement
+	StateHit                 // 4: Stunned/Hurt
+)
 
 func Init() *Killer {
 	playerModel := rl.LoadModel("resources/robot.glb")
@@ -50,7 +62,8 @@ func Init() *Killer {
 			Fovy:       30.0,
 			Projection: rl.CameraOrthographic,
 		},
-		ShotGunSound: shotGunSound,
+		ShotGunSound:   shotGunSound,
+		ActionTimeLeft: 0,
 	}
 }
 
@@ -73,6 +86,23 @@ func (k *Killer) Draw3D() {
 }
 
 func (k *Killer) Mutate(input input.Input, dt float32) {
+	if k.ActionTimeLeft > 0 {
+		k.ActionTimeLeft -= dt
+	}
+	if k.ActionTimeLeft <= 0 {
+		k.movement(input, dt)
+	}
+
+	k.Camera = rl.Camera3D{
+		Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
+		Target:     k.Position,
+		Up:         rl.NewVector3(0.0, 0.0, -1),
+		Fovy:       30.0,
+		Projection: rl.CameraOrthographic,
+	}
+}
+
+func (k *Killer) movement(input input.Input, dt float32) {
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
 		k.MoveDirection.Z -= 1
@@ -96,6 +126,7 @@ func (k *Killer) Mutate(input input.Input, dt float32) {
 		move = false
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+		k.ActionTimeLeft = 0.2
 	}
 	if move {
 		k.Position = rl.Vector3Add(k.Position, moveAmount)
@@ -110,11 +141,4 @@ func (k *Killer) Mutate(input input.Input, dt float32) {
 		Z: ray.Position.Z,
 	}
 	k.TargetDirection = rl.Vector3Subtract(targetOnXzPlane, k.Position)
-	k.Camera = rl.Camera3D{
-		Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
-		Target:     k.Position,
-		Up:         rl.NewVector3(0.0, 0.0, -1),
-		Fovy:       30.0,
-		Projection: rl.CameraOrthographic,
-	}
 }

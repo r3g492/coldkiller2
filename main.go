@@ -14,12 +14,14 @@ var lastLog = time.Now()
 func main() {
 	rl.InitWindow(1600, 900, "my new game")
 	defer rl.CloseWindow()
+	rl.InitAudioDevice()
 	rl.SetTargetFPS(60)
 	player := killer.Init()
 	defer player.Unload()
 	keyMap := input.DefaultWASD()
-	rl.InitAudioDevice()
+
 	for !rl.WindowShouldClose() {
+		// seconds
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
 		log(mouseLocation, dt, player)
