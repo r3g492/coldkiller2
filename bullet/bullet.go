@@ -1,4 +1,4 @@
-package killer
+package bullet
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"

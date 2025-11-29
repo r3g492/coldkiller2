@@ -1,6 +1,7 @@
 package killer
 
 import (
+	"coldkiller2/bullet"
 	"coldkiller2/input"
 	"coldkiller2/util"
 	"math"
@@ -25,7 +26,7 @@ type Killer struct {
 	ShotGunSound          rl.Sound
 	ActionTimeLeft        float32
 	State                 State
-	Bullets               []Bullet
+	Bullets               []bullet.Bullet
 }
 
 type State int
@@ -65,7 +66,7 @@ func Init() *Killer {
 		},
 		ShotGunSound:   shotGunSound,
 		ActionTimeLeft: 0,
-		Bullets:        make([]Bullet, 0, 100),
+		Bullets:        make([]bullet.Bullet, 0, 100),
 	}
 }
 
@@ -139,7 +140,7 @@ func (k *Killer) movement(input input.Input, dt float32) {
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
 		spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(fireDir, 1.5))
 
-		k.Bullets = append(k.Bullets, NewBullet(spawnPos, fireDir))
+		k.Bullets = append(k.Bullets, bullet.NewBullet(spawnPos, fireDir))
 
 		k.ActionTimeLeft = 0.2
 	}
