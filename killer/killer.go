@@ -24,22 +24,6 @@ type Killer struct {
 	Camera                rl.Camera3D
 	ShotGunSound          rl.Sound
 	ActionTimeLeft        float32
-	State                 State
-}
-
-type State int
-
-const (
-	StateIdle   State = iota // 0
-	StateMove                // 1
-	StateAttack              // 2: Stationary shooting
-	StateDash                // 3: Fast uncontrolled movement
-	StateHit                 // 4: Stunned/Hurt
-)
-
-type BulletCmd struct {
-	Pos rl.Vector3
-	Dir rl.Vector3
 }
 
 func Init() *Killer {
@@ -82,7 +66,7 @@ func (k *Killer) Draw3D() {
 	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
 	rl.PushMatrix()
 	rl.Translatef(k.Position.X, k.Position.Y, k.Position.Z)
-	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Purple)
+	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
 	rl.Rotatef(270, 1, 0, 0)
 	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.7, rl.White)

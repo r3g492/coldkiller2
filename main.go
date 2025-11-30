@@ -2,6 +2,7 @@ package main
 
 import (
 	"coldkiller2/bullet"
+	"coldkiller2/enemy"
 	"coldkiller2/input"
 	"coldkiller2/killer"
 	"fmt"
@@ -21,21 +22,29 @@ func main() {
 	defer p.Unload()
 	keyMap := input.DefaultWASD()
 	bm := bullet.Manager{}
+	em := enemy.Manager{}
+	em.Init()
 	for !rl.WindowShouldClose() {
 		// seconds
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
 		log(mouseLocation, dt, p)
-		bm.Mutate(dt, p)
+
 		bc := p.Mutate(input.ReadInput(keyMap), dt)
+		ebc := em.Mutate(dt, p)
+
 		bm.KillerBulletCreate(bc)
+		bm.EnemyBulletCreate(ebc)
+		bm.Mutate(dt, p)
+
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
 
 		rl.BeginMode3D(p.Camera)
 		rl.DrawGrid(1000, 1)
 		p.Draw3D()
-		bm.DrawBullets()
+		em.DrawEnemies3D()
+		bm.DrawBullets3D()
 		rl.EndMode3D()
 
 		rl.EndDrawing()

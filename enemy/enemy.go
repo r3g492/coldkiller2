@@ -1,8 +1,6 @@
 package enemy
 
 import (
-	"coldkiller2/bullet"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -19,19 +17,31 @@ type Enemy struct {
 	Position              rl.Vector3
 	Size                  float32
 	MoveSpeed             float32
-	Camera                rl.Camera3D
-	ShotGunSound          rl.Sound
+	AttackSound           rl.Sound
 	ActionTimeLeft        float32
-	State                 State
-	Bullets               []bullet.Bullet
+	Health                int32
+	IsDead                bool
 }
 
-type State int
+func (e *Enemy) Draw3D() {
+	anim := e.Animation[e.AnimationIdx]
+	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
+	rl.PushMatrix()
+	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
+	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
+	rl.Rotatef(270, 1, 0, 0)
+	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
+	rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), 0.7, rl.White)
+	rl.PopMatrix()
+	rl.DrawRay(rl.NewRay(e.Position, e.TargetDirection), rl.Green)
+}
 
-const (
-	StateIdle   State = iota // 0
-	StateMove                // 1
-	StateAttack              // 2: Stationary shooting
-	StateDash                // 3: Fast uncontrolled movement
-	StateHit                 // 4: Stunned/Hurt
-)
+func (e *Enemy) Mutate(dt float32) []BulletCmd {
+	var bulletCmds []BulletCmd
+	if e.ActionTimeLeft > 0 {
+		e.ActionTimeLeft -= dt
+		return bulletCmds
+	}
+	// TODO: implment movement and bullet cmds
+	return bulletCmds
+}
