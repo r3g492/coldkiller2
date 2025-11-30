@@ -1,6 +1,7 @@
 package main
 
 import (
+	"coldkiller2/bullet"
 	"coldkiller2/input"
 	"coldkiller2/killer"
 	"fmt"
@@ -16,22 +17,27 @@ func main() {
 	defer rl.CloseWindow()
 	rl.InitAudioDevice()
 	rl.SetTargetFPS(60)
-	player := killer.Init()
-	defer player.Unload()
+	p := killer.Init()
+	defer p.Unload()
 	keyMap := input.DefaultWASD()
-
+	bm := bullet.Manager{}
 	for !rl.WindowShouldClose() {
 		// seconds
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
-		log(mouseLocation, dt, player)
-		player.Mutate(input.ReadInput(keyMap), dt)
+		log(mouseLocation, dt, p)
+		bm.Mutate(dt)
+		p.Mutate(input.ReadInput(keyMap), dt, &bm)
+
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
-		rl.BeginMode3D(player.Camera)
+
+		rl.BeginMode3D(p.Camera)
 		rl.DrawGrid(1000, 1)
-		player.Draw3D()
+		p.Draw3D()
+		bm.DrawBullets()
 		rl.EndMode3D()
+
 		rl.EndDrawing()
 	}
 }
