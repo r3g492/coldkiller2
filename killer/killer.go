@@ -23,7 +23,7 @@ type Killer struct {
 	MoveSpeed             float32
 	Camera                rl.Camera3D
 	ShotGunSound          rl.Sound
-	ActionTimeLeft        float32
+	AttackTimeLeft        float32
 }
 
 func Init() *Killer {
@@ -52,7 +52,7 @@ func Init() *Killer {
 			Projection: rl.CameraOrthographic,
 		},
 		ShotGunSound:   shotGunSound,
-		ActionTimeLeft: 0,
+		AttackTimeLeft: 0,
 	}
 }
 
@@ -76,11 +76,7 @@ func (k *Killer) Draw3D() {
 
 func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	var bulletCmds []BulletCmd
-	if k.ActionTimeLeft > 0 {
-		k.ActionTimeLeft -= dt
-		return bulletCmds
-	}
-	bulletCmds = k.movement(input, dt)
+	var move = k.movement(input, dt)
 	k.Camera = rl.Camera3D{
 		Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
 		Target:     k.Position,
@@ -88,12 +84,15 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 		Fovy:       30.0,
 		Projection: rl.CameraOrthographic,
 	}
+	if k.AttackTimeLeft <= 0 {
+		bulletCmds = k.attack(input, move)
+		return bulletCmds
+	}
+	k.AttackTimeLeft -= dt
 	return bulletCmds
 }
 
-func (k *Killer) movement(input input.Input, dt float32) []BulletCmd {
-	var bulletCmds []BulletCmd
-
+func (k *Killer) movement(input input.Input, dt float32) bool {
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
 		k.MoveDirection.Z -= 1
@@ -112,24 +111,8 @@ func (k *Killer) movement(input input.Input, dt float32) []BulletCmd {
 	}
 	moveAmount := rl.Vector3Scale(k.MoveDirection, k.MoveSpeed*dt)
 	move := rl.Vector3Length(moveAmount) > 0
-	if input.Fire {
-		rl.PlaySound(k.ShotGunSound)
-		move = false
-
-		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
-		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
-
-		fireDir := rl.Vector3Normalize(k.TargetDirection)
-		k.ActionTimeLeft = 0.2
-
-		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
-		spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(fireDir, 1.5))
-		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, fireDir})
-	}
 	if move {
 		k.Position = rl.Vector3Add(k.Position, moveAmount)
-		angleRad := math.Atan2(float64(k.MoveDirection.X), float64(k.MoveDirection.Z))
-		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 	}
 	mouseLocation := input.MouseLocation
 	ray := rl.GetScreenToWorldRay(mouseLocation, k.Camera)
@@ -139,5 +122,26 @@ func (k *Killer) movement(input input.Input, dt float32) []BulletCmd {
 		Z: ray.Position.Z,
 	}
 	k.TargetDirection = rl.Vector3Subtract(targetOnXzPlane, k.Position)
+	angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
+	k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+	return move
+}
+
+func (k *Killer) attack(input input.Input, move bool) []BulletCmd {
+	var bulletCmds []BulletCmd
+	if input.Fire {
+		rl.PlaySound(k.ShotGunSound)
+		move = false
+
+		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
+		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+
+		fireDir := rl.Vector3Normalize(k.TargetDirection)
+		k.AttackTimeLeft = 0.2
+
+		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
+		spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(fireDir, 1.5))
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, fireDir})
+	}
 	return bulletCmds
 }
