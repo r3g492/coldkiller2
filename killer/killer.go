@@ -43,7 +43,7 @@ func Init() *Killer {
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:              playerPosition,
 		Size:                  2,
-		MoveSpeed:             10.0,
+		MoveSpeed:             20.0,
 		Camera: rl.Camera3D{
 			Position:   rl.Vector3Add(playerPosition, rl.NewVector3(0.0, 10.0, 0.0)),
 			Target:     playerPosition,

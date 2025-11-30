@@ -29,8 +29,8 @@ func main() {
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
 		log(mouseLocation, dt, p)
-
-		bc := p.Mutate(input.ReadInput(keyMap), dt)
+		ip := input.ReadInput(keyMap)
+		bc := p.Mutate(ip, dt)
 		ebc := em.Mutate(dt, p)
 
 		bm.KillerBulletCreate(bc)
