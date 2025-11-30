@@ -21,8 +21,8 @@ func main() {
 	p := killer.Init()
 	defer p.Unload()
 	keyMap := input.DefaultWASD()
-	bm := bullet.Manager{}
-	em := enemy.Manager{}
+	bm := bullet.CreateManager()
+	em := enemy.CreateManager()
 	em.Init()
 	for !rl.WindowShouldClose() {
 		// seconds
@@ -35,7 +35,7 @@ func main() {
 
 		bm.KillerBulletCreate(bc)
 		bm.EnemyBulletCreate(ebc)
-		bm.Mutate(dt, p)
+		bm.Mutate(dt, p, em.Enemies)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)

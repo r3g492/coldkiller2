@@ -24,6 +24,9 @@ type Enemy struct {
 }
 
 func (e *Enemy) Draw3D() {
+	if e.IsDead {
+		return
+	}
 	anim := e.Animation[e.AnimationIdx]
 	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 	rl.PushMatrix()
@@ -44,4 +47,11 @@ func (e *Enemy) Mutate(dt float32) []BulletCmd {
 	}
 	// TODO: implment movement and bullet cmds
 	return bulletCmds
+}
+
+func (e *Enemy) Damage(d int32) {
+	e.Health -= d
+	if e.Health <= 0 {
+		e.IsDead = true
+	}
 }

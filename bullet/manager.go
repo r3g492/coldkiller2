@@ -11,6 +11,10 @@ type Manager struct {
 	Bullets []Bullet
 }
 
+func CreateManager() *Manager {
+	return &Manager{}
+}
+
 func (bm *Manager) KillerBulletCreate(
 	bulletCmds []killer.BulletCmd,
 ) {
@@ -47,9 +51,19 @@ func (bm *Manager) EnemyBulletCreate(
 	}
 }
 
-func (bm *Manager) Mutate(dt float32, p *killer.Killer) {
+func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 	for i := 0; i < len(bm.Bullets); i++ {
 		bm.Bullets[i].Mutate(dt)
+		for j := 0; j < len(el); j++ {
+			enemyPos := el[j].Position
+			enemySize := el[j].Size
+			curBullet := bm.Bullets[i]
+			if rl.Vector3Distance(enemyPos, curBullet.Position) < enemySize {
+				el[j].Damage(50)
+				bm.Bullets[i].Active = false
+			}
+		}
+
 		if bm.Bullets[i].LifeTime <= 0 || !bm.Bullets[i].Active {
 			bm.Bullets[i] = bm.Bullets[len(bm.Bullets)-1]
 			bm.Bullets = bm.Bullets[:len(bm.Bullets)-1]

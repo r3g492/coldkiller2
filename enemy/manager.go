@@ -11,6 +11,10 @@ type Manager struct {
 	Enemies []Enemy
 }
 
+func CreateManager() *Manager {
+	return &Manager{}
+}
+
 func (em *Manager) Init() {
 	enemyModel := rl.LoadModel("resources/robot.glb")
 	enemyAnimation := rl.LoadModelAnimations("resources/robot.glb")
