@@ -26,9 +26,9 @@ func main() {
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
 		log(mouseLocation, dt, p)
-		bm.Mutate(dt)
-		p.Mutate(input.ReadInput(keyMap), dt, &bm)
-
+		bm.Mutate(dt, p)
+		bc := p.Mutate(input.ReadInput(keyMap), dt)
+		bm.KillerBulletCreate(bc)
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
 

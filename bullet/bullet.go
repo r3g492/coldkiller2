@@ -1,6 +1,8 @@
 package bullet
 
 import (
+	"coldkiller2/killer"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -35,23 +37,24 @@ type Manager struct {
 	Bullets []Bullet
 }
 
-func (bm *Manager) NewPlayerBullet(
-	pos,
-	dir rl.Vector3,
+func (bm *Manager) KillerBulletCreate(
+	bulletCmds []killer.BulletCmd,
 ) {
-	b := Bullet{
-		Position:  pos,
-		Direction: dir,
-		Speed:     40.0,
-		Radius:    0.2,
-		Active:    true,
-		LifeTime:  2.0,
-		Shooter:   Player,
+	for _, bc := range bulletCmds {
+		b := Bullet{
+			Position:  bc.Pos,
+			Direction: bc.Dir,
+			Speed:     40.0,
+			Radius:    0.2,
+			Active:    true,
+			LifeTime:  2.0,
+			Shooter:   Player,
+		}
+		bm.Bullets = append(bm.Bullets, b)
 	}
-	bm.Bullets = append(bm.Bullets, b)
 }
 
-func (bm *Manager) Mutate(dt float32) {
+func (bm *Manager) Mutate(dt float32, p *killer.Killer) {
 	for i := 0; i < len(bm.Bullets); i++ {
 		bm.Bullets[i].Mutate(dt)
 		if bm.Bullets[i].LifeTime <= 0 || !bm.Bullets[i].Active {

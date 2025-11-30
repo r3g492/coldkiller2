@@ -1,7 +1,6 @@
 package killer
 
 import (
-	"coldkiller2/bullet"
 	"coldkiller2/input"
 	"coldkiller2/util"
 	"math"
@@ -37,6 +36,11 @@ const (
 	StateDash                // 3: Fast uncontrolled movement
 	StateHit                 // 4: Stunned/Hurt
 )
+
+type BulletCmd struct {
+	Pos rl.Vector3
+	Dir rl.Vector3
+}
 
 func Init() *Killer {
 	playerModel := rl.LoadModel("resources/robot.glb")
@@ -86,14 +90,13 @@ func (k *Killer) Draw3D() {
 	rl.DrawRay(rl.NewRay(k.Position, k.TargetDirection), rl.Green)
 }
 
-func (k *Killer) Mutate(input input.Input, dt float32, bm *bullet.Manager) {
+func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
+	var bulletCmds []BulletCmd
 	if k.ActionTimeLeft > 0 {
 		k.ActionTimeLeft -= dt
+		return bulletCmds
 	}
-	if k.ActionTimeLeft <= 0 {
-		k.movement(input, dt, bm)
-	}
-
+	bulletCmds = k.movement(input, dt)
 	k.Camera = rl.Camera3D{
 		Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
 		Target:     k.Position,
@@ -101,9 +104,12 @@ func (k *Killer) Mutate(input input.Input, dt float32, bm *bullet.Manager) {
 		Fovy:       30.0,
 		Projection: rl.CameraOrthographic,
 	}
+	return bulletCmds
 }
 
-func (k *Killer) movement(input input.Input, dt float32, bm *bullet.Manager) {
+func (k *Killer) movement(input input.Input, dt float32) []BulletCmd {
+	var bulletCmds []BulletCmd
+
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
 		k.MoveDirection.Z -= 1
@@ -126,16 +132,15 @@ func (k *Killer) movement(input input.Input, dt float32, bm *bullet.Manager) {
 		rl.PlaySound(k.ShotGunSound)
 		move = false
 
-		// 1. Calculate Rotation
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 
 		fireDir := rl.Vector3Normalize(k.TargetDirection)
+		k.ActionTimeLeft = 0.2
 
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
 		spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(fireDir, 1.5))
-		bm.NewPlayerBullet(spawnPos, fireDir)
-		k.ActionTimeLeft = 0.2
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, fireDir})
 	}
 	if move {
 		k.Position = rl.Vector3Add(k.Position, moveAmount)
@@ -150,4 +155,5 @@ func (k *Killer) movement(input input.Input, dt float32, bm *bullet.Manager) {
 		Z: ray.Position.Z,
 	}
 	k.TargetDirection = rl.Vector3Subtract(targetOnXzPlane, k.Position)
+	return bulletCmds
 }
