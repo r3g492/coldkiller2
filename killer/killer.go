@@ -38,7 +38,7 @@ func Init() *Killer {
 		AnimationIdx:          0,
 		AnimationCurrentFrame: 0,
 		AnimationFrameCounter: 0,
-		AnimationFrameSpeed:   0.1,
+		AnimationFrameSpeed:   24,
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:              playerPosition,
@@ -144,4 +144,18 @@ func (k *Killer) attack(input input.Input, move bool) []BulletCmd {
 		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, fireDir})
 	}
 	return bulletCmds
+}
+
+func (k *Killer) PlanAnimate(dt float32) {
+	k.AnimationFrameCounter += k.AnimationFrameSpeed * dt
+	anim := k.Animation[k.AnimationIdx]
+
+	for k.AnimationFrameCounter >= 1.0 {
+		k.AnimationCurrentFrame++
+		k.AnimationFrameCounter -= 1.0
+
+		if k.AnimationCurrentFrame >= anim.FrameCount {
+			k.AnimationCurrentFrame = 0
+		}
+	}
 }

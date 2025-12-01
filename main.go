@@ -31,6 +31,7 @@ func main() {
 		log(mouseLocation, dt, p)
 		ip := input.ReadInput(keyMap)
 		bc := p.Mutate(ip, dt)
+		p.PlanAnimate(dt)
 		ebc := em.Mutate(dt, p)
 
 		bm.KillerBulletCreate(bc)
