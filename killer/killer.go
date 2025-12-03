@@ -67,7 +67,7 @@ func (k *Killer) Draw3D() {
 	rl.PushMatrix()
 	rl.Translatef(k.Position.X, k.Position.Y, k.Position.Z)
 	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
-	rl.Rotatef(270, 1, 0, 0)
+	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.7, rl.White)
 	rl.PopMatrix()

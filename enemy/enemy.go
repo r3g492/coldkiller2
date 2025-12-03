@@ -32,7 +32,7 @@ func (e *Enemy) Draw3D() {
 	rl.PushMatrix()
 	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
 	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
-	rl.Rotatef(270, 1, 0, 0)
+	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), 0.7, rl.White)
 	rl.PopMatrix()
