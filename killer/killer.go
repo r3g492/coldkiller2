@@ -32,10 +32,20 @@ func Init() *Killer {
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 	return &Killer{
-		Model:                 playerModel,
-		ModelAngleDeg:         0,
-		Animation:             playerAnimation,
-		AnimationIdx:          0,
+		Model:         playerModel,
+		ModelAngleDeg: 0,
+		Animation:     playerAnimation,
+		// 0 dance
+		// 1 death
+		// 2 idle
+		// 3 jump
+		// 4 no
+		// 5 punch
+		// 6 running
+		// 7 sitting
+		// 8 standing
+		// 9 thumbsup
+		AnimationIdx:          2,
 		AnimationCurrentFrame: 0,
 		AnimationFrameCounter: 0,
 		AnimationFrameSpeed:   24,
@@ -113,6 +123,11 @@ func (k *Killer) movement(input input.Input, dt float32) bool {
 	move := rl.Vector3Length(moveAmount) > 0
 	if move {
 		k.Position = rl.Vector3Add(k.Position, moveAmount)
+		k.AnimationIdx = 6
+		k.AnimationFrameSpeed = 100
+	} else {
+		k.AnimationIdx = 2
+		k.AnimationFrameSpeed = 24
 	}
 	mouseLocation := input.MouseLocation
 	ray := rl.GetScreenToWorldRay(mouseLocation, k.Camera)
@@ -142,6 +157,8 @@ func (k *Killer) attack(input input.Input, move bool) []BulletCmd {
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
 		spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(fireDir, 1.5))
 		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, fireDir})
+		k.AnimationIdx = 5
+		k.AnimationFrameSpeed = 30
 	}
 	return bulletCmds
 }
