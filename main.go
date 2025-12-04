@@ -17,7 +17,7 @@ func main() {
 	rl.InitWindow(1600, 900, "my new game")
 	defer rl.CloseWindow()
 	rl.InitAudioDevice()
-	rl.SetTargetFPS(60)
+	rl.SetTargetFPS(144)
 	p := killer.Init()
 	defer p.Unload()
 	keyMap := input.DefaultWASD()
