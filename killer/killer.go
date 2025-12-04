@@ -90,9 +90,9 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	if k.AttackTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
 		if attack {
-			k.AttackTimeLeft = 0.7
+			k.AttackTimeLeft = 0.4
 			k.AnimationIdx = 5
-			k.AnimationFrameSpeed = 60
+			k.AnimationFrameSpeed = 100
 			k.AnimationCurrentFrame = 0
 		}
 	}
