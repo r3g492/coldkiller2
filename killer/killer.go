@@ -89,10 +89,10 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	mouseMovement(input, k)
 	if input.PunchPressed {
 		k.AnimationCurrentFrame = 0
+		k.AnimationFrameSpeed = 96
 	}
 	if input.PunchHold {
 		k.AnimationIdx = 7
-		k.AnimationFrameSpeed = 24
 		return bulletCmds
 	}
 
