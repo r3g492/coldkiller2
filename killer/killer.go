@@ -24,6 +24,7 @@ type Killer struct {
 	Camera                rl.Camera3D
 	ShotGunSound          rl.Sound
 	AttackTimeLeft        float32
+	HoldCount             float32
 }
 
 func Init() *Killer {
@@ -75,12 +76,29 @@ func (k *Killer) Draw3D() {
 	anim := k.Animation[k.AnimationIdx]
 	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
 	rl.PushMatrix()
-	rl.Translatef(k.Position.X, k.Position.Y, k.Position.Z)
-	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
+	backAmount := k.HoldCount * 0.001
+	if backAmount > 0.05 {
+		backAmount = 0.05
+	}
+	rl.Translatef(
+		k.Position.X-k.TargetDirection.X*backAmount,
+		k.Position.Y-k.TargetDirection.Y*backAmount,
+		k.Position.Z-k.TargetDirection.Z*backAmount,
+	)
 	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.7, rl.White)
 	rl.PopMatrix()
+
+	rl.PushMatrix()
+	rl.Translatef(
+		k.Position.X,
+		k.Position.Y,
+		k.Position.Z,
+	)
+	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
+	rl.PopMatrix()
+
 	rl.DrawRay(rl.NewRay(k.Position, k.TargetDirection), rl.Green)
 }
 
@@ -90,12 +108,16 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	if input.PunchPressed {
 		k.AnimationCurrentFrame = 0
 		k.AnimationFrameSpeed = 96
+		k.HoldCount = 0
 	}
 	if input.PunchHold {
+		k.HoldCount += 1
 		k.AnimationIdx = 7
 		return bulletCmds
 	}
-
+	if input.PunchReleased {
+		k.HoldCount = 0
+	}
 	attack := false
 	if k.AttackTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
