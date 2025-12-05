@@ -8,24 +8,26 @@ type Input struct {
 	MoveLeft      bool
 	MoveRight     bool
 	MouseLocation rl.Vector2
-	Fire          bool
+	PunchHold     bool
+	PunchPressed  bool
+	PunchReleased bool
 }
 
 type KeyMap struct {
-	Up    int32
-	Down  int32
-	Left  int32
-	Right int32
-	Fire  rl.MouseButton
+	Up        int32
+	Down      int32
+	Left      int32
+	Right     int32
+	PunchHold rl.MouseButton
 }
 
 func DefaultWASD() KeyMap {
 	return KeyMap{
-		Up:    rl.KeyW,
-		Down:  rl.KeyS,
-		Left:  rl.KeyA,
-		Right: rl.KeyD,
-		Fire:  rl.MouseLeftButton,
+		Up:        rl.KeyW,
+		Down:      rl.KeyS,
+		Left:      rl.KeyA,
+		Right:     rl.KeyD,
+		PunchHold: rl.MouseLeftButton,
 	}
 }
 
@@ -36,6 +38,8 @@ func ReadInput(keyMap KeyMap) Input {
 		MoveLeft:      rl.IsKeyDown(keyMap.Left),
 		MoveRight:     rl.IsKeyDown(keyMap.Right),
 		MouseLocation: rl.GetMousePosition(),
-		Fire:          rl.IsMouseButtonDown(keyMap.Fire),
+		PunchHold:     rl.IsMouseButtonDown(keyMap.PunchHold),
+		PunchPressed:  rl.IsMouseButtonPressed(keyMap.PunchHold),
+		PunchReleased: rl.IsMouseButtonReleased(keyMap.PunchHold),
 	}
 }

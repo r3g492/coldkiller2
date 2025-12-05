@@ -87,13 +87,22 @@ func (k *Killer) Draw3D() {
 func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	var bulletCmds []BulletCmd
 	mouseMovement(input, k)
+	if input.PunchPressed {
+		k.AnimationCurrentFrame = 0
+	}
+	if input.PunchHold {
+		k.AnimationIdx = 7
+		k.AnimationFrameSpeed = 24
+		return bulletCmds
+	}
+
 	attack := false
 	if k.AttackTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
 		if attack {
-			k.AttackTimeLeft = 0.4
+			k.AttackTimeLeft = 0.2
 			k.AnimationIdx = 5
-			k.AnimationFrameSpeed = 100
+			k.AnimationFrameSpeed = 150
 			k.AnimationCurrentFrame = 0
 		}
 	}
@@ -163,7 +172,7 @@ func (k *Killer) movement(input input.Input, dt float32) bool {
 
 func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	var bulletCmds []BulletCmd
-	if input.Fire {
+	if input.PunchReleased {
 		rl.PlaySound(k.ShotGunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
@@ -176,13 +185,29 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	return []BulletCmd{}, false
 }
 
+func (k *Killer) endOfHold() []BulletCmd {
+	var bulletCmds []BulletCmd
+	rl.PlaySound(k.ShotGunSound)
+	angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
+	k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+	fireDir := rl.Vector3Normalize(k.TargetDirection)
+	spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
+	spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(fireDir, 1.5))
+	bulletCmds = append(bulletCmds, BulletCmd{spawnPos, fireDir})
+	return bulletCmds
+}
+
 func (k *Killer) PlanAnimate(dt float32) {
 	k.AnimationFrameCounter += k.AnimationFrameSpeed * dt
 	anim := k.Animation[k.AnimationIdx]
-
 	for k.AnimationFrameCounter >= 1.0 {
 		k.AnimationCurrentFrame++
 		k.AnimationFrameCounter -= 1.0
+
+		if k.AnimationIdx == 7 && k.AnimationCurrentFrame >= anim.FrameCount-5 {
+			k.AnimationCurrentFrame = anim.FrameCount - 5
+			return
+		}
 
 		if k.AnimationCurrentFrame >= anim.FrameCount {
 			k.AnimationCurrentFrame = 0
