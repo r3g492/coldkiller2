@@ -86,6 +86,7 @@ func (k *Killer) Draw3D() {
 
 func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	var bulletCmds []BulletCmd
+	mouseMovement(input, k)
 	attack := false
 	if k.AttackTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
@@ -96,7 +97,6 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 			k.AnimationCurrentFrame = 0
 		}
 	}
-
 	move := false
 	if !attack && k.AttackTimeLeft <= 0 {
 		move = k.movement(input, dt)
@@ -123,6 +123,19 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	return bulletCmds
 }
 
+func mouseMovement(input input.Input, k *Killer) {
+	mouseLocation := input.MouseLocation
+	ray := rl.GetScreenToWorldRay(mouseLocation, k.Camera)
+	targetOnXzPlane := rl.Vector3{
+		X: ray.Position.X,
+		Y: 0,
+		Z: ray.Position.Z,
+	}
+	k.TargetDirection = rl.Vector3Subtract(targetOnXzPlane, k.Position)
+	angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
+	k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+}
+
 func (k *Killer) movement(input input.Input, dt float32) bool {
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
@@ -145,16 +158,6 @@ func (k *Killer) movement(input input.Input, dt float32) bool {
 	if move {
 		k.Position = rl.Vector3Add(k.Position, moveAmount)
 	}
-	mouseLocation := input.MouseLocation
-	ray := rl.GetScreenToWorldRay(mouseLocation, k.Camera)
-	targetOnXzPlane := rl.Vector3{
-		X: ray.Position.X,
-		Y: 0,
-		Z: ray.Position.Z,
-	}
-	k.TargetDirection = rl.Vector3Subtract(targetOnXzPlane, k.Position)
-	angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
-	k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 	return move
 }
 
