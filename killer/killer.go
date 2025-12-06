@@ -76,17 +76,34 @@ func (k *Killer) Draw3D() {
 	anim := k.Animation[k.AnimationIdx]
 	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
 	rl.PushMatrix()
-	backAmount := k.HoldCount * 0.001
-	if backAmount > 0.05 {
-		backAmount = 0.05
+
+	if k.AnimationIdx == 3 {
+		var frontAmount float32 = 0.1
+		rl.Translatef(
+			k.Position.X+k.TargetDirection.X*frontAmount,
+			k.Position.Y+k.TargetDirection.Y*frontAmount,
+			k.Position.Z+k.TargetDirection.Z*frontAmount,
+		)
+
+		angleRad := math.Atan2(float64(-k.TargetDirection.X), float64(-k.TargetDirection.Z))
+		headingDeg := float32(angleRad * (180.0 / math.Pi))
+		rl.Rotatef(headingDeg, 0, 1, 0)
+		rl.Rotatef(180, 0, 0, 1)
+		rl.Rotatef(-60, 1, 0, 0)
+	} else {
+		backAmount := k.HoldCount * 0.001
+		if backAmount > 0.05 {
+			backAmount = 0.05
+		}
+		rl.Translatef(
+			k.Position.X-k.TargetDirection.X*backAmount,
+			k.Position.Y-k.TargetDirection.Y*backAmount,
+			k.Position.Z-k.TargetDirection.Z*backAmount,
+		)
+
+		rl.Rotatef(-60, 1, 0, 0)
+		rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
 	}
-	rl.Translatef(
-		k.Position.X-k.TargetDirection.X*backAmount,
-		k.Position.Y-k.TargetDirection.Y*backAmount,
-		k.Position.Z-k.TargetDirection.Z*backAmount,
-	)
-	rl.Rotatef(-60, 1, 0, 0)
-	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.7, rl.White)
 	rl.PopMatrix()
 
@@ -123,7 +140,7 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 		bulletCmds, attack = k.attack(input)
 		if attack {
 			k.AttackTimeLeft = 0.2
-			k.AnimationIdx = 5
+			k.AnimationIdx = 3
 			k.AnimationFrameSpeed = 150
 			k.AnimationCurrentFrame = 0
 		}
