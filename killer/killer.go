@@ -85,6 +85,7 @@ func (k *Killer) Draw3D() {
 			k.Position.Z+k.TargetDirection.Z*frontAmount,
 		)
 
+		// TODO: adjust rotations ..
 		angleRad := math.Atan2(float64(-k.TargetDirection.X), float64(-k.TargetDirection.Z))
 		headingDeg := float32(angleRad * (180.0 / math.Pi))
 		rl.Rotatef(headingDeg, 0, 1, 0)
