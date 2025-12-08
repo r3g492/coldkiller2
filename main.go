@@ -5,6 +5,7 @@ import (
 	"coldkiller2/enemy"
 	"coldkiller2/input"
 	"coldkiller2/killer"
+	"coldkiller2/push"
 	"fmt"
 	"time"
 
@@ -24,19 +25,23 @@ func main() {
 	bm := bullet.CreateManager()
 	em := enemy.CreateManager()
 	em.Init()
+	pm := push.CreateManager()
 	for !rl.WindowShouldClose() {
 		// seconds
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
 		log(mouseLocation, dt, p)
 		ip := input.ReadInput(keyMap)
-		bc := p.Mutate(ip, dt)
+		bc, pc := p.Mutate(ip, dt)
 		p.PlanAnimate(dt)
 		ebc := em.Mutate(dt, p)
 
 		bm.KillerBulletCreate(bc)
 		bm.EnemyBulletCreate(ebc)
 		bm.Mutate(dt, p, em.Enemies)
+
+		pm.KillerPushCreate(pc)
+		pm.Mutate(dt, p, em.Enemies)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
@@ -46,6 +51,7 @@ func main() {
 		p.Draw3D()
 		em.DrawEnemies3D()
 		bm.DrawBullets3D()
+		pm.DrawPush3D()
 		rl.EndMode3D()
 
 		rl.EndDrawing()

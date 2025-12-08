@@ -25,6 +25,7 @@ type Killer struct {
 	ShotGunSound          rl.Sound
 	AttackTimeLeft        float32
 	HoldCount             float32
+	Health                float32
 }
 
 func Init() *Killer {
@@ -64,6 +65,7 @@ func Init() *Killer {
 		},
 		ShotGunSound:   shotGunSound,
 		AttackTimeLeft: 0,
+		Health:         100,
 	}
 }
 
@@ -119,8 +121,9 @@ func (k *Killer) Draw3D() {
 	rl.DrawRay(rl.NewRay(k.Position, k.TargetDirection), rl.Green)
 }
 
-func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
+func (k *Killer) Mutate(input input.Input, dt float32) ([]BulletCmd, []PushCmd) {
 	var bulletCmds []BulletCmd
+	var pushCmds []PushCmd
 	mouseMovement(input, k)
 	if input.PunchPressed {
 		k.AnimationCurrentFrame = 0
@@ -130,14 +133,14 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	if input.PunchHold {
 		k.HoldCount += 1
 		k.AnimationIdx = 7
-		return bulletCmds
+		return bulletCmds, pushCmds
 	}
 	if input.PunchReleased {
 		k.HoldCount = 0
 	}
 	attack := false
 	if k.AttackTimeLeft <= 0 {
-		bulletCmds, attack = k.attack(input)
+		bulletCmds, pushCmds, attack = k.attack(input)
 		if attack {
 			k.AttackTimeLeft = 0.2
 			k.AnimationIdx = 3
@@ -168,7 +171,7 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 		k.AnimationFrameSpeed = 24
 	}
 
-	return bulletCmds
+	return bulletCmds, pushCmds
 }
 
 func mouseMovement(input input.Input, k *Killer) {
@@ -209,8 +212,9 @@ func (k *Killer) movement(input input.Input, dt float32) bool {
 	return move
 }
 
-func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
+func (k *Killer) attack(input input.Input) ([]BulletCmd, []PushCmd, bool) {
 	var bulletCmds []BulletCmd
+	var pushCmds []PushCmd
 	if input.PunchReleased {
 		rl.PlaySound(k.ShotGunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
@@ -219,9 +223,10 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
 		spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(fireDir, 1.5))
 		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, fireDir})
-		return bulletCmds, true
+		pushCmds = append(pushCmds, PushCmd{spawnPos, 1.0, 0.5, 10})
+		return bulletCmds, pushCmds, true
 	}
-	return []BulletCmd{}, false
+	return bulletCmds, pushCmds, false
 }
 
 func (k *Killer) endOfHold() []BulletCmd {
