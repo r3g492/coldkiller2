@@ -8,8 +8,9 @@ type BulletCmd struct {
 }
 
 type PushCmd struct {
-	Position rl.Vector3
-	Radius   float32
-	LifeTime float32
-	Force    float32
+	Position  rl.Vector3
+	Direction rl.Vector3
+	Radius    float32
+	LifeTime  float32
+	Force     float32
 }

@@ -63,6 +63,7 @@ func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 		msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
 		fmt.Println(msg)
 		fmt.Println(player.MoveDirection)
+		fmt.Println(player.HoldCount)
 		lastLog = time.Now()
 	}
 }

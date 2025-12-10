@@ -135,9 +135,6 @@ func (k *Killer) Mutate(input input.Input, dt float32) ([]BulletCmd, []PushCmd) 
 		k.AnimationIdx = 7
 		return bulletCmds, pushCmds
 	}
-	if input.PunchReleased {
-		k.HoldCount = 0
-	}
 	attack := false
 	if k.AttackTimeLeft <= 0 {
 		bulletCmds, pushCmds, attack = k.attack(input)
@@ -147,6 +144,9 @@ func (k *Killer) Mutate(input input.Input, dt float32) ([]BulletCmd, []PushCmd) 
 			k.AnimationFrameSpeed = 150
 			k.AnimationCurrentFrame = 0
 		}
+	}
+	if input.PunchReleased {
+		k.HoldCount = 0
 	}
 	move := false
 	if !attack && k.AttackTimeLeft <= 0 {
@@ -215,14 +215,14 @@ func (k *Killer) movement(input input.Input, dt float32) bool {
 func (k *Killer) attack(input input.Input) ([]BulletCmd, []PushCmd, bool) {
 	var bulletCmds []BulletCmd
 	var pushCmds []PushCmd
-	if input.PunchReleased {
+	if input.PunchReleased && k.HoldCount > 20 {
 		rl.PlaySound(k.ShotGunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 		dir := rl.Vector3Normalize(k.TargetDirection)
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
-		spawnPos = rl.Vector3Add(spawnPos, rl.Vector3Scale(dir, 1.5))
-		pushCmds = append(pushCmds, PushCmd{spawnPos, 2.0, 0.5, 10})
+		spawnPosMoved := rl.Vector3Add(spawnPos, rl.Vector3Scale(dir, 1.5))
+		pushCmds = append(pushCmds, PushCmd{spawnPosMoved, dir, 2.0, 0.5, 10})
 		return bulletCmds, pushCmds, true
 	}
 	return bulletCmds, pushCmds, false

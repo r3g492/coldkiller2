@@ -20,13 +20,14 @@ func (pm *Manager) KillerPushCreate(
 ) {
 	for _, pc := range cmds {
 		p := Push{
-			Position: pc.Position,
-			Radius:   pc.Radius,
-			LifeTime: 1.0,
-			Shooter:  Player,
-			Color:    rl.Green,
-			Active:   true,
-			Force:    pc.Force,
+			Position:  pc.Position,
+			Direction: pc.Direction,
+			Radius:    pc.Radius,
+			LifeTime:  1.0,
+			Shooter:   Player,
+			Color:     rl.Green,
+			Active:    true,
+			Force:     pc.Force,
 		}
 		pm.PushList = append(pm.PushList, p)
 	}

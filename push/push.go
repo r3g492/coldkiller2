@@ -3,9 +3,10 @@ package push
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 type Push struct {
-	Position rl.Vector3
-	Radius   float32
-	Color    rl.Color
+	Position  rl.Vector3
+	Direction rl.Vector3
+	Radius    float32
+	Color     rl.Color
 	// F = ma
 	Force    float32
 	Shooter  Shooter
