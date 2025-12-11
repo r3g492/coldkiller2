@@ -56,9 +56,8 @@ func (pm *Manager) Mutate(dt float32, p *killer.Killer, enemyList []enemy.Enemy)
 		pm.PushList[i].Mutate(dt)
 		for j := 0; j < len(enemyList); j++ {
 			enemyPos := enemyList[j].Position
-			enemySize := enemyList[j].Size
 			curPush := pm.PushList[i]
-			if rl.Vector3Distance(enemyPos, curPush.Position) < enemySize {
+			if rl.Vector3Distance(enemyPos, curPush.Position) < curPush.Radius {
 				enemyList[j].Push(
 					curPush.Direction,
 					curPush.Force,

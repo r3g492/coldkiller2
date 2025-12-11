@@ -22,11 +22,11 @@ const (
 )
 
 func (p *Push) DrawPush() {
-	rl.DrawSphere(
+	/*rl.DrawSphere(
 		p.Position,
 		p.Radius,
 		p.Color,
-	)
+	)*/
 }
 
 func (p *Push) Mutate(dt float32) {
