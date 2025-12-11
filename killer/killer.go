@@ -223,7 +223,7 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, []PushCmd, bool) {
 		dir := rl.Vector3Normalize(k.TargetDirection)
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
 		spawnPosMoved := rl.Vector3Add(spawnPos, rl.Vector3Scale(dir, 1.5))
-		pushCmds = append(pushCmds, PushCmd{spawnPosMoved, dir, 4.0, 0.1, 10})
+		pushCmds = append(pushCmds, PushCmd{spawnPosMoved, dir, 5.0, 0.1, 10})
 		return bulletCmds, pushCmds, true
 	}
 	return bulletCmds, pushCmds, false

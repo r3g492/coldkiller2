@@ -41,6 +41,27 @@ func (em *Manager) Init() {
 		IsDead:                false,
 	}
 	em.Enemies = append(em.Enemies, addEnemy1)
+
+	addEnemy2 := Enemy{
+		Model:                 enemyModel,
+		ModelAngleDeg:         0,
+		Animation:             enemyAnimation,
+		AnimationIdx:          2,
+		AnimationCurrentFrame: 0,
+		AnimationFrameCounter: 0,
+		AnimationFrameSpeed:   24,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Position:              rl.Vector3{X: 5, Y: 0, Z: 0},
+		Size:                  2,
+		MoveSpeed:             10.0,
+		AttackSound:           shotGunSound,
+		ActionTimeLeft:        0,
+		PushedTimeLeft:        0,
+		Health:                100,
+		IsDead:                false,
+	}
+	em.Enemies = append(em.Enemies, addEnemy2)
 }
 
 func (em *Manager) Mutate(dt float32, p *killer.Killer) ([]BulletCmd, []PushCmd) {

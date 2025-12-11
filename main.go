@@ -55,7 +55,7 @@ func main() {
 		rl.ClearBackground(rl.Black)
 
 		rl.BeginMode3D(p.Camera)
-		rl.DrawGrid(1000, 1)
+		//rl.DrawGrid(1000, 1)
 		p.Draw3D()
 		em.DrawEnemies3D()
 		bm.DrawBullets3D()
