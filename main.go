@@ -32,15 +32,23 @@ func main() {
 		mouseLocation := rl.GetMousePosition()
 		log(mouseLocation, dt, p)
 		ip := input.ReadInput(keyMap)
+
+		// player
 		bc, pc := p.Mutate(ip, dt)
 		p.PlanAnimate(dt)
-		ebc := em.Mutate(dt, p)
 
+		// enemy
+		em.PlanAnimate(dt)
+		var ebc, epc = em.Mutate(dt, p)
+
+		// bullet
 		bm.KillerBulletCreate(bc)
 		bm.EnemyBulletCreate(ebc)
 		bm.Mutate(dt, p, em.Enemies)
 
+		// push
 		pm.KillerPushCreate(pc)
+		pm.EnemyPushCreate(epc)
 		pm.Mutate(dt, p, em.Enemies)
 
 		rl.BeginDrawing()

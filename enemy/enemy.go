@@ -19,14 +19,14 @@ type Enemy struct {
 	MoveSpeed             float32
 	AttackSound           rl.Sound
 	ActionTimeLeft        float32
+	PushedTimeLeft        float32
+	PushDirection         rl.Vector3
+	PushForce             float32
 	Health                int32
 	IsDead                bool
 }
 
 func (e *Enemy) Draw3D() {
-	if e.IsDead {
-		return
-	}
 	anim := e.Animation[e.AnimationIdx]
 	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 	rl.PushMatrix()
@@ -39,14 +39,24 @@ func (e *Enemy) Draw3D() {
 	rl.DrawRay(rl.NewRay(e.Position, e.TargetDirection), rl.Green)
 }
 
-func (e *Enemy) Mutate(dt float32) []BulletCmd {
+func (e *Enemy) Mutate(dt float32) ([]BulletCmd, []PushCmd) {
+	if e.PushedTimeLeft > 0 {
+		e.PushedTimeLeft -= dt
+		moveAmount := rl.Vector3Scale(e.PushDirection, e.PushForce*dt)
+		move := rl.Vector3Length(moveAmount) > 0
+		if move {
+			e.Position = rl.Vector3Add(e.Position, moveAmount)
+		}
+		return []BulletCmd{}, []PushCmd{}
+	}
+
 	var bulletCmds []BulletCmd
+	var pushCmds []PushCmd
 	if e.ActionTimeLeft > 0 {
 		e.ActionTimeLeft -= dt
-		return bulletCmds
+		return bulletCmds, pushCmds
 	}
-	// TODO: implment movement and bullet cmds
-	return bulletCmds
+	return []BulletCmd{}, []PushCmd{}
 }
 
 func (e *Enemy) Damage(d int32) {
@@ -54,4 +64,39 @@ func (e *Enemy) Damage(d int32) {
 	if e.Health <= 0 {
 		e.IsDead = true
 	}
+}
+
+func (e *Enemy) Push(
+	pushDirection rl.Vector3,
+	force float32,
+) {
+	e.PushedTimeLeft = 1.0
+	e.PushDirection = pushDirection
+	e.PushForce = force
+	e.AnimationIdx = 1
+	e.AnimationFrameSpeed = 58
+	e.AnimationCurrentFrame = 0
+}
+
+func (e *Enemy) PlanAnimate(dt float32) {
+	e.AnimationFrameCounter += e.AnimationFrameSpeed * dt
+	anim := e.Animation[e.AnimationIdx]
+	for e.AnimationFrameCounter >= 1.0 {
+		e.AnimationCurrentFrame++
+		e.AnimationFrameCounter -= 1.0
+
+		if e.AnimationIdx == 1 && e.AnimationCurrentFrame >= anim.FrameCount-1 {
+			e.AnimationCurrentFrame = anim.FrameCount - 1
+			return
+		}
+
+		if e.AnimationCurrentFrame >= anim.FrameCount {
+			e.AnimationCurrentFrame = 0
+		}
+	}
+}
+
+func (e *Enemy) Unload() {
+	rl.UnloadModel(e.Model)
+	rl.UnloadModelAnimations(e.Animation)
 }

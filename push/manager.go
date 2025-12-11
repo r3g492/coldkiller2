@@ -23,7 +23,7 @@ func (pm *Manager) KillerPushCreate(
 			Position:  pc.Position,
 			Direction: pc.Direction,
 			Radius:    pc.Radius,
-			LifeTime:  1.0,
+			LifeTime:  pc.LifeTime,
 			Shooter:   Player,
 			Color:     rl.Green,
 			Active:    true,
@@ -33,16 +33,36 @@ func (pm *Manager) KillerPushCreate(
 	}
 }
 
-func (pm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
+func (pm *Manager) EnemyPushCreate(
+	cmds []enemy.PushCmd,
+) {
+	for _, ec := range cmds {
+		p := Push{
+			Position:  ec.Position,
+			Direction: ec.Direction,
+			Radius:    ec.Radius,
+			LifeTime:  ec.LifeTime,
+			Shooter:   Enemy,
+			Color:     rl.Red,
+			Active:    true,
+			Force:     ec.Force,
+		}
+		pm.PushList = append(pm.PushList, p)
+	}
+}
+
+func (pm *Manager) Mutate(dt float32, p *killer.Killer, enemyList []enemy.Enemy) {
 	for i := 0; i < len(pm.PushList); i++ {
 		pm.PushList[i].Mutate(dt)
-		for j := 0; j < len(el); j++ {
-			enemyPos := el[j].Position
-			enemySize := el[j].Size
+		for j := 0; j < len(enemyList); j++ {
+			enemyPos := enemyList[j].Position
+			enemySize := enemyList[j].Size
 			curPush := pm.PushList[i]
 			if rl.Vector3Distance(enemyPos, curPush.Position) < enemySize {
-				el[j].Damage(50)
-				pm.PushList[i].Active = false
+				enemyList[j].Push(
+					curPush.Direction,
+					curPush.Force,
+				)
 			}
 		}
 

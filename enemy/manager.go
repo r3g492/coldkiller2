@@ -25,10 +25,10 @@ func (em *Manager) Init() {
 		Model:                 enemyModel,
 		ModelAngleDeg:         0,
 		Animation:             enemyAnimation,
-		AnimationIdx:          0,
+		AnimationIdx:          2,
 		AnimationCurrentFrame: 0,
 		AnimationFrameCounter: 0,
-		AnimationFrameSpeed:   0.1,
+		AnimationFrameSpeed:   24,
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:              enemyPosition,
@@ -36,28 +36,37 @@ func (em *Manager) Init() {
 		MoveSpeed:             10.0,
 		AttackSound:           shotGunSound,
 		ActionTimeLeft:        0,
+		PushedTimeLeft:        0,
 		Health:                100,
 		IsDead:                false,
 	}
 	em.Enemies = append(em.Enemies, addEnemy1)
 }
 
-func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
+func (em *Manager) Mutate(dt float32, p *killer.Killer) ([]BulletCmd, []PushCmd) {
 	var bulletCmds []BulletCmd
+	var pushCmds []PushCmd
 	for i := 0; i < len(em.Enemies); i++ {
-		var addBullets []BulletCmd = em.Enemies[i].Mutate(dt)
+		var addBullets, addPush = em.Enemies[i].Mutate(dt)
 		bulletCmds = append(bulletCmds, addBullets...)
+		pushCmds = append(pushCmds, addPush...)
 		if em.Enemies[i].IsDead {
 			em.Enemies[i] = em.Enemies[len(em.Enemies)-1]
 			em.Enemies = em.Enemies[:len(em.Enemies)-1]
 			i--
 		}
 	}
-	return bulletCmds
+	return bulletCmds, pushCmds
 }
 
 func (em *Manager) DrawEnemies3D() {
-	for _, e := range em.Enemies {
-		e.Draw3D()
+	for i := range em.Enemies {
+		em.Enemies[i].Draw3D()
+	}
+}
+
+func (em *Manager) PlanAnimate(dt float32) {
+	for i, _ := range em.Enemies {
+		em.Enemies[i].PlanAnimate(dt)
 	}
 }
