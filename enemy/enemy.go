@@ -1,30 +1,32 @@
 package enemy
 
 import (
+	"coldkiller2/animation"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type Enemy struct {
-	Model                 rl.Model
-	ModelAngleDeg         float32
+	Model         rl.Model
+	ModelAngleDeg float32
+
 	Animation             []rl.ModelAnimation
+	AnimationState        animation.ActionState
 	AnimationIdx          int
 	AnimationCurrentFrame int32
 	AnimationFrameCounter float32
 	AnimationFrameSpeed   float32
 	AnimationReplay       bool
-	MoveDirection         rl.Vector3
-	TargetDirection       rl.Vector3
-	Position              rl.Vector3
-	Size                  float32
-	MoveSpeed             float32
-	AttackSound           rl.Sound
-	ActionTimeLeft        float32
-	PushedTimeLeft        float32
-	PushDirection         rl.Vector3
-	PushForce             float32
-	Health                int32
-	IsDead                bool
+
+	MoveDirection   rl.Vector3
+	TargetDirection rl.Vector3
+	Position        rl.Vector3
+	Size            float32
+	MoveSpeed       float32
+	AttackSound     rl.Sound
+	ActionTimeLeft  float32
+	Health          int32
+	IsDead          bool
 }
 
 func (e *Enemy) Draw3D() {
@@ -41,41 +43,63 @@ func (e *Enemy) Draw3D() {
 }
 
 func (e *Enemy) Mutate(dt float32) []BulletCmd {
-	if e.PushedTimeLeft > 0 {
-		e.PushedTimeLeft -= dt
-		moveAmount := rl.Vector3Scale(e.PushDirection, e.PushForce*dt)
-		move := rl.Vector3Length(moveAmount) > 0
-		if move {
-			e.Position = rl.Vector3Add(e.Position, moveAmount)
-		}
-		return []BulletCmd{}
-	}
-
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
 		e.ActionTimeLeft -= dt
 		return bulletCmds
+	}
+
+	if e.ActionTimeLeft <= 0 {
+		e.AnimationState = animation.StateIdle
 	}
 	return []BulletCmd{}
 }
 
 func (e *Enemy) Damage(d int32) {
 	e.Health -= d
+	e.AnimationState = animation.StateAttacking
+	e.ActionTimeLeft = 0.2
 	if e.Health <= 0 {
 		e.IsDead = true
 	}
 }
 
-func (e *Enemy) Push(
-	pushDirection rl.Vector3,
-	force float32,
-) {
-	e.PushedTimeLeft = 1.0
-	e.PushDirection = pushDirection
-	e.PushForce = force
-	e.AnimationIdx = 1
-	e.AnimationFrameSpeed = 58
-	e.AnimationCurrentFrame = 0
+func (e *Enemy) Unload() {
+	rl.UnloadModel(e.Model)
+	rl.UnloadModelAnimations(e.Animation)
+}
+
+func (e *Enemy) ResolveAnimation() {
+	// 0 dance
+	// 1 death
+	// 2 idle
+	// 3 jump
+	// 4 no
+	// 5 punch
+	// 6 running
+	// 7 sitting
+	// 8 standing
+	// 9 thumbsup
+	switch e.AnimationState {
+	case animation.StateIdle:
+		e.setAnim(2, 24, true)
+	case animation.StateRunning:
+		e.setAnim(6, 100, true)
+	case animation.StateAttacking:
+		e.setAnim(3, 150, false)
+	case animation.StateCharging:
+		e.setAnim(7, 96, false)
+	}
+}
+
+func (e *Enemy) setAnim(idx int, speed float32, loop bool) {
+	if e.AnimationIdx != idx {
+		e.AnimationIdx = idx
+		e.AnimationCurrentFrame = 0
+		e.AnimationFrameCounter = 0
+	}
+	e.AnimationFrameSpeed = speed
+	e.AnimationReplay = loop
 }
 
 func (e *Enemy) PlanAnimate(dt float32) {
@@ -84,19 +108,14 @@ func (e *Enemy) PlanAnimate(dt float32) {
 	for e.AnimationFrameCounter >= 1.0 {
 		e.AnimationCurrentFrame++
 		e.AnimationFrameCounter -= 1.0
-
-		if e.AnimationIdx == 1 && e.AnimationCurrentFrame >= anim.FrameCount-1 {
-			e.AnimationCurrentFrame = anim.FrameCount - 1
+		if e.AnimationReplay == false && e.AnimationCurrentFrame >= anim.FrameCount-5 {
+			e.AnimationCurrentFrame = anim.FrameCount - 5
 			return
-		}
-
-		if e.AnimationCurrentFrame >= anim.FrameCount {
-			e.AnimationCurrentFrame = 0
 		}
 	}
 }
 
-func (e *Enemy) Unload() {
-	rl.UnloadModel(e.Model)
-	rl.UnloadModelAnimations(e.Animation)
+func (e *Enemy) Animate() {
+	anim := e.Animation[e.AnimationIdx]
+	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 }

@@ -38,14 +38,14 @@ func main() {
 		bc := p.Mutate(ip, dt)
 		p.ResolveAnimation()
 		p.PlanAnimate(dt)
+		p.Animate()
 		rl.BeginMode3D(p.Camera)
 		p.Draw3D()
-		p.Animate()
 		rl.EndMode3D()
 
 		// enemy
-		em.PlanAnimate(dt)
 		var ebc = em.Mutate(dt, p)
+		em.ProcessAnimation(dt)
 		rl.BeginMode3D(p.Camera)
 		em.DrawEnemies3D()
 		rl.EndMode3D()
@@ -67,7 +67,6 @@ func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 		msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
 		fmt.Println(msg)
 		fmt.Println(player.MoveDirection)
-		fmt.Println(player.HoldCount)
 		lastLog = time.Now()
 	}
 }

@@ -28,8 +28,7 @@ type Killer struct {
 	MoveSpeed       float32
 	Camera          rl.Camera3D
 	ShotGunSound    rl.Sound
-	AttackTimeLeft  float32
-	HoldCount       float32
+	ActionTimeLeft  float32
 	Health          float32
 }
 
@@ -40,19 +39,14 @@ func Init() *Killer {
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 	return &Killer{
-		Model:                 playerModel,
-		ModelAngleDeg:         0,
-		Animation:             playerAnimation,
-		AnimationIdx:          2,
-		AnimationCurrentFrame: 0,
-		AnimationFrameCounter: 0,
-		AnimationFrameSpeed:   24,
-		AnimationReplay:       true,
-		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:              playerPosition,
-		Size:                  2,
-		MoveSpeed:             20.0,
+		Model:           playerModel,
+		ModelAngleDeg:   0,
+		Animation:       playerAnimation,
+		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
+		Position:        playerPosition,
+		Size:            2,
+		MoveSpeed:       20.0,
 		Camera: rl.Camera3D{
 			Position:   rl.Vector3Add(playerPosition, rl.NewVector3(0.0, 10.0, 0.0)),
 			Target:     playerPosition,
@@ -61,7 +55,7 @@ func Init() *Killer {
 			Projection: rl.CameraOrthographic,
 		},
 		ShotGunSound:   shotGunSound,
-		AttackTimeLeft: 0,
+		ActionTimeLeft: 0,
 		Health:         100,
 	}
 }
@@ -69,11 +63,6 @@ func Init() *Killer {
 func (k *Killer) Unload() {
 	rl.UnloadModel(k.Model)
 	rl.UnloadModelAnimations(k.Animation)
-}
-
-func (k *Killer) Animate() {
-	anim := k.Animation[k.AnimationIdx]
-	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
 }
 
 func (k *Killer) Draw3D() {
@@ -105,16 +94,16 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 
 	mouseMovement(input, k)
 	attack := false
-	if k.AttackTimeLeft <= 0 {
+	if k.ActionTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
 		if attack {
-			k.AttackTimeLeft = 0.2
+			k.ActionTimeLeft = 0.2
 			k.AnimationState = animation.StateAttacking
 			k.AnimationCurrentFrame = 0
 		}
 	}
 
-	if !attack && k.AttackTimeLeft <= 0 {
+	if !attack && k.ActionTimeLeft <= 0 {
 		moving := k.movement(input, dt)
 		k.Camera = rl.Camera3D{
 			Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
@@ -130,7 +119,7 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 		}
 	}
 
-	k.AttackTimeLeft -= dt
+	k.ActionTimeLeft -= dt
 	return bulletCmds
 }
 
@@ -186,19 +175,6 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	return bulletCmds, false
 }
 
-func (k *Killer) PlanAnimate(dt float32) {
-	k.AnimationFrameCounter += k.AnimationFrameSpeed * dt
-	anim := k.Animation[k.AnimationIdx]
-	for k.AnimationFrameCounter >= 1.0 {
-		k.AnimationCurrentFrame++
-		k.AnimationFrameCounter -= 1.0
-		if k.AnimationReplay == false && k.AnimationCurrentFrame >= anim.FrameCount-5 {
-			k.AnimationCurrentFrame = anim.FrameCount - 5
-			return
-		}
-	}
-}
-
 func (k *Killer) ResolveAnimation() {
 	// 0 dance
 	// 1 death
@@ -230,4 +206,22 @@ func (k *Killer) setAnim(idx int, speed float32, loop bool) {
 	}
 	k.AnimationFrameSpeed = speed
 	k.AnimationReplay = loop
+}
+
+func (k *Killer) PlanAnimate(dt float32) {
+	k.AnimationFrameCounter += k.AnimationFrameSpeed * dt
+	anim := k.Animation[k.AnimationIdx]
+	for k.AnimationFrameCounter >= 1.0 {
+		k.AnimationCurrentFrame++
+		k.AnimationFrameCounter -= 1.0
+		if k.AnimationReplay == false && k.AnimationCurrentFrame >= anim.FrameCount-5 {
+			k.AnimationCurrentFrame = anim.FrameCount - 5
+			return
+		}
+	}
+}
+
+func (k *Killer) Animate() {
+	anim := k.Animation[k.AnimationIdx]
+	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
 }

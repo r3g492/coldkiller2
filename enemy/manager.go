@@ -1,6 +1,7 @@
 package enemy
 
 import (
+	"coldkiller2/animation"
 	"coldkiller2/killer"
 	"coldkiller2/util"
 
@@ -22,44 +23,35 @@ func (em *Manager) Init() {
 	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 	// TODO: change unit init
 	addEnemy1 := Enemy{
-		Model:                 enemyModel,
-		ModelAngleDeg:         0,
-		Animation:             enemyAnimation,
-		AnimationIdx:          0,
-		AnimationCurrentFrame: 0,
-		AnimationFrameCounter: 0,
-		AnimationFrameSpeed:   24,
-		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:              enemyPosition,
-		Size:                  2,
-		MoveSpeed:             10.0,
-		AttackSound:           shotGunSound,
-		ActionTimeLeft:        0,
-		PushedTimeLeft:        0,
-		Health:                100,
-		IsDead:                false,
+		Model:           enemyModel,
+		ModelAngleDeg:   0,
+		Animation:       enemyAnimation,
+		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
+		Position:        enemyPosition,
+		Size:            2,
+		MoveSpeed:       10.0,
+		AttackSound:     shotGunSound,
+		ActionTimeLeft:  0,
+		Health:          100,
+		IsDead:          false,
 	}
 	em.Enemies = append(em.Enemies, addEnemy1)
 
 	addEnemy2 := Enemy{
-		Model:                 enemyModel,
-		ModelAngleDeg:         0,
-		Animation:             enemyAnimation,
-		AnimationIdx:          0,
-		AnimationCurrentFrame: 0,
-		AnimationFrameCounter: 0,
-		AnimationFrameSpeed:   24,
-		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:              rl.Vector3{X: 5, Y: 0, Z: 0},
-		Size:                  2,
-		MoveSpeed:             10.0,
-		AttackSound:           shotGunSound,
-		ActionTimeLeft:        0,
-		PushedTimeLeft:        0,
-		Health:                100,
-		IsDead:                false,
+		Model:           enemyModel,
+		ModelAngleDeg:   0,
+		Animation:       enemyAnimation,
+		AnimationState:  animation.StateIdle,
+		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
+		Position:        rl.Vector3{X: 5, Y: 0, Z: 0},
+		Size:            2,
+		MoveSpeed:       10.0,
+		AttackSound:     shotGunSound,
+		ActionTimeLeft:  0,
+		Health:          100,
+		IsDead:          false,
 	}
 	em.Enemies = append(em.Enemies, addEnemy2)
 }
@@ -84,8 +76,10 @@ func (em *Manager) DrawEnemies3D() {
 	}
 }
 
-func (em *Manager) PlanAnimate(dt float32) {
+func (em *Manager) ProcessAnimation(dt float32) {
 	for i, _ := range em.Enemies {
+		em.Enemies[i].ResolveAnimation()
 		em.Enemies[i].PlanAnimate(dt)
+		em.Enemies[i].Animate()
 	}
 }
