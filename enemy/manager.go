@@ -20,12 +20,12 @@ func (em *Manager) Init() {
 	enemyAnimation := rl.LoadModelAnimations("resources/robot.glb")
 	enemyPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
-
+	// TODO: change unit init
 	addEnemy1 := Enemy{
 		Model:                 enemyModel,
 		ModelAngleDeg:         0,
 		Animation:             enemyAnimation,
-		AnimationIdx:          2,
+		AnimationIdx:          0,
 		AnimationCurrentFrame: 0,
 		AnimationFrameCounter: 0,
 		AnimationFrameSpeed:   24,
@@ -46,7 +46,7 @@ func (em *Manager) Init() {
 		Model:                 enemyModel,
 		ModelAngleDeg:         0,
 		Animation:             enemyAnimation,
-		AnimationIdx:          2,
+		AnimationIdx:          0,
 		AnimationCurrentFrame: 0,
 		AnimationFrameCounter: 0,
 		AnimationFrameSpeed:   24,
@@ -64,20 +64,18 @@ func (em *Manager) Init() {
 	em.Enemies = append(em.Enemies, addEnemy2)
 }
 
-func (em *Manager) Mutate(dt float32, p *killer.Killer) ([]BulletCmd, []PushCmd) {
+func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 	var bulletCmds []BulletCmd
-	var pushCmds []PushCmd
 	for i := 0; i < len(em.Enemies); i++ {
-		var addBullets, addPush = em.Enemies[i].Mutate(dt)
+		var addBullets = em.Enemies[i].Mutate(dt)
 		bulletCmds = append(bulletCmds, addBullets...)
-		pushCmds = append(pushCmds, addPush...)
 		if em.Enemies[i].IsDead {
 			em.Enemies[i] = em.Enemies[len(em.Enemies)-1]
 			em.Enemies = em.Enemies[:len(em.Enemies)-1]
 			i--
 		}
 	}
-	return bulletCmds, pushCmds
+	return bulletCmds
 }
 
 func (em *Manager) DrawEnemies3D() {

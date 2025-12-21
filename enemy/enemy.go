@@ -12,6 +12,7 @@ type Enemy struct {
 	AnimationCurrentFrame int32
 	AnimationFrameCounter float32
 	AnimationFrameSpeed   float32
+	AnimationReplay       bool
 	MoveDirection         rl.Vector3
 	TargetDirection       rl.Vector3
 	Position              rl.Vector3
@@ -39,7 +40,7 @@ func (e *Enemy) Draw3D() {
 	rl.DrawRay(rl.NewRay(e.Position, e.TargetDirection), rl.Green)
 }
 
-func (e *Enemy) Mutate(dt float32) ([]BulletCmd, []PushCmd) {
+func (e *Enemy) Mutate(dt float32) []BulletCmd {
 	if e.PushedTimeLeft > 0 {
 		e.PushedTimeLeft -= dt
 		moveAmount := rl.Vector3Scale(e.PushDirection, e.PushForce*dt)
@@ -47,16 +48,15 @@ func (e *Enemy) Mutate(dt float32) ([]BulletCmd, []PushCmd) {
 		if move {
 			e.Position = rl.Vector3Add(e.Position, moveAmount)
 		}
-		return []BulletCmd{}, []PushCmd{}
+		return []BulletCmd{}
 	}
 
 	var bulletCmds []BulletCmd
-	var pushCmds []PushCmd
 	if e.ActionTimeLeft > 0 {
 		e.ActionTimeLeft -= dt
-		return bulletCmds, pushCmds
+		return bulletCmds
 	}
-	return []BulletCmd{}, []PushCmd{}
+	return []BulletCmd{}
 }
 
 func (e *Enemy) Damage(d int32) {

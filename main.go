@@ -5,7 +5,6 @@ import (
 	"coldkiller2/enemy"
 	"coldkiller2/input"
 	"coldkiller2/killer"
-	"coldkiller2/push"
 	"fmt"
 	"time"
 
@@ -25,8 +24,10 @@ func main() {
 	bm := bullet.CreateManager()
 	em := enemy.CreateManager()
 	em.Init()
-	pm := push.CreateManager()
 	for !rl.WindowShouldClose() {
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.Black)
+
 		// seconds
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
@@ -34,32 +35,27 @@ func main() {
 		ip := input.ReadInput(keyMap)
 
 		// player
-		bc, pc := p.Mutate(ip, dt)
+		bc := p.Mutate(ip, dt)
+		p.ResolveAnimation()
 		p.PlanAnimate(dt)
+		rl.BeginMode3D(p.Camera)
+		p.Draw3D()
+		p.Animate()
+		rl.EndMode3D()
 
 		// enemy
 		em.PlanAnimate(dt)
-		var ebc, epc = em.Mutate(dt, p)
+		var ebc = em.Mutate(dt, p)
+		rl.BeginMode3D(p.Camera)
+		em.DrawEnemies3D()
+		rl.EndMode3D()
 
 		// bullet
 		bm.KillerBulletCreate(bc)
 		bm.EnemyBulletCreate(ebc)
 		bm.Mutate(dt, p, em.Enemies)
-
-		// push
-		pm.KillerPushCreate(pc)
-		pm.EnemyPushCreate(epc)
-		pm.Mutate(dt, p, em.Enemies)
-
-		rl.BeginDrawing()
-		rl.ClearBackground(rl.Black)
-
 		rl.BeginMode3D(p.Camera)
-		//rl.DrawGrid(1000, 1)
-		p.Draw3D()
-		em.DrawEnemies3D()
 		bm.DrawBullets3D()
-		pm.DrawPush3D()
 		rl.EndMode3D()
 
 		rl.EndDrawing()
