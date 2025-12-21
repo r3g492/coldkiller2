@@ -180,7 +180,7 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 		dir := rl.Vector3Normalize(k.TargetDirection)
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
-		var _ = rl.Vector3Add(spawnPos, rl.Vector3Scale(dir, 1.5))
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir})
 		return bulletCmds, true
 	}
 	return bulletCmds, false
