@@ -6,5 +6,5 @@ const (
 	StateIdle ActionState = iota
 	StateRunning
 	StateAttacking
-	StateCharging
+	StateDying
 )

@@ -193,8 +193,8 @@ func (k *Killer) ResolveAnimation() {
 		k.setAnim(6, 100, true)
 	case animation.StateAttacking:
 		k.setAnim(3, 150, false)
-	case animation.StateCharging:
-		k.setAnim(7, 96, false)
+	case animation.StateDying:
+		k.setAnim(1, 56, false)
 	}
 }
 

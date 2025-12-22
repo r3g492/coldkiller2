@@ -52,6 +52,11 @@ func (e *Enemy) Mutate(dt float32) []BulletCmd {
 	if e.ActionTimeLeft <= 0 {
 		e.AnimationState = animation.StateIdle
 	}
+
+	if e.ActionTimeLeft <= 0 && e.Health <= 0 {
+		e.IsDead = true
+	}
+
 	return []BulletCmd{}
 }
 
@@ -60,7 +65,8 @@ func (e *Enemy) Damage(d int32) {
 	e.AnimationState = animation.StateAttacking
 	e.ActionTimeLeft = 0.2
 	if e.Health <= 0 {
-		e.IsDead = true
+		e.AnimationState = animation.StateDying
+		e.ActionTimeLeft = 10
 	}
 }
 
@@ -87,8 +93,8 @@ func (e *Enemy) ResolveAnimation() {
 		e.setAnim(6, 100, true)
 	case animation.StateAttacking:
 		e.setAnim(3, 150, false)
-	case animation.StateCharging:
-		e.setAnim(7, 96, false)
+	case animation.StateDying:
+		e.setAnim(1, 56, false)
 	}
 }
 
