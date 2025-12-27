@@ -34,8 +34,8 @@ type Killer struct {
 
 func Init() *Killer {
 	// TODO: change unit init
-	playerModel := rl.LoadModel("resources/robot.glb")
-	playerAnimation := rl.LoadModelAnimations("resources/robot.glb")
+	playerModel := rl.LoadModel("resources/unit.glb")
+	playerAnimation := rl.LoadModelAnimations("resources/unit.glb")
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 	return &Killer{
@@ -188,13 +188,13 @@ func (k *Killer) ResolveAnimation() {
 	// 9 thumbsup
 	switch k.AnimationState {
 	case animation.StateIdle:
-		k.setAnim(2, 24, true)
+		k.setAnim(0, 24, true)
 	case animation.StateRunning:
-		k.setAnim(6, 100, true)
+		k.setAnim(1, 48, true)
 	case animation.StateAttacking:
-		k.setAnim(3, 150, false)
+		k.setAnim(0, 150, false)
 	case animation.StateDying:
-		k.setAnim(1, 56, false)
+		k.setAnim(0, 56, false)
 	}
 }
 
