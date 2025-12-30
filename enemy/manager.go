@@ -17,8 +17,8 @@ func CreateManager() *Manager {
 }
 
 func (em *Manager) Init() {
-	enemyModel := rl.LoadModel("resources/robot.glb")
-	enemyAnimation := rl.LoadModelAnimations("resources/robot.glb")
+	enemyModel := rl.LoadModel("resources/unit_v3.glb")
+	enemyAnimation := rl.LoadModelAnimations("resources/unit_v3.glb")
 	enemyPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 	// TODO: change unit init

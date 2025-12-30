@@ -62,8 +62,8 @@ func (e *Enemy) Mutate(dt float32) []BulletCmd {
 
 func (e *Enemy) Damage(d int32) {
 	e.Health -= d
-	e.AnimationState = animation.StateAttacking
-	e.ActionTimeLeft = 0.2
+	e.AnimationState = animation.StateDying
+	e.ActionTimeLeft = 0.1
 	if e.Health <= 0 {
 		e.AnimationState = animation.StateDying
 		e.ActionTimeLeft = 10
@@ -88,13 +88,13 @@ func (e *Enemy) ResolveAnimation() {
 	// 9 thumbsup
 	switch e.AnimationState {
 	case animation.StateIdle:
-		e.setAnim(2, 24, true)
+		e.setAnim(0, 24, true)
 	case animation.StateRunning:
-		e.setAnim(6, 100, true)
+		e.setAnim(1, 96, true)
 	case animation.StateAttacking:
-		e.setAnim(3, 150, false)
+		e.setAnim(2, 150, false)
 	case animation.StateDying:
-		e.setAnim(1, 56, false)
+		e.setAnim(3, 96, false)
 	}
 }
 
