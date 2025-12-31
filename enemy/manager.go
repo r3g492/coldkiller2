@@ -83,3 +83,10 @@ func (em *Manager) ProcessAnimation(dt float32) {
 		em.Enemies[i].Animate()
 	}
 }
+
+func (em *Manager) Unload() {
+	for i, _ := range em.Enemies {
+		em.Enemies[i].Unload()
+	}
+	em.Enemies = nil
+}
