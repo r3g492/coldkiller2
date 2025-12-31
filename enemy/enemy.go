@@ -46,6 +46,7 @@ func (e *Enemy) Draw3D() {
 func (e *Enemy) Mutate(
 	dt float32,
 	p killer.Killer,
+	enemyObstacles []rl.BoundingBox,
 ) []BulletCmd {
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
@@ -60,7 +61,7 @@ func (e *Enemy) Mutate(
 		e.IsDead = true
 	}
 
-	// TODO: add ai
+	// TODO: add ai, do collision check
 	// e.MoveDirection = rl.Vector3Normalize(rl.Vector3Subtract(p.Position, e.Position))
 	e.updateByMovementDirection(dt)
 

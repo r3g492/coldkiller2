@@ -58,8 +58,9 @@ func (em *Manager) Init() {
 
 func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 	var bulletCmds []BulletCmd
+	allEnemyBoxes := em.GetEnemyBoundingBoxes()
 	for i := 0; i < len(em.Enemies); i++ {
-		var addBullets = em.Enemies[i].Mutate(dt, *p)
+		var addBullets = em.Enemies[i].Mutate(dt, *p, allEnemyBoxes)
 		bulletCmds = append(bulletCmds, addBullets...)
 		if em.Enemies[i].IsDead {
 			em.Enemies[i] = em.Enemies[len(em.Enemies)-1]
@@ -99,4 +100,17 @@ func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
 		}
 	}
 	return boxes
+}
+
+func (e *Enemy) isColliding(myIdx int, obstacles []rl.BoundingBox) bool {
+	myBox := e.GetBoundingBox()
+	for i, box := range obstacles {
+		if i == myIdx {
+			continue
+		}
+		if rl.CheckCollisionBoxes(myBox, box) {
+			return true
+		}
+	}
+	return false
 }

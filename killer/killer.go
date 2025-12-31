@@ -156,14 +156,10 @@ func (k *Killer) movement(input input.Input, dt float32, obstacles []rl.Bounding
 	moveAmount := rl.Vector3Scale(k.MoveDirection, k.MoveSpeed*dt)
 	if rl.Vector3Length(moveAmount) > 0 {
 		oldPos := k.Position
-
-		// Try X move
 		k.Position.X += moveAmount.X
 		if k.isColliding(obstacles) {
 			k.Position.X = oldPos.X
 		}
-
-		// Try Z move
 		k.Position.Z += moveAmount.Z
 		if k.isColliding(obstacles) {
 			k.Position.Z = oldPos.Z
