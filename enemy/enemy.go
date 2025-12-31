@@ -2,6 +2,7 @@ package enemy
 
 import (
 	"coldkiller2/animation"
+	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -39,7 +40,6 @@ func (e *Enemy) Draw3D() {
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), 0.7, rl.White)
 	rl.PopMatrix()
-	rl.DrawRay(rl.NewRay(e.Position, e.TargetDirection), rl.Green)
 }
 
 func (e *Enemy) Mutate(dt float32) []BulletCmd {
@@ -57,7 +57,21 @@ func (e *Enemy) Mutate(dt float32) []BulletCmd {
 		e.IsDead = true
 	}
 
-	return []BulletCmd{}
+	// TODO: add ai
+	e.MoveDirection = rl.Vector3{X: 1}
+	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
+	moving := rl.Vector3Length(moveAmount) > 0
+	if moving {
+		e.Position = rl.Vector3Add(e.Position, moveAmount)
+	}
+	if moving {
+		e.AnimationState = animation.StateRunning
+	}
+	e.TargetDirection = e.MoveDirection
+	angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
+	e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+
+	return bulletCmds
 }
 
 func (e *Enemy) Damage(d int32) {
@@ -84,7 +98,7 @@ func (e *Enemy) ResolveAnimation() {
 	case animation.StateAttacking:
 		e.setAnim(2, 150, false)
 	case animation.StateDying:
-		e.setAnim(3, 96, false)
+		e.setAnim(3, 200, false)
 	}
 }
 
