@@ -47,6 +47,7 @@ func (e *Enemy) Mutate(
 	dt float32,
 	p killer.Killer,
 	enemyObstacles []rl.BoundingBox,
+	myIdx int,
 ) []BulletCmd {
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
@@ -62,24 +63,27 @@ func (e *Enemy) Mutate(
 	}
 
 	// TODO: add ai, do collision check
-	// e.MoveDirection = rl.Vector3Normalize(rl.Vector3Subtract(p.Position, e.Position))
-	e.updateByMovementDirection(dt)
-
-	return bulletCmds
-}
-
-func (e *Enemy) updateByMovementDirection(dt float32) {
+	e.MoveDirection = rl.Vector3Normalize(rl.Vector3Subtract(p.Position, e.Position))
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 	moving := rl.Vector3Length(moveAmount) > 0
 	if moving {
-		e.Position = rl.Vector3Add(e.Position, moveAmount)
-	}
-	if moving {
 		e.AnimationState = animation.StateRunning
 	}
+
+	oldPos := e.Position
+	e.Position.X += moveAmount.X
+	if e.isColliding(myIdx, enemyObstacles, p.GetBoundingBox()) {
+		e.Position.X = oldPos.X
+	}
+	e.Position.Z += moveAmount.Z
+	if e.isColliding(myIdx, enemyObstacles, p.GetBoundingBox()) {
+		e.Position.Z = oldPos.Z
+	}
+
 	e.TargetDirection = e.MoveDirection
 	angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 	e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+	return bulletCmds
 }
 
 func (e *Enemy) Damage(d int32) {

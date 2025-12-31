@@ -30,7 +30,7 @@ func (em *Manager) Init() {
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        enemyPosition,
 		Size:            2,
-		MoveSpeed:       10.0,
+		MoveSpeed:       2.0,
 		AttackSound:     shotGunSound,
 		ActionTimeLeft:  0,
 		Health:          100,
@@ -47,7 +47,7 @@ func (em *Manager) Init() {
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        rl.Vector3{X: 5, Y: 0, Z: 0},
 		Size:            2,
-		MoveSpeed:       10.0,
+		MoveSpeed:       2.0,
 		AttackSound:     shotGunSound,
 		ActionTimeLeft:  0,
 		Health:          100,
@@ -60,7 +60,7 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 	var bulletCmds []BulletCmd
 	allEnemyBoxes := em.GetEnemyBoundingBoxes()
 	for i := 0; i < len(em.Enemies); i++ {
-		var addBullets = em.Enemies[i].Mutate(dt, *p, allEnemyBoxes)
+		var addBullets = em.Enemies[i].Mutate(dt, *p, allEnemyBoxes, i)
 		bulletCmds = append(bulletCmds, addBullets...)
 		if em.Enemies[i].IsDead {
 			em.Enemies[i] = em.Enemies[len(em.Enemies)-1]
@@ -102,7 +102,7 @@ func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
 	return boxes
 }
 
-func (e *Enemy) isColliding(myIdx int, obstacles []rl.BoundingBox) bool {
+func (e *Enemy) isColliding(myIdx int, obstacles []rl.BoundingBox, killerObstacle rl.BoundingBox) bool {
 	myBox := e.GetBoundingBox()
 	for i, box := range obstacles {
 		if i == myIdx {
@@ -111,6 +111,9 @@ func (e *Enemy) isColliding(myIdx int, obstacles []rl.BoundingBox) bool {
 		if rl.CheckCollisionBoxes(myBox, box) {
 			return true
 		}
+	}
+	if rl.CheckCollisionBoxes(myBox, killerObstacle) {
+		return true
 	}
 	return false
 }
