@@ -13,6 +13,7 @@ type Bullet struct {
 	LifeTime  float32
 	Shooter   Shooter
 	Color     rl.Color
+	Damage    int32
 }
 
 type Shooter int

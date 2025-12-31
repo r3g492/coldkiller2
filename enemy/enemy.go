@@ -76,21 +76,11 @@ func (e *Enemy) Unload() {
 }
 
 func (e *Enemy) ResolveAnimation() {
-	// 0 dance
-	// 1 death
-	// 2 idle
-	// 3 jump
-	// 4 no
-	// 5 punch
-	// 6 running
-	// 7 sitting
-	// 8 standing
-	// 9 thumbsup
 	switch e.AnimationState {
 	case animation.StateIdle:
 		e.setAnim(0, 24, true)
 	case animation.StateRunning:
-		e.setAnim(1, 96, true)
+		e.setAnim(1, 180, true)
 	case animation.StateAttacking:
 		e.setAnim(2, 150, false)
 	case animation.StateDying:

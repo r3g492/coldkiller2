@@ -169,28 +169,18 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 		dir := rl.Vector3Normalize(k.TargetDirection)
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
-		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir})
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200})
 		return bulletCmds, true
 	}
 	return bulletCmds, false
 }
 
 func (k *Killer) ResolveAnimation() {
-	// 0 dance
-	// 1 death
-	// 2 idle
-	// 3 jump
-	// 4 no
-	// 5 punch
-	// 6 running
-	// 7 sitting
-	// 8 standing
-	// 9 thumbsup
 	switch k.AnimationState {
 	case animation.StateIdle:
 		k.setAnim(0, 24, true)
 	case animation.StateRunning:
-		k.setAnim(1, 96, true)
+		k.setAnim(1, 180, true)
 	case animation.StateAttacking:
 		k.setAnim(2, 150, false)
 	case animation.StateDying:
