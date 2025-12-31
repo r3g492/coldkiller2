@@ -19,14 +19,15 @@ func main() {
 	rl.InitAudioDevice()
 	rl.SetTargetFPS(144)
 	keyMap := input.DefaultWASD()
-
 	bm := bullet.CreateManager()
+
 	em := enemy.CreateManager()
+	defer em.Unload()
 
 	p := killer.Init()
 	defer p.Unload()
+
 	em.Init()
-	defer em.Unload()
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
