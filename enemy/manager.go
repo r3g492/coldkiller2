@@ -19,7 +19,7 @@ func CreateManager() *Manager {
 func (em *Manager) Init() {
 	enemyModel := rl.LoadModel("resources/unit_v3.glb")
 	enemyAnimation := rl.LoadModelAnimations("resources/unit_v3.glb")
-	enemyPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
+	enemyPosition := rl.Vector3{X: 10, Y: 0, Z: 0}
 	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 	// TODO: change unit init
 	addEnemy1 := Enemy{
@@ -59,7 +59,7 @@ func (em *Manager) Init() {
 func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 	var bulletCmds []BulletCmd
 	for i := 0; i < len(em.Enemies); i++ {
-		var addBullets = em.Enemies[i].Mutate(dt)
+		var addBullets = em.Enemies[i].Mutate(dt, *p)
 		bulletCmds = append(bulletCmds, addBullets...)
 		if em.Enemies[i].IsDead {
 			em.Enemies[i] = em.Enemies[len(em.Enemies)-1]
@@ -89,4 +89,14 @@ func (em *Manager) Unload() {
 		em.Enemies[i].Unload()
 	}
 	em.Enemies = nil
+}
+
+func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
+	boxes := make([]rl.BoundingBox, 0, len(em.Enemies))
+	for _, e := range em.Enemies {
+		if e.Health > 0 {
+			boxes = append(boxes, e.GetBoundingBox())
+		}
+	}
+	return boxes
 }

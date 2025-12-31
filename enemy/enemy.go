@@ -2,6 +2,7 @@ package enemy
 
 import (
 	"coldkiller2/animation"
+	"coldkiller2/killer"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -42,13 +43,15 @@ func (e *Enemy) Draw3D() {
 	rl.PopMatrix()
 }
 
-func (e *Enemy) Mutate(dt float32) []BulletCmd {
+func (e *Enemy) Mutate(
+	dt float32,
+	p killer.Killer,
+) []BulletCmd {
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
 		e.ActionTimeLeft -= dt
-		return bulletCmds
+		return []BulletCmd{}
 	}
-
 	if e.ActionTimeLeft <= 0 {
 		e.AnimationState = animation.StateIdle
 	}
@@ -58,7 +61,13 @@ func (e *Enemy) Mutate(dt float32) []BulletCmd {
 	}
 
 	// TODO: add ai
-	e.MoveDirection = rl.Vector3{X: 1}
+	// e.MoveDirection = rl.Vector3Normalize(rl.Vector3Subtract(p.Position, e.Position))
+	e.updateByMovementDirection(dt)
+
+	return bulletCmds
+}
+
+func (e *Enemy) updateByMovementDirection(dt float32) {
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 	moving := rl.Vector3Length(moveAmount) > 0
 	if moving {
@@ -70,8 +79,6 @@ func (e *Enemy) Mutate(dt float32) []BulletCmd {
 	e.TargetDirection = e.MoveDirection
 	angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 	e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
-
-	return bulletCmds
 }
 
 func (e *Enemy) Damage(d int32) {
@@ -128,4 +135,11 @@ func (e *Enemy) PlanAnimate(dt float32) {
 func (e *Enemy) Animate() {
 	anim := e.Animation[e.AnimationIdx]
 	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
+}
+
+func (e *Enemy) GetBoundingBox() rl.BoundingBox {
+	return rl.BoundingBox{
+		Min: rl.Vector3{X: e.Position.X - e.Size, Y: e.Position.Y - e.Size, Z: e.Position.Z - e.Size},
+		Max: rl.Vector3{X: e.Position.X + e.Size, Y: e.Position.Y + e.Size, Z: e.Position.Z + e.Size},
+	}
 }

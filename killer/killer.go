@@ -89,7 +89,7 @@ func (k *Killer) Draw3D() {
 	rl.DrawRay(rl.NewRay(k.Position, k.TargetDirection), rl.Green)
 }
 
-func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
+func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {
 	var bulletCmds []BulletCmd
 
 	mouseMovement(input, k)
@@ -104,7 +104,7 @@ func (k *Killer) Mutate(input input.Input, dt float32) []BulletCmd {
 	}
 
 	if !attack && k.ActionTimeLeft <= 0 {
-		moving := k.movement(input, dt)
+		moving := k.movement(input, dt, obstacles)
 		k.Camera = rl.Camera3D{
 			Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
 			Target:     k.Position,
@@ -136,7 +136,7 @@ func mouseMovement(input input.Input, k *Killer) {
 	k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 }
 
-func (k *Killer) movement(input input.Input, dt float32) bool {
+func (k *Killer) movement(input input.Input, dt float32, obstacles []rl.BoundingBox) bool {
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
 		k.MoveDirection.Z -= 1
@@ -154,11 +154,23 @@ func (k *Killer) movement(input input.Input, dt float32) bool {
 		k.MoveDirection = rl.Vector3Normalize(k.MoveDirection)
 	}
 	moveAmount := rl.Vector3Scale(k.MoveDirection, k.MoveSpeed*dt)
-	move := rl.Vector3Length(moveAmount) > 0
-	if move {
-		k.Position = rl.Vector3Add(k.Position, moveAmount)
+	if rl.Vector3Length(moveAmount) > 0 {
+		oldPos := k.Position
+
+		// Try X move
+		k.Position.X += moveAmount.X
+		if k.isColliding(obstacles) {
+			k.Position.X = oldPos.X
+		}
+
+		// Try Z move
+		k.Position.Z += moveAmount.Z
+		if k.isColliding(obstacles) {
+			k.Position.Z = oldPos.Z
+		}
+		return k.Position != oldPos
 	}
-	return move
+	return false
 }
 
 func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
@@ -214,4 +226,21 @@ func (k *Killer) PlanAnimate(dt float32) {
 func (k *Killer) Animate() {
 	anim := k.Animation[k.AnimationIdx]
 	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
+}
+
+func (k *Killer) isColliding(obstacles []rl.BoundingBox) bool {
+	myBox := k.GetBoundingBox()
+	for _, box := range obstacles {
+		if rl.CheckCollisionBoxes(myBox, box) {
+			return true
+		}
+	}
+	return false
+}
+
+func (k *Killer) GetBoundingBox() rl.BoundingBox {
+	return rl.BoundingBox{
+		Min: rl.Vector3{X: k.Position.X - k.Size, Y: k.Position.Y - k.Size, Z: k.Position.Z - k.Size},
+		Max: rl.Vector3{X: k.Position.X + k.Size, Y: k.Position.Y + k.Size, Z: k.Position.Z + k.Size},
+	}
 }

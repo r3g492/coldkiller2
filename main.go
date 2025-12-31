@@ -40,7 +40,7 @@ func main() {
 		ip := input.ReadInput(keyMap)
 
 		// player
-		bc := p.Mutate(ip, dt)
+		bc := p.Mutate(ip, dt, em.GetEnemyBoundingBoxes())
 		p.ResolveAnimation()
 		p.PlanAnimate(dt)
 		p.Animate()
