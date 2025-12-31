@@ -22,8 +22,8 @@ func (bm *Manager) KillerBulletCreate(
 		b := Bullet{
 			Position:  bc.Pos,
 			Direction: bc.Dir,
-			Speed:     40.0,
-			Radius:    0.2,
+			Speed:     80.0,
+			Radius:    0.15,
 			Active:    true,
 			LifeTime:  2.0,
 			Shooter:   Player,
@@ -47,6 +47,7 @@ func (bm *Manager) EnemyBulletCreate(
 			LifeTime:  2.0,
 			Shooter:   Enemy,
 			Color:     rl.Red,
+			Damage:    bc.Damage,
 		}
 		bm.Bullets = append(bm.Bullets, b)
 	}
