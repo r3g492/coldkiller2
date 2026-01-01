@@ -55,6 +55,12 @@ func (e *Enemy) Mutate(
 	enemyObstacles []rl.BoundingBox,
 	myIdx int,
 ) []BulletCmd {
+	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
+	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
+	var _ = rl.Vector3Normalize(vecToPlayer)
+	if distToPlayer <= e.AttackRange && !e.IsDead {
+		rl.DrawLine3D(e.Position, p.Position, rl.Red)
+	}
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
 		e.ActionTimeLeft -= dt
@@ -69,11 +75,8 @@ func (e *Enemy) Mutate(
 	}
 
 	// TODO: decide moveDirection by ai
-	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
-	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
-	var _ = rl.Vector3Normalize(vecToPlayer)
+
 	if distToPlayer <= e.AttackRange {
-		rl.PlaySound(e.AttackSound)
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))

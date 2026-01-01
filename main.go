@@ -57,9 +57,9 @@ func main() {
 		rl.EndMode3D()
 
 		// enemy
+		rl.BeginMode3D(p.Camera)
 		var ebc = em.Mutate(dt, p)
 		em.ProcessAnimation(dt)
-		rl.BeginMode3D(p.Camera)
 		em.DrawEnemies3D()
 		rl.EndMode3D()
 
