@@ -31,6 +31,9 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 		if rl.IsKeyPressed(rl.KeyR) {
+			em.Unload()
+			p.Unload()
+
 			p = killer.Init()
 			em.Init()
 		}

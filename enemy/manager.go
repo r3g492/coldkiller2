@@ -9,7 +9,10 @@ import (
 )
 
 type Manager struct {
-	Enemies []Enemy
+	Enemies          []Enemy
+	SharedModel      rl.Model
+	SharedAnimations []rl.ModelAnimation
+	SharedSound      rl.Sound
 }
 
 func CreateManager() *Manager {
@@ -17,22 +20,25 @@ func CreateManager() *Manager {
 }
 
 func (em *Manager) Init() {
-	em.Enemies = []Enemy{}
-	enemyModel := rl.LoadModel("resources/unit_v3.glb")
-	enemyAnimation := rl.LoadModelAnimations("resources/unit_v3.glb")
-	enemyPosition := rl.Vector3{X: 10, Y: 0, Z: 0}
-	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
+	em.Enemies = make([]Enemy, 0)
+
+	// Load assets ONCE
+	em.SharedModel = rl.LoadModel("resources/unit_v3.glb")
+	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v3.glb")
+	em.SharedSound = util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
+
 	// TODO: change unit init
+	enemyPosition := rl.Vector3{X: 10, Y: 0, Z: 0}
 	addEnemy1 := Enemy{
-		Model:           enemyModel,
+		Model:           em.SharedModel,
 		ModelAngleDeg:   0,
-		Animation:       enemyAnimation,
+		Animation:       em.SharedAnimations,
 		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        enemyPosition,
 		Size:            1.5,
 		MoveSpeed:       2.0,
-		AttackSound:     shotGunSound,
+		AttackSound:     em.SharedSound,
 		ActionTimeLeft:  0,
 		Health:          100,
 		IsDead:          false,
@@ -40,16 +46,16 @@ func (em *Manager) Init() {
 	em.Enemies = append(em.Enemies, addEnemy1)
 
 	addEnemy2 := Enemy{
-		Model:           enemyModel,
+		Model:           em.SharedModel,
 		ModelAngleDeg:   0,
-		Animation:       enemyAnimation,
+		Animation:       em.SharedAnimations,
 		AnimationState:  animation.StateIdle,
 		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        rl.Vector3{X: 5, Y: 0, Z: 0},
 		Size:            1.5,
 		MoveSpeed:       2.0,
-		AttackSound:     shotGunSound,
+		AttackSound:     em.SharedSound,
 		ActionTimeLeft:  0,
 		Health:          100,
 		IsDead:          false,
@@ -87,9 +93,8 @@ func (em *Manager) ProcessAnimation(dt float32) {
 }
 
 func (em *Manager) Unload() {
-	for i, _ := range em.Enemies {
-		em.Enemies[i].Unload()
-	}
+	rl.UnloadModel(em.SharedModel)
+	rl.UnloadModelAnimations(em.SharedAnimations)
 	em.Enemies = nil
 }
 
