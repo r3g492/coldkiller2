@@ -65,10 +65,6 @@ func (e *Enemy) Mutate(
 	// TODO: add ai, do collision check
 	e.MoveDirection = rl.Vector3Normalize(rl.Vector3Subtract(p.Position, e.Position))
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
-	moving := rl.Vector3Length(moveAmount) > 0
-	if moving {
-		e.AnimationState = animation.StateRunning
-	}
 
 	oldPos := e.Position
 	e.Position.X += moveAmount.X
@@ -78,6 +74,11 @@ func (e *Enemy) Mutate(
 	e.Position.Z += moveAmount.Z
 	if e.isColliding(myIdx, enemyObstacles, p.GetBoundingBox()) {
 		e.Position.Z = oldPos.Z
+	}
+
+	moving := rl.Vector3Distance(oldPos, e.Position) > 0
+	if moving {
+		e.AnimationState = animation.StateRunning
 	}
 
 	e.TargetDirection = e.MoveDirection
