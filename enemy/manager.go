@@ -42,6 +42,9 @@ func (em *Manager) Init() {
 		ActionTimeLeft:  0,
 		Health:          100,
 		IsDead:          false,
+		AttackRange:     15,
+		AimTimeLeft:     2,
+		AimTimeUnit:     2,
 	}
 	em.Enemies = append(em.Enemies, addEnemy1)
 
@@ -59,6 +62,9 @@ func (em *Manager) Init() {
 		ActionTimeLeft:  0,
 		Health:          100,
 		IsDead:          false,
+		AttackRange:     15,
+		AimTimeLeft:     2,
+		AimTimeUnit:     2,
 	}
 	em.Enemies = append(em.Enemies, addEnemy2)
 }

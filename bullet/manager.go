@@ -41,7 +41,7 @@ func (bm *Manager) EnemyBulletCreate(
 		b := Bullet{
 			Position:  bc.Pos,
 			Direction: bc.Dir,
-			Speed:     40.0,
+			Speed:     30.0,
 			Radius:    0.2,
 			Active:    true,
 			LifeTime:  2.0,

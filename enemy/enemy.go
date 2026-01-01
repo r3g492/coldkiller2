@@ -4,6 +4,7 @@ import (
 	"coldkiller2/animation"
 	"coldkiller2/killer"
 	"math"
+	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -29,6 +30,11 @@ type Enemy struct {
 	ActionTimeLeft  float32
 	Health          int32
 	IsDead          bool
+	AttackCooldown  time.Duration
+	LastAttack      time.Time
+	AttackRange     float32
+	AimTimeLeft     float32
+	AimTimeUnit     float32
 }
 
 func (e *Enemy) Draw3D() {
@@ -63,12 +69,28 @@ func (e *Enemy) Mutate(
 	}
 
 	// TODO: decide moveDirection by ai
+	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
+	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
+	var _ = rl.Vector3Normalize(vecToPlayer)
+	if distToPlayer <= e.AttackRange {
+		rl.PlaySound(e.AttackSound)
+		e.TargetDirection = vecToPlayer
+		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
+		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+
+		e.ActionTimeLeft = 0.2
+		e.AnimationState = animation.StateAttacking
+		e.AnimationCurrentFrame = 0
+		return []BulletCmd{}
+	}
+
 	e.MoveDirection = rl.Vector3Normalize(
 		rl.Vector3Subtract(
 			p.Position,
 			e.Position,
 		),
 	)
+
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 
 	oldPos := e.Position
