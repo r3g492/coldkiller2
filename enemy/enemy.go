@@ -76,7 +76,7 @@ func (e *Enemy) Mutate(
 		e.Position.Z = oldPos.Z
 	}
 
-	moving := rl.Vector3Distance(oldPos, e.Position) > 0
+	moving := rl.Vector3Distance(oldPos, e.Position) > 0.01
 	if moving {
 		e.AnimationState = animation.StateRunning
 	}
