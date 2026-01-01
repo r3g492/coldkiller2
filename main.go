@@ -30,6 +30,11 @@ func main() {
 	em.Init()
 
 	for !rl.WindowShouldClose() {
+		if rl.IsKeyPressed(rl.KeyR) {
+			p = killer.Init()
+			em.Init()
+		}
+
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
 

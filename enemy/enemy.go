@@ -62,8 +62,13 @@ func (e *Enemy) Mutate(
 		e.IsDead = true
 	}
 
-	// TODO: add ai, do collision check
-	e.MoveDirection = rl.Vector3Normalize(rl.Vector3Subtract(p.Position, e.Position))
+	// TODO: decide moveDirection by ai
+	e.MoveDirection = rl.Vector3Normalize(
+		rl.Vector3Subtract(
+			p.Position,
+			e.Position,
+		),
+	)
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 
 	oldPos := e.Position

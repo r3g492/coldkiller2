@@ -17,6 +17,7 @@ func CreateManager() *Manager {
 }
 
 func (em *Manager) Init() {
+	em.Enemies = []Enemy{}
 	enemyModel := rl.LoadModel("resources/unit_v3.glb")
 	enemyAnimation := rl.LoadModelAnimations("resources/unit_v3.glb")
 	enemyPosition := rl.Vector3{X: 10, Y: 0, Z: 0}
