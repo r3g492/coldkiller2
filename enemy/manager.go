@@ -3,7 +3,6 @@ package enemy
 import (
 	"coldkiller2/animation"
 	"coldkiller2/killer"
-	"coldkiller2/util"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -12,7 +11,6 @@ type Manager struct {
 	Enemies          []Enemy
 	SharedModel      rl.Model
 	SharedAnimations []rl.ModelAnimation
-	SharedSound      rl.Sound
 }
 
 func CreateManager() *Manager {
@@ -25,7 +23,6 @@ func (em *Manager) Init() {
 	// Load assets ONCE
 	em.SharedModel = rl.LoadModel("resources/unit_v3.glb")
 	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v3.glb")
-	em.SharedSound = util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 
 	// TODO: change unit init
 	enemyPosition := rl.Vector3{X: 10, Y: 0, Z: 0}
@@ -38,7 +35,6 @@ func (em *Manager) Init() {
 		Position:        enemyPosition,
 		Size:            1.5,
 		MoveSpeed:       2.0,
-		AttackSound:     em.SharedSound,
 		ActionTimeLeft:  0,
 		Health:          100,
 		IsDead:          false,
@@ -58,7 +54,6 @@ func (em *Manager) Init() {
 		Position:        rl.Vector3{X: 5, Y: 0, Z: 0},
 		Size:            1.5,
 		MoveSpeed:       2.0,
-		AttackSound:     em.SharedSound,
 		ActionTimeLeft:  0,
 		Health:          100,
 		IsDead:          false,

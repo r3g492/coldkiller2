@@ -60,9 +60,16 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 			enemyPos := el[j].Position
 			enemySize := el[j].Size
 			curBullet := bm.Bullets[i]
-			if rl.Vector3Distance(enemyPos, curBullet.Position) < enemySize && el[j].Health > 0 {
+			if curBullet.Shooter == Player && rl.Vector3Distance(enemyPos, curBullet.Position) < enemySize && el[j].Health > 0 {
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
+					bm.Bullets[i].Active = false
+				}
+			}
+
+			if curBullet.Shooter == Enemy && rl.Vector3Distance(p.Position, curBullet.Position) < p.Size && p.Health > 0 {
+				if bm.Bullets[i].Active {
+					p.Damage(bm.Bullets[i].Damage)
 					bm.Bullets[i].Active = false
 				}
 			}

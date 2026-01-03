@@ -3,7 +3,7 @@ package killer
 import (
 	"coldkiller2/animation"
 	"coldkiller2/input"
-	"coldkiller2/util"
+	"coldkiller2/sound"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -27,9 +27,8 @@ type Killer struct {
 	Size            float32
 	MoveSpeed       float32
 	Camera          rl.Camera3D
-	ShotGunSound    rl.Sound
 	ActionTimeLeft  float32
-	Health          float32
+	Health          int32
 }
 
 func Init() *Killer {
@@ -37,7 +36,6 @@ func Init() *Killer {
 	playerModel := rl.LoadModel("resources/unit_v3.glb")
 	playerAnimation := rl.LoadModelAnimations("resources/unit_v3.glb")
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
-	shotGunSound := util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
 	return &Killer{
 		Model:           playerModel,
 		ModelAngleDeg:   0,
@@ -54,7 +52,6 @@ func Init() *Killer {
 			Fovy:       30.0,
 			Projection: rl.CameraOrthographic,
 		},
-		ShotGunSound:   shotGunSound,
 		ActionTimeLeft: 0,
 		Health:         100,
 	}
@@ -172,7 +169,7 @@ func (k *Killer) movement(input input.Input, dt float32, obstacles []rl.Bounding
 func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	var bulletCmds []BulletCmd
 	if input.PunchHold {
-		rl.PlaySound(k.ShotGunSound)
+		rl.PlaySound(sound.ShotgunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 		dir := rl.Vector3Normalize(k.TargetDirection)
@@ -238,5 +235,15 @@ func (k *Killer) GetBoundingBox() rl.BoundingBox {
 	return rl.BoundingBox{
 		Min: rl.Vector3{X: k.Position.X - k.Size, Y: k.Position.Y - k.Size, Z: k.Position.Z - k.Size},
 		Max: rl.Vector3{X: k.Position.X + k.Size, Y: k.Position.Y + k.Size, Z: k.Position.Z + k.Size},
+	}
+}
+
+func (k *Killer) Damage(d int32) {
+	k.Health -= d
+	k.AnimationState = animation.StateDying
+	k.ActionTimeLeft = 0.1
+	if k.Health <= 0 {
+		k.AnimationState = animation.StateDying
+		k.ActionTimeLeft = 10
 	}
 }

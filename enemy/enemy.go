@@ -3,6 +3,7 @@ package enemy
 import (
 	"coldkiller2/animation"
 	"coldkiller2/killer"
+	"coldkiller2/sound"
 	"math"
 	"time"
 
@@ -26,7 +27,6 @@ type Enemy struct {
 	Position        rl.Vector3
 	Size            float32
 	MoveSpeed       float32
-	AttackSound     rl.Sound
 	ActionTimeLeft  float32
 	Health          int32
 	IsDead          bool
@@ -73,7 +73,6 @@ func (e *Enemy) Mutate(
 	}
 
 	// TODO: decide moveDirection by ai
-
 	if e.AimTimeLeft <= 0 && distToPlayer <= e.AttackRange {
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
@@ -84,7 +83,11 @@ func (e *Enemy) Mutate(
 		e.AnimationCurrentFrame = 0
 
 		e.AimTimeLeft = e.AimTimeUnit
-		return []BulletCmd{}
+		rl.PlaySound(sound.ShotgunSound)
+		dir := rl.Vector3Normalize(e.TargetDirection)
+		spawnPos := rl.Vector3Add(e.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200})
+		return bulletCmds
 	}
 
 	if e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && e.Health > 0 {

@@ -5,6 +5,7 @@ import (
 	"coldkiller2/enemy"
 	"coldkiller2/input"
 	"coldkiller2/killer"
+	"coldkiller2/sound"
 	"fmt"
 	"time"
 
@@ -28,6 +29,7 @@ func main() {
 	defer p.Unload()
 
 	em.Init()
+	sound.Init()
 
 	for !rl.WindowShouldClose() {
 		if rl.IsKeyPressed(rl.KeyR) {
