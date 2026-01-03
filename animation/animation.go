@@ -7,4 +7,5 @@ const (
 	StateRunning
 	StateAttacking
 	StateDying
+	StateAiming
 )

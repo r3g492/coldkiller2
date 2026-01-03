@@ -58,9 +58,7 @@ func (e *Enemy) Mutate(
 	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
 	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
 	var _ = rl.Vector3Normalize(vecToPlayer)
-	if distToPlayer <= e.AttackRange && !e.IsDead {
-		rl.DrawLine3D(e.Position, p.Position, rl.Red)
-	}
+
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
 		e.ActionTimeLeft -= dt
@@ -76,16 +74,31 @@ func (e *Enemy) Mutate(
 
 	// TODO: decide moveDirection by ai
 
-	if distToPlayer <= e.AttackRange {
+	if e.AimTimeLeft <= 0 && distToPlayer <= e.AttackRange {
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 
-		e.ActionTimeLeft = 0.2
+		e.ActionTimeLeft = 1
 		e.AnimationState = animation.StateAttacking
+		e.AnimationCurrentFrame = 0
+
+		e.AimTimeLeft = e.AimTimeUnit
+		return []BulletCmd{}
+	}
+
+	if e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && e.Health > 0 {
+		rl.DrawLine3D(e.Position, p.Position, rl.Red)
+		e.TargetDirection = vecToPlayer
+		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
+		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+
+		e.AimTimeLeft -= dt
+		e.AnimationState = animation.StateAiming
 		e.AnimationCurrentFrame = 0
 		return []BulletCmd{}
 	}
+	e.AimTimeLeft = e.AimTimeUnit
 
 	e.MoveDirection = rl.Vector3Normalize(
 		rl.Vector3Subtract(
@@ -142,6 +155,8 @@ func (e *Enemy) ResolveAnimation() {
 		e.setAnim(2, 150, false)
 	case animation.StateDying:
 		e.setAnim(3, 200, false)
+	case animation.StateAiming:
+		e.setAnim(2, 0, false)
 	}
 }
 
