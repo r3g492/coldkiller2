@@ -31,7 +31,25 @@ func main() {
 	em.Init()
 	sound.Init()
 
+	showMenu := true
+
 	for !rl.WindowShouldClose() {
+		if showMenu {
+			rl.BeginDrawing()
+			rl.ClearBackground(rl.Black)
+			rl.EndDrawing()
+
+			if rl.IsKeyPressed(rl.KeyR) {
+				showMenu = false
+			}
+
+			continue
+		}
+
+		if rl.IsKeyPressed(rl.KeyEscape) {
+			showMenu = true
+		}
+
 		if rl.IsKeyPressed(rl.KeyR) {
 			em.Unload()
 			p.Unload()
