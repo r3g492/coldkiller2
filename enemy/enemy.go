@@ -72,7 +72,6 @@ func (e *Enemy) Mutate(
 		e.IsDead = true
 	}
 
-	// TODO: decide moveDirection by ai
 	if e.AimTimeLeft <= 0 && distToPlayer <= e.AttackRange {
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
@@ -90,7 +89,7 @@ func (e *Enemy) Mutate(
 		return bulletCmds
 	}
 
-	if e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && e.Health > 0 {
+	if e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && e.IsAlive() {
 		rl.DrawLine3D(e.Position, p.Position, rl.Red)
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
@@ -196,4 +195,8 @@ func (e *Enemy) GetBoundingBox() rl.BoundingBox {
 		Min: rl.Vector3{X: e.Position.X - e.Size, Y: e.Position.Y - e.Size, Z: e.Position.Z - e.Size},
 		Max: rl.Vector3{X: e.Position.X + e.Size, Y: e.Position.Y + e.Size, Z: e.Position.Z + e.Size},
 	}
+}
+
+func (e *Enemy) IsAlive() bool {
+	return e.Health > 0
 }

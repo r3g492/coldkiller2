@@ -89,7 +89,9 @@ func (k *Killer) Draw3D() {
 func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {
 	var bulletCmds []BulletCmd
 
-	mouseMovement(input, k)
+	if k.IsAlive() {
+		mouseMovement(input, k)
+	}
 	attack := false
 	if k.ActionTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
@@ -246,4 +248,8 @@ func (k *Killer) Damage(d int32) {
 		k.AnimationState = animation.StateDying
 		k.ActionTimeLeft = 10
 	}
+}
+
+func (k *Killer) IsAlive() bool {
+	return k.Health > 0
 }
