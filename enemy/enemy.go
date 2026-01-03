@@ -58,7 +58,7 @@ func (e *Enemy) Mutate(
 	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
 	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
 	var _ = rl.Vector3Normalize(vecToPlayer)
-	if distToPlayer <= e.AttackRange && !e.IsDead {
+	if distToPlayer <= e.AttackRange && e.Health > 0 {
 		rl.DrawLine3D(e.Position, p.Position, rl.Red)
 	}
 	var bulletCmds []BulletCmd
