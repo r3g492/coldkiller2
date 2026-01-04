@@ -79,9 +79,9 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 	return bulletCmds
 }
 
-func (em *Manager) DrawEnemies3D() {
+func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 	for i := range em.Enemies {
-		em.Enemies[i].Draw3D()
+		em.Enemies[i].Draw3D(p)
 	}
 }
 

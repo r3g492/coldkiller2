@@ -20,12 +20,10 @@ func main() {
 	curr := rl.GetCurrentMonitor()
 	w := rl.GetMonitorWidth(curr)
 	h := rl.GetMonitorHeight(curr)
-	fmt.Printf("Detected Monitor %d: %dx%d\n", curr, w, h)
 	rl.SetWindowSize(w, h)
 	rl.ToggleBorderlessWindowed()
 	defer rl.CloseWindow()
-	// rl.DisableCursor()
-	// TODO: draw cursor
+	rl.DisableCursor()
 
 	rl.InitAudioDevice()
 	rl.SetTargetFPS(144)
@@ -90,7 +88,7 @@ func main() {
 		rl.BeginMode3D(p.Camera)
 		var ebc = em.Mutate(dt, p)
 		em.ProcessAnimation(dt)
-		em.DrawEnemies3D()
+		em.DrawEnemies3D(p)
 		rl.EndMode3D()
 
 		// bullet
@@ -100,6 +98,8 @@ func main() {
 		rl.BeginMode3D(p.Camera)
 		bm.DrawBullets3D()
 		rl.EndMode3D()
+
+		drawCursor(mouseLocation, p)
 
 		rl.EndDrawing()
 	}
@@ -112,4 +112,11 @@ func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 		fmt.Println(player.MoveDirection)
 		lastLog = time.Now()
 	}
+}
+
+func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
+	rl.BeginMode3D(player.Camera)
+	rl.DrawRay(rl.NewRay(player.Position, player.TargetDirection), rl.Green)
+	rl.EndMode3D()
+	rl.DrawCircle(int32(mouseLocation.X), int32(mouseLocation.Y), 5, rl.Green)
 }

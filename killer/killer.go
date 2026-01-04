@@ -82,8 +82,6 @@ func (k *Killer) Draw3D() {
 	)
 	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
 	rl.PopMatrix()
-
-	rl.DrawRay(rl.NewRay(k.Position, k.TargetDirection), rl.Green)
 }
 
 func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {

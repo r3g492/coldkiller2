@@ -37,7 +37,7 @@ type Enemy struct {
 	AimTimeUnit     float32
 }
 
-func (e *Enemy) Draw3D() {
+func (e *Enemy) Draw3D(p *killer.Killer) {
 	anim := e.Animation[e.AnimationIdx]
 	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 	rl.PushMatrix()
@@ -47,6 +47,10 @@ func (e *Enemy) Draw3D() {
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), 0.7, rl.White)
 	rl.PopMatrix()
+
+	if e.AnimationState == animation.StateAiming {
+		rl.DrawLine3D(e.Position, p.Position, rl.Red)
+	}
 }
 
 func (e *Enemy) Mutate(
@@ -90,7 +94,6 @@ func (e *Enemy) Mutate(
 	}
 
 	if e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && e.IsAlive() {
-		rl.DrawLine3D(e.Position, p.Position, rl.Red)
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
