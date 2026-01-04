@@ -45,6 +45,13 @@ func main() {
 		if showMenu {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
+			rl.DrawText(
+				"HELLO",
+				int32(w/2-200),
+				int32(h/2),
+				100,
+				rl.Red,
+			)
 			rl.EndDrawing()
 
 			if rl.IsKeyPressed(rl.KeyR) {
