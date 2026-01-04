@@ -15,8 +15,18 @@ import (
 var lastLog = time.Now()
 
 func main() {
-	rl.InitWindow(1600, 900, "my new game")
+	rl.SetConfigFlags(rl.FlagWindowResizable | rl.FlagWindowUndecorated)
+	rl.InitWindow(0, 0, "coldkiller2")
+	curr := rl.GetCurrentMonitor()
+	w := rl.GetMonitorWidth(curr)
+	h := rl.GetMonitorHeight(curr)
+	fmt.Printf("Detected Monitor %d: %dx%d\n", curr, w, h)
+	rl.SetWindowSize(w, h)
+	rl.ToggleBorderlessWindowed()
 	defer rl.CloseWindow()
+	// rl.DisableCursor()
+	// TODO: draw cursor
+
 	rl.InitAudioDevice()
 	rl.SetTargetFPS(144)
 	keyMap := input.DefaultWASD()
