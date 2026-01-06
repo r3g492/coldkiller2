@@ -56,7 +56,7 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 func (e *Enemy) Mutate(
 	dt float32,
 	p killer.Killer,
-	enemyObstacles []rl.BoundingBox,
+	others []Enemy,
 	myIdx int,
 ) []BulletCmd {
 	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
@@ -116,11 +116,11 @@ func (e *Enemy) Mutate(
 
 	oldPos := e.Position
 	e.Position.X += moveAmount.X
-	if e.isColliding(myIdx, enemyObstacles, p.GetBoundingBox()) {
+	if e.isColliding(myIdx, others, p.GetBoundingBox()) {
 		e.Position.X = oldPos.X
 	}
 	e.Position.Z += moveAmount.Z
-	if e.isColliding(myIdx, enemyObstacles, p.GetBoundingBox()) {
+	if e.isColliding(myIdx, others, p.GetBoundingBox()) {
 		e.Position.Z = oldPos.Z
 	}
 

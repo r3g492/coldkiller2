@@ -243,7 +243,7 @@ func (k *Killer) Damage(d int32) {
 	k.ActionTimeLeft = 0.1
 	if k.Health <= 0 {
 		k.AnimationState = animation.StateDying
-		k.ActionTimeLeft = 10
+		k.ActionTimeLeft = 2
 	}
 }
 

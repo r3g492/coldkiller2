@@ -88,3 +88,7 @@ func (bm *Manager) DrawBullets3D() {
 		b.DrawBullet()
 	}
 }
+
+func (bm *Manager) Unload() {
+	bm.Bullets = []Bullet{}
+}

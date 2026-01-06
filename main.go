@@ -29,6 +29,7 @@ func main() {
 	rl.SetTargetFPS(144)
 	keyMap := input.DefaultWASD()
 	bm := bullet.CreateManager()
+	defer bm.Unload()
 
 	em := enemy.CreateManager()
 	defer em.Unload()
@@ -40,8 +41,28 @@ func main() {
 	sound.Init()
 
 	showMenu := true
-
+	lost := false
 	for !rl.WindowShouldClose() {
+		if showMenu && lost {
+			rl.BeginDrawing()
+			rl.ClearBackground(rl.Black)
+			rl.DrawText(
+				"You Lost! Press R to Restart",
+				int32(w/2-200),
+				int32(h/2),
+				100,
+				rl.Red,
+			)
+			rl.EndDrawing()
+
+			if rl.IsKeyPressed(rl.KeyR) {
+				showMenu = false
+				lost = true
+			}
+
+			continue
+		}
+
 		if showMenu {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
@@ -61,16 +82,18 @@ func main() {
 			continue
 		}
 
+		if gameEnd(p) {
+			showMenu = true
+			lost = true
+			p = resetGame(em, p, bm)
+		}
+
 		if rl.IsKeyPressed(rl.KeyEscape) {
 			showMenu = true
 		}
 
 		if rl.IsKeyPressed(rl.KeyR) {
-			em.Unload()
-			p.Unload()
-
-			p = killer.Init()
-			em.Init()
+			p = resetGame(em, p, bm)
 		}
 
 		rl.BeginDrawing()
@@ -112,6 +135,16 @@ func main() {
 	}
 }
 
+func resetGame(em *enemy.Manager, p *killer.Killer, bm *bullet.Manager) *killer.Killer {
+	em.Unload()
+	p.Unload()
+	bm.Unload()
+
+	p = killer.Init()
+	em.Init()
+	return p
+}
+
 func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 	if time.Since(lastLog) >= 1000*time.Millisecond {
 		msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
@@ -126,4 +159,8 @@ func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 	rl.DrawRay(rl.NewRay(player.Position, player.TargetDirection), rl.Green)
 	rl.EndMode3D()
 	rl.DrawCircle(int32(mouseLocation.X), int32(mouseLocation.Y), 5, rl.Green)
+}
+
+func gameEnd(player *killer.Killer) bool {
+	return player.Health <= 0 && player.ActionTimeLeft <= 0
 }

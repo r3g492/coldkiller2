@@ -8,9 +8,10 @@ import (
 )
 
 type Manager struct {
-	Enemies          []Enemy
-	SharedModel      rl.Model
-	SharedAnimations []rl.ModelAnimation
+	Enemies              []Enemy
+	SharedModel          rl.Model
+	SharedAnimations     []rl.ModelAnimation
+	EnemyGenerationLevel int
 }
 
 func CreateManager() *Manager {
@@ -25,7 +26,7 @@ func (em *Manager) Init() {
 	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v3.glb")
 
 	// TODO: change unit init
-	enemyPosition := rl.Vector3{X: 10, Y: 0, Z: 0}
+	enemyPosition := rl.Vector3{X: 20, Y: 0, Z: 0}
 	addEnemy1 := Enemy{
 		Model:           em.SharedModel,
 		ModelAngleDeg:   0,
@@ -43,7 +44,7 @@ func (em *Manager) Init() {
 		AimTimeUnit:     2,
 	}
 	em.Enemies = append(em.Enemies, addEnemy1)
-
+	enemyPosition = rl.Vector3{X: 30, Y: 0, Z: 0}
 	addEnemy2 := Enemy{
 		Model:           em.SharedModel,
 		ModelAngleDeg:   0,
@@ -51,7 +52,7 @@ func (em *Manager) Init() {
 		AnimationState:  animation.StateIdle,
 		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:        rl.Vector3{X: 5, Y: 0, Z: 0},
+		Position:        enemyPosition,
 		Size:            1.0,
 		MoveSpeed:       2.0,
 		ActionTimeLeft:  0,
@@ -66,16 +67,18 @@ func (em *Manager) Init() {
 
 func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 	var bulletCmds []BulletCmd
-	allEnemyBoxes := em.GetEnemyBoundingBoxes()
+
 	for i := 0; i < len(em.Enemies); i++ {
-		var addBullets = em.Enemies[i].Mutate(dt, *p, allEnemyBoxes, i)
+		addBullets := em.Enemies[i].Mutate(dt, *p, em.Enemies, i)
 		bulletCmds = append(bulletCmds, addBullets...)
+	}
+
+	for i := len(em.Enemies) - 1; i >= 0; i-- {
 		if em.Enemies[i].IsDead {
-			em.Enemies[i] = em.Enemies[len(em.Enemies)-1]
-			em.Enemies = em.Enemies[:len(em.Enemies)-1]
-			i--
+			em.Enemies = append(em.Enemies[:i], em.Enemies[i+1:]...)
 		}
 	}
+
 	return bulletCmds
 }
 
@@ -96,7 +99,7 @@ func (em *Manager) ProcessAnimation(dt float32) {
 func (em *Manager) Unload() {
 	rl.UnloadModel(em.SharedModel)
 	rl.UnloadModelAnimations(em.SharedAnimations)
-	em.Enemies = nil
+	em.Enemies = []Enemy{}
 }
 
 func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
@@ -109,16 +112,20 @@ func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
 	return boxes
 }
 
-func (e *Enemy) isColliding(myIdx int, obstacles []rl.BoundingBox, killerObstacle rl.BoundingBox) bool {
+func (e *Enemy) isColliding(myIdx int, others []Enemy, killerObstacle rl.BoundingBox) bool {
 	myBox := e.GetBoundingBox()
-	for i, box := range obstacles {
-		if i == myIdx {
+
+	for i, other := range others {
+		// Skip self AND skip enemies that are already dead/dying
+		if i == myIdx || !other.IsAlive() {
 			continue
 		}
-		if rl.CheckCollisionBoxes(myBox, box) {
+
+		if rl.CheckCollisionBoxes(myBox, other.GetBoundingBox()) {
 			return true
 		}
 	}
+
 	if rl.CheckCollisionBoxes(myBox, killerObstacle) {
 		return true
 	}
