@@ -43,7 +43,7 @@ func Init() *Killer {
 		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        playerPosition,
-		Size:            1.5,
+		Size:            1.0,
 		MoveSpeed:       20.0,
 		Camera: rl.Camera3D{
 			Position:   rl.Vector3Add(playerPosition, rl.NewVector3(0.0, 10.0, 0.0)),
@@ -71,7 +71,7 @@ func (k *Killer) Draw3D() {
 	)
 	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
-	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.7, rl.White)
+	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.45, rl.White)
 	rl.PopMatrix()
 
 	rl.PushMatrix()

@@ -46,7 +46,7 @@ func main() {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
 			rl.DrawText(
-				"HELLO",
+				"Press R to Start",
 				int32(w/2-200),
 				int32(h/2),
 				100,
