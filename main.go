@@ -7,6 +7,7 @@ import (
 	"coldkiller2/killer"
 	"coldkiller2/sound"
 	"fmt"
+	"strconv"
 	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -130,7 +131,7 @@ func main() {
 		rl.EndMode3D()
 
 		drawCursor(mouseLocation, p)
-
+		rl.DrawText(strconv.Itoa(em.EnemyGenerationLevel), 500, 500, 30, rl.Purple)
 		rl.EndDrawing()
 	}
 }

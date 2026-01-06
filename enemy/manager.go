@@ -29,7 +29,7 @@ func (em *Manager) Init(p *killer.Killer) {
 	em.SharedModel = rl.LoadModel("resources/unit_v3.glb")
 	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v3.glb")
 	em.EnemyGenerationLevel = 0
-	em.EnemyGenerationLevelUpUnit = 10 * time.Second
+	em.EnemyGenerationLevelUpUnit = 8 * time.Second
 	em.LastLevelUp = time.Now()
 	em.EnemyGenerateUnit = 4 * time.Second
 	em.LastGenerated = time.Now()
@@ -176,6 +176,6 @@ func getRandomPosition(p *killer.Killer) rl.Vector3 {
 }
 
 func (em *Manager) UpTheTempo() {
-	em.EnemyGenerateUnit++
+	em.EnemyGenerationLevel++
 	em.LastLevelUp = time.Now()
 }
