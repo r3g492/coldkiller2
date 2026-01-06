@@ -1,17 +1,21 @@
 package enemy
 
 import (
-	"coldkiller2/animation"
 	"coldkiller2/killer"
+	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type Manager struct {
-	Enemies              []Enemy
-	SharedModel          rl.Model
-	SharedAnimations     []rl.ModelAnimation
-	EnemyGenerationLevel int
+	Enemies                    []Enemy
+	SharedModel                rl.Model
+	SharedAnimations           []rl.ModelAnimation
+	EnemyGenerationLevel       int
+	EnemyGenerationLevelUpUnit time.Duration
+	LastLevelUp                time.Time
+	EnemyGenerateUnit          time.Duration
+	LastGenerated              time.Time
 }
 
 func CreateManager() *Manager {
@@ -20,49 +24,14 @@ func CreateManager() *Manager {
 
 func (em *Manager) Init() {
 	em.Enemies = make([]Enemy, 0)
-
-	// Load assets ONCE
 	em.SharedModel = rl.LoadModel("resources/unit_v3.glb")
 	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v3.glb")
-
-	// TODO: change unit init
-	enemyPosition := rl.Vector3{X: 20, Y: 0, Z: 0}
-	addEnemy1 := Enemy{
-		Model:           em.SharedModel,
-		ModelAngleDeg:   0,
-		Animation:       em.SharedAnimations,
-		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:        enemyPosition,
-		Size:            1.0,
-		MoveSpeed:       2.0,
-		ActionTimeLeft:  0,
-		Health:          100,
-		IsDead:          false,
-		AttackRange:     15,
-		AimTimeLeft:     2,
-		AimTimeUnit:     2,
-	}
-	em.Enemies = append(em.Enemies, addEnemy1)
-	enemyPosition = rl.Vector3{X: 30, Y: 0, Z: 0}
-	addEnemy2 := Enemy{
-		Model:           em.SharedModel,
-		ModelAngleDeg:   0,
-		Animation:       em.SharedAnimations,
-		AnimationState:  animation.StateIdle,
-		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:        enemyPosition,
-		Size:            1.0,
-		MoveSpeed:       2.0,
-		ActionTimeLeft:  0,
-		Health:          100,
-		IsDead:          false,
-		AttackRange:     15,
-		AimTimeLeft:     2,
-		AimTimeUnit:     2,
-	}
-	em.Enemies = append(em.Enemies, addEnemy2)
+	em.EnemyGenerationLevel = 0
+	em.EnemyGenerationLevelUpUnit = 60 * time.Second
+	em.LastLevelUp = time.Now()
+	em.EnemyGenerateUnit = 4 * time.Second
+	em.LastGenerated = time.Now()
+	em.Generate()
 }
 
 func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
@@ -77,6 +46,14 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 		if em.Enemies[i].IsDead {
 			em.Enemies = append(em.Enemies[:i], em.Enemies[i+1:]...)
 		}
+	}
+
+	if time.Since(em.LastGenerated) > em.EnemyGenerateUnit {
+		em.Generate()
+	}
+
+	if time.Since(em.LastLevelUp) > em.EnemyGenerationLevelUpUnit {
+		em.UpTheTempo()
 	}
 
 	return bulletCmds
@@ -116,7 +93,6 @@ func (e *Enemy) isColliding(myIdx int, others []Enemy, killerObstacle rl.Boundin
 	myBox := e.GetBoundingBox()
 
 	for i, other := range others {
-		// Skip self AND skip enemies that are already dead/dying
 		if i == myIdx || !other.IsAlive() {
 			continue
 		}
@@ -130,4 +106,32 @@ func (e *Enemy) isColliding(myIdx int, others []Enemy, killerObstacle rl.Boundin
 		return true
 	}
 	return false
+}
+
+func (em *Manager) Generate() {
+
+	enemyPosition := rl.Vector3{X: 20, Y: 0, Z: 0}
+	addEnemy := Enemy{
+		Model:           em.SharedModel,
+		ModelAngleDeg:   0,
+		Animation:       em.SharedAnimations,
+		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
+		Position:        enemyPosition,
+		Size:            1.0,
+		MoveSpeed:       2.0,
+		ActionTimeLeft:  0,
+		Health:          100,
+		IsDead:          false,
+		AttackRange:     15,
+		AimTimeLeft:     2,
+		AimTimeUnit:     2,
+	}
+	em.Enemies = append(em.Enemies, addEnemy)
+	em.LastGenerated = time.Now()
+}
+
+func (em *Manager) UpTheTempo() {
+	em.EnemyGenerateUnit++
+	em.LastLevelUp = time.Now()
 }
