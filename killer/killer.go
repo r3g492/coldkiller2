@@ -32,7 +32,6 @@ type Killer struct {
 }
 
 func Init() *Killer {
-	// TODO: change unit init
 	playerModel := rl.LoadModel("resources/unit_v3.glb")
 	playerAnimation := rl.LoadModelAnimations("resources/unit_v3.glb")
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
@@ -94,7 +93,7 @@ func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBo
 	if k.ActionTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
 		if attack {
-			k.ActionTimeLeft = 0.2
+			k.ActionTimeLeft = 0.25
 			k.AnimationState = animation.StateAttacking
 			k.AnimationCurrentFrame = 0
 		}
