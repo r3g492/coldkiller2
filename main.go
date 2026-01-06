@@ -82,6 +82,13 @@ func main() {
 		log(mouseLocation, dt, p)
 		ip := input.ReadInput(keyMap)
 
+		// enemy
+		rl.BeginMode3D(p.Camera)
+		var ebc = em.Mutate(dt, p)
+		em.ProcessAnimation(dt)
+		em.DrawEnemies3D(p)
+		rl.EndMode3D()
+
 		// player
 		bc := p.Mutate(ip, dt, em.GetEnemyBoundingBoxes())
 		p.ResolveAnimation()
@@ -89,13 +96,6 @@ func main() {
 		p.Animate()
 		rl.BeginMode3D(p.Camera)
 		p.Draw3D()
-		rl.EndMode3D()
-
-		// enemy
-		rl.BeginMode3D(p.Camera)
-		var ebc = em.Mutate(dt, p)
-		em.ProcessAnimation(dt)
-		em.DrawEnemies3D(p)
 		rl.EndMode3D()
 
 		// bullet

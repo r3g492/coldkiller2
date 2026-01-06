@@ -71,7 +71,7 @@ func (k *Killer) Draw3D() {
 	)
 	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
-	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.45, rl.White)
+	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.45, rl.Green)
 	rl.PopMatrix()
 
 	rl.PushMatrix()
