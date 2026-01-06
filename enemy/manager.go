@@ -2,6 +2,8 @@ package enemy
 
 import (
 	"coldkiller2/killer"
+	"math"
+	"math/rand"
 	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -22,16 +24,16 @@ func CreateManager() *Manager {
 	return &Manager{}
 }
 
-func (em *Manager) Init() {
+func (em *Manager) Init(p *killer.Killer) {
 	em.Enemies = make([]Enemy, 0)
 	em.SharedModel = rl.LoadModel("resources/unit_v3.glb")
 	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v3.glb")
 	em.EnemyGenerationLevel = 0
-	em.EnemyGenerationLevelUpUnit = 60 * time.Second
+	em.EnemyGenerationLevelUpUnit = 10 * time.Second
 	em.LastLevelUp = time.Now()
 	em.EnemyGenerateUnit = 4 * time.Second
 	em.LastGenerated = time.Now()
-	em.Generate()
+	em.Generate(p)
 }
 
 func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
@@ -49,7 +51,7 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 	}
 
 	if time.Since(em.LastGenerated) > em.EnemyGenerateUnit {
-		em.Generate()
+		em.Generate(p)
 	}
 
 	if time.Since(em.LastLevelUp) > em.EnemyGenerationLevelUpUnit {
@@ -108,18 +110,25 @@ func (e *Enemy) isColliding(myIdx int, others []Enemy, killerObstacle rl.Boundin
 	return false
 }
 
-func (em *Manager) Generate() {
+func (em *Manager) Generate(p *killer.Killer) {
+	for i := 0; i <= em.EnemyGenerationLevel; i++ {
+		em.addEnemy(p)
+		em.addEnemy(p)
+	}
+	em.LastGenerated = time.Now()
+}
 
-	enemyPosition := rl.Vector3{X: 20, Y: 0, Z: 0}
-	addEnemy := Enemy{
+func (em *Manager) addEnemy(p *killer.Killer) {
+	candidatePosition := getRandomPosition(p)
+	candidate := Enemy{
 		Model:           em.SharedModel,
 		ModelAngleDeg:   0,
 		Animation:       em.SharedAnimations,
 		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:        enemyPosition,
+		Position:        candidatePosition,
 		Size:            1.0,
-		MoveSpeed:       2.0,
+		MoveSpeed:       5.0,
 		ActionTimeLeft:  0,
 		Health:          100,
 		IsDead:          false,
@@ -127,8 +136,43 @@ func (em *Manager) Generate() {
 		AimTimeLeft:     2,
 		AimTimeUnit:     2,
 	}
-	em.Enemies = append(em.Enemies, addEnemy)
-	em.LastGenerated = time.Now()
+	trialLimit := 3
+	trial := 0
+	for ; candidate.isColliding(-1, em.Enemies, p.GetBoundingBox()) && trial < trialLimit; trial++ {
+		candidatePosition = getRandomPosition(p)
+		candidate = Enemy{
+			Model:           em.SharedModel,
+			ModelAngleDeg:   0,
+			Animation:       em.SharedAnimations,
+			MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
+			TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
+			Position:        candidatePosition,
+			Size:            1.0,
+			MoveSpeed:       5.0,
+			ActionTimeLeft:  0,
+			Health:          100,
+			IsDead:          false,
+			AttackRange:     15,
+			AimTimeLeft:     2,
+			AimTimeUnit:     2,
+		}
+	}
+	if trial >= trialLimit {
+		return
+	}
+	em.Enemies = append(em.Enemies, candidate)
+}
+
+func getRandomPosition(p *killer.Killer) rl.Vector3 {
+	angle := rand.Float64() * 2 * math.Pi
+	distance := float32(28.0)
+	offsetX := float32(math.Cos(angle)) * distance
+	offsetZ := float32(math.Sin(angle)) * distance
+	return rl.Vector3{
+		X: p.Position.X + offsetX,
+		Y: 0,
+		Z: p.Position.Z + offsetZ,
+	}
 }
 
 func (em *Manager) UpTheTempo() {

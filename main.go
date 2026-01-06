@@ -37,7 +37,7 @@ func main() {
 	p := killer.Init()
 	defer p.Unload()
 
-	em.Init()
+	em.Init(p)
 	sound.Init()
 
 	showMenu := true
@@ -141,7 +141,7 @@ func resetGame(em *enemy.Manager, p *killer.Killer, bm *bullet.Manager) *killer.
 	bm.Unload()
 
 	p = killer.Init()
-	em.Init()
+	em.Init(p)
 	return p
 }
 
