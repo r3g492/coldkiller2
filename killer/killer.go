@@ -29,6 +29,8 @@ type Killer struct {
 	Camera          rl.Camera3D
 	ActionTimeLeft  float32
 	Health          int32
+	AmmoCapacity    int32
+	Ammo            int32
 }
 
 func Init() *Killer {
@@ -53,6 +55,8 @@ func Init() *Killer {
 		},
 		ActionTimeLeft: 0,
 		Health:         100,
+		AmmoCapacity:   6,
+		Ammo:           6,
 	}
 }
 
@@ -85,6 +89,10 @@ func (k *Killer) Draw3D() {
 
 func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {
 	var bulletCmds []BulletCmd
+
+	if input.ReloadPressed {
+		k.Ammo = k.AmmoCapacity
+	}
 
 	if k.IsAlive() {
 		mouseMovement(input, k)
@@ -167,13 +175,14 @@ func (k *Killer) movement(input input.Input, dt float32, obstacles []rl.Bounding
 
 func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	var bulletCmds []BulletCmd
-	if input.PunchHold {
+	if input.PunchHold && k.Ammo > 0 {
 		rl.PlaySound(sound.ShotgunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 		dir := rl.Vector3Normalize(k.TargetDirection)
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
 		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200})
+		k.Ammo--
 		return bulletCmds, true
 	}
 	return bulletCmds, false

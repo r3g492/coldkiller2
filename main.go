@@ -44,6 +44,12 @@ func main() {
 	showMenu := true
 	lost := false
 	for !rl.WindowShouldClose() {
+		// seconds
+		dt := rl.GetFrameTime()
+		mouseLocation := rl.GetMousePosition()
+		log(mouseLocation, dt, p)
+		ip := input.ReadInput(keyMap)
+
 		if showMenu && lost {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
@@ -56,7 +62,7 @@ func main() {
 			)
 			rl.EndDrawing()
 
-			if rl.IsKeyPressed(rl.KeyR) {
+			if ip.ResetGamePressed {
 				showMenu = false
 				lost = true
 			}
@@ -76,7 +82,7 @@ func main() {
 			)
 			rl.EndDrawing()
 
-			if rl.IsKeyPressed(rl.KeyR) {
+			if ip.ResetGamePressed {
 				showMenu = false
 			}
 
@@ -89,22 +95,16 @@ func main() {
 			p = resetGame(em, p, bm)
 		}
 
-		if rl.IsKeyPressed(rl.KeyEscape) {
+		if ip.EndGamePressed {
 			showMenu = true
 		}
 
-		if rl.IsKeyPressed(rl.KeyR) {
+		if ip.ResetGamePressed {
 			p = resetGame(em, p, bm)
 		}
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
-
-		// seconds
-		dt := rl.GetFrameTime()
-		mouseLocation := rl.GetMousePosition()
-		log(mouseLocation, dt, p)
-		ip := input.ReadInput(keyMap)
 
 		// enemy
 		rl.BeginMode3D(p.Camera)
