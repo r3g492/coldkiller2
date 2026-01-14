@@ -8,4 +8,5 @@ const (
 	StateAttacking
 	StateDying
 	StateAiming
+	StateReloading
 )

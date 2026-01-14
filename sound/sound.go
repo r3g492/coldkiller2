@@ -7,9 +7,11 @@ import (
 )
 
 var (
-	ShotgunSound rl.Sound
+	ShotgunSound   rl.Sound
+	ReloadingSound rl.Sound
 )
 
 func Init() {
 	ShotgunSound = util.LoadSoundFromEmbedded("shotgun-03-38220.mp3")
+	ReloadingSound = util.LoadSoundFromEmbedded("1911-reload-6248.mp3")
 }

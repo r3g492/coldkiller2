@@ -54,7 +54,7 @@ func main() {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
 			rl.DrawText(
-				"You Lost! Press R to Restart",
+				"You Lost! Press F1 to Restart",
 				int32(w/2-200),
 				int32(h/2),
 				100,
@@ -74,7 +74,7 @@ func main() {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
 			rl.DrawText(
-				"Press R to Start",
+				"Press F1 to Start",
 				int32(w/2-200),
 				int32(h/2),
 				100,
@@ -121,6 +121,7 @@ func main() {
 		rl.BeginMode3D(p.Camera)
 		p.Draw3D()
 		rl.EndMode3D()
+		p.DrawUI()
 
 		// bullet
 		bm.KillerBulletCreate(bc)

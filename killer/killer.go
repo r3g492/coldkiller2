@@ -4,6 +4,7 @@ import (
 	"coldkiller2/animation"
 	"coldkiller2/input"
 	"coldkiller2/sound"
+	"fmt"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -87,12 +88,32 @@ func (k *Killer) Draw3D() {
 	rl.PopMatrix()
 }
 
+func (k *Killer) DrawUI() {
+	uiWorldPos := rl.Vector3{X: k.Position.X, Y: k.Position.Y + 3.0, Z: k.Position.Z}
+
+	screenPos := rl.GetWorldToScreen(uiWorldPos, k.Camera)
+
+	ammoText := fmt.Sprintf("%d / %d", k.Ammo, k.AmmoCapacity)
+	fontSize := int32(20)
+	textWidth := rl.MeasureText(ammoText, fontSize)
+
+	rl.DrawText(ammoText, int32(screenPos.X)-textWidth/2, int32(screenPos.Y), fontSize, rl.White)
+
+	if k.ActionTimeLeft > 0 {
+		barWidth := float32(60)
+		barHeight := float32(8)
+		fillWidth := (k.ActionTimeLeft / 1.0) * barWidth
+
+		barX := screenPos.X - barWidth/2
+		barY := screenPos.Y + 25
+
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.Black)
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, fillWidth, barHeight), rl.Yellow)
+	}
+}
+
 func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {
 	var bulletCmds []BulletCmd
-
-	if input.ReloadPressed {
-		k.Ammo = k.AmmoCapacity
-	}
 
 	if k.IsAlive() {
 		mouseMovement(input, k)
@@ -105,6 +126,14 @@ func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBo
 			k.AnimationState = animation.StateAttacking
 			k.AnimationCurrentFrame = 0
 		}
+	}
+
+	if input.ReloadPressed && k.ActionTimeLeft <= 0 {
+		rl.PlaySound(sound.ReloadingSound)
+		k.Ammo = k.AmmoCapacity
+		k.ActionTimeLeft = 1.0
+		k.AnimationState = animation.StateReloading
+		k.AnimationCurrentFrame = 0
 	}
 
 	if !attack && k.ActionTimeLeft <= 0 {
@@ -198,6 +227,10 @@ func (k *Killer) ResolveAnimation() {
 		k.setAnim(2, 150, false)
 	case animation.StateDying:
 		k.setAnim(3, 96, false)
+	case animation.StateReloading:
+		k.setAnim(2, 150, false)
+	default:
+		panic("unhandled default case")
 	}
 }
 

@@ -164,6 +164,8 @@ func (e *Enemy) ResolveAnimation() {
 		e.setAnim(3, 200, false)
 	case animation.StateAiming:
 		e.setAnim(2, 0, false)
+	default:
+		panic("unhandled default case")
 	}
 }
 
