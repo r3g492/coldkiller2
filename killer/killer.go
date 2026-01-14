@@ -29,6 +29,7 @@ type Killer struct {
 	MoveSpeed       float32
 	Camera          rl.Camera3D
 	ActionTimeLeft  float32
+	MaxActionTime   float32
 	Health          int32
 	AmmoCapacity    int32
 	Ammo            int32
@@ -90,25 +91,25 @@ func (k *Killer) Draw3D() {
 
 func (k *Killer) DrawUI() {
 	uiWorldPos := rl.Vector3{X: k.Position.X, Y: k.Position.Y + 3.0, Z: k.Position.Z}
-
 	screenPos := rl.GetWorldToScreen(uiWorldPos, k.Camera)
 
 	ammoText := fmt.Sprintf("%d / %d", k.Ammo, k.AmmoCapacity)
 	fontSize := int32(20)
 	textWidth := rl.MeasureText(ammoText, fontSize)
-
 	rl.DrawText(ammoText, int32(screenPos.X)-textWidth/2, int32(screenPos.Y), fontSize, rl.White)
 
-	if k.ActionTimeLeft > 0 {
+	if k.ActionTimeLeft > 0 && k.MaxActionTime > 0 {
 		barWidth := float32(60)
 		barHeight := float32(8)
-		fillWidth := (k.ActionTimeLeft / 1.0) * barWidth
+		pct := k.ActionTimeLeft / k.MaxActionTime
+		fillWidth := pct * barWidth
 
 		barX := screenPos.X - barWidth/2
 		barY := screenPos.Y + 25
 
-		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.Black)
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.DarkGray)
 		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, fillWidth, barHeight), rl.Yellow)
+		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
 	}
 }
 
@@ -122,7 +123,9 @@ func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBo
 	if k.ActionTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
 		if attack {
-			k.ActionTimeLeft = 0.25
+			var attackTime float32 = 0.25
+			k.ActionTimeLeft = attackTime
+			k.MaxActionTime = attackTime
 			k.AnimationState = animation.StateAttacking
 			k.AnimationCurrentFrame = 0
 		}
@@ -131,7 +134,9 @@ func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBo
 	if input.ReloadPressed && k.ActionTimeLeft <= 0 {
 		rl.PlaySound(sound.ReloadingSound)
 		k.Ammo = k.AmmoCapacity
-		k.ActionTimeLeft = 1.0
+		var reloadTime float32 = 0.7
+		k.ActionTimeLeft = reloadTime
+		k.MaxActionTime = reloadTime
 		k.AnimationState = animation.StateReloading
 		k.AnimationCurrentFrame = 0
 	}
@@ -282,10 +287,14 @@ func (k *Killer) GetBoundingBox() rl.BoundingBox {
 func (k *Killer) Damage(d int32) {
 	k.Health -= d
 	k.AnimationState = animation.StateDying
-	k.ActionTimeLeft = 0.1
+	var shotTime float32 = 0.1
+	k.ActionTimeLeft = shotTime
+	k.MaxActionTime = shotTime
 	if k.Health <= 0 {
 		k.AnimationState = animation.StateDying
-		k.ActionTimeLeft = 2
+		var dyingTime float32 = 2
+		k.ActionTimeLeft = dyingTime
+		k.MaxActionTime = dyingTime
 	}
 }
 

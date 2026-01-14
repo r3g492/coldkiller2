@@ -43,6 +43,7 @@ func main() {
 
 	showMenu := true
 	lost := false
+
 	for !rl.WindowShouldClose() {
 		// seconds
 		dt := rl.GetFrameTime()
@@ -50,27 +51,27 @@ func main() {
 		log(mouseLocation, dt, p)
 		ip := input.ReadInput(keyMap)
 
-		if showMenu && lost {
-			rl.BeginDrawing()
-			rl.ClearBackground(rl.Black)
-			rl.DrawText(
-				"You Lost! Press F1 to Restart",
-				int32(w/2-200),
-				int32(h/2),
-				100,
-				rl.Red,
-			)
-			rl.EndDrawing()
+		if showMenu {
+			if lost {
+				rl.BeginDrawing()
+				rl.ClearBackground(rl.Black)
+				rl.DrawText(
+					"You Lost! Press F1 to Restart",
+					int32(w/2-200),
+					int32(h/2),
+					100,
+					rl.Red,
+				)
+				rl.EndDrawing()
 
-			if ip.ResetGamePressed {
-				showMenu = false
-				lost = true
+				if ip.ResetGamePressed {
+					showMenu = false
+					lost = true
+				}
+
+				continue
 			}
 
-			continue
-		}
-
-		if showMenu {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
 			rl.DrawText(
@@ -90,9 +91,17 @@ func main() {
 		}
 
 		if gameEnd(p) {
+			if !lost {
+				rl.StopSound(sound.Track)
+				rl.PlaySound(sound.YouLose)
+			}
 			showMenu = true
 			lost = true
 			p = resetGame(em, p, bm)
+		}
+
+		if !rl.IsSoundPlaying(sound.Track) {
+			rl.PlaySound(sound.Track)
 		}
 
 		if ip.EndGamePressed {
