@@ -121,6 +121,7 @@ func main() {
 		em.ProcessAnimation(dt)
 		em.DrawEnemies3D(p)
 		rl.EndMode3D()
+		em.DrawEnemiesUi(p)
 
 		// player
 		bc := p.Mutate(ip, dt, em.GetEnemyBoundingBoxes())

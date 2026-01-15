@@ -18,6 +18,7 @@ type Manager struct {
 	LastLevelUp                time.Time
 	EnemyGenerateUnit          time.Duration
 	LastGenerated              time.Time
+	EnemyLimit                 int
 }
 
 func CreateManager() *Manager {
@@ -33,6 +34,7 @@ func (em *Manager) Init(p *killer.Killer) {
 	em.LastLevelUp = time.Now()
 	em.EnemyGenerateUnit = 4 * time.Second
 	em.LastGenerated = time.Now()
+	em.EnemyLimit = 100
 	em.Generate(p)
 }
 
@@ -64,6 +66,12 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 	for i := range em.Enemies {
 		em.Enemies[i].Draw3D(p)
+	}
+}
+
+func (em *Manager) DrawEnemiesUi(p *killer.Killer) {
+	for i := range em.Enemies {
+		em.Enemies[i].DrawUI(p)
 	}
 }
 
@@ -119,6 +127,10 @@ func (em *Manager) Generate(p *killer.Killer) {
 }
 
 func (em *Manager) addEnemy(p *killer.Killer) {
+	if em.EnemyLimit < len(em.Enemies) {
+		return
+	}
+
 	candidatePosition := getRandomPosition(p)
 	candidate := Enemy{
 		Model:           em.SharedModel,

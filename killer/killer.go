@@ -85,7 +85,7 @@ func (k *Killer) Draw3D() {
 		k.Position.Y,
 		k.Position.Z,
 	)
-	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
+	// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
 	rl.PopMatrix()
 }
 

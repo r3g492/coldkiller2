@@ -43,7 +43,7 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 	rl.PushMatrix()
 	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
 	if e.IsAlive() {
-		rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
+		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
 	}
 	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
@@ -52,6 +52,25 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 
 	if e.AnimationState == animation.StateAiming {
 		rl.DrawLine3D(e.Position, p.Position, rl.Red)
+	}
+}
+
+func (e *Enemy) DrawUI(p *killer.Killer) {
+	uiWorldPos := rl.Vector3{X: e.Position.X, Y: e.Position.Y + 3.0, Z: e.Position.Z}
+	screenPos := rl.GetWorldToScreen(uiWorldPos, p.Camera)
+
+	if e.AimTimeLeft > 0 && e.AimTimeLeft != e.AimTimeUnit && e.IsAlive() {
+		barWidth := float32(40)
+		barHeight := float32(8)
+		pct := e.AimTimeLeft / e.AimTimeUnit
+		fillWidth := pct * barWidth
+
+		barX := screenPos.X - barWidth/2
+		barY := screenPos.Y + 25
+
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.DarkGray)
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, fillWidth, barHeight), rl.Yellow)
+		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
 	}
 }
 
