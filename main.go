@@ -91,16 +91,14 @@ func main() {
 		}
 
 		if gameEnd(p) {
-			if !lost {
-				rl.StopSound(sound.Track)
-				rl.PlaySound(sound.YouLose)
-			}
+			rl.StopSound(sound.Track)
+			rl.PlaySound(sound.YouLose)
 			showMenu = true
 			lost = true
 			p = resetGame(em, p, bm)
 		}
 
-		if !rl.IsSoundPlaying(sound.Track) {
+		if !rl.IsSoundPlaying(sound.Track) && !showMenu {
 			rl.PlaySound(sound.Track)
 		}
 
