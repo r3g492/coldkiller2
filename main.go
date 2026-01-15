@@ -24,7 +24,6 @@ func main() {
 	rl.SetWindowSize(w, h)
 	rl.ToggleBorderlessWindowed()
 	defer rl.CloseWindow()
-	rl.DisableCursor()
 
 	rl.InitAudioDevice()
 	rl.SetTargetFPS(144)
@@ -41,8 +40,18 @@ func main() {
 	em.Init(p)
 	sound.Init()
 
+	rl.DisableCursor()
+
 	showMenu := true
 	lost := false
+
+	btnWidth, btnHeight := float32(400), float32(80)
+	btnRect := rl.Rectangle{
+		X:      float32(w)/2 - btnWidth/2,
+		Y:      float32(h)/2 - btnHeight/2,
+		Width:  btnWidth,
+		Height: btnHeight,
+	}
 
 	for !rl.WindowShouldClose() {
 		// seconds
@@ -52,41 +61,28 @@ func main() {
 		ip := input.ReadInput(keyMap)
 
 		if showMenu {
-			if lost {
-				rl.BeginDrawing()
-				rl.ClearBackground(rl.Black)
-				rl.DrawText(
-					"You Lost! Press F1 to Restart",
-					int32(w/2-200),
-					int32(h/2),
-					100,
-					rl.Red,
-				)
-				rl.EndDrawing()
-
-				if ip.ResetGamePressed {
-					showMenu = false
-					lost = true
-				}
-
-				continue
+			if rl.IsCursorHidden() {
+				rl.EnableCursor()
 			}
 
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
-			rl.DrawText(
-				"Press F1 to Start",
-				int32(w/2-200),
-				int32(h/2),
-				100,
-				rl.Red,
-			)
-			rl.EndDrawing()
 
-			if ip.ResetGamePressed {
-				showMenu = false
+			buttonText := "Start Game"
+			if lost {
+				buttonText = "Restart Game"
+				rl.DrawText("YOU LOSE", int32(w/2-150), int32(h/2-150), 60, rl.Red)
 			}
 
+			if drawButton(btnRect, buttonText) || ip.ResetGamePressed {
+				showMenu = false
+				if lost {
+					p = resetGame(em, p, bm)
+					lost = false
+				}
+			}
+
+			rl.EndDrawing()
 			continue
 		}
 
@@ -100,6 +96,10 @@ func main() {
 
 		if !rl.IsSoundPlaying(sound.Track) && !showMenu {
 			rl.PlaySound(sound.Track)
+		}
+
+		if !rl.IsCursorHidden() {
+			rl.DisableCursor()
 		}
 
 		if ip.EndGamePressed {
@@ -166,11 +166,36 @@ func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 
 func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 	rl.BeginMode3D(player.Camera)
-	rl.DrawRay(rl.NewRay(player.Position, player.TargetDirection), rl.Green)
+	// rl.DrawRay(rl.NewRay(player.Position, player.TargetDirection), rl.Green)
 	rl.EndMode3D()
 	rl.DrawCircle(int32(mouseLocation.X), int32(mouseLocation.Y), 5, rl.Green)
 }
 
 func gameEnd(player *killer.Killer) bool {
 	return player.Health <= 0 && player.ActionTimeLeft <= 0
+}
+
+func drawButton(rect rl.Rectangle, text string) bool {
+	mousePoint := rl.GetMousePosition()
+	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)
+
+	color := rl.Red
+	if isHovered {
+		color = rl.Maroon
+		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
+			return true
+		}
+	}
+
+	rl.DrawRectangleRec(rect, rl.Fade(color, 0.3))
+	rl.DrawRectangleLinesEx(rect, 3, color)
+
+	fontSize := int32(30)
+	textWidth := rl.MeasureText(text, fontSize)
+	textX := int32(rect.X + (rect.Width / 2) - float32(textWidth/2))
+	textY := int32(rect.Y + (rect.Height / 2) - float32(fontSize/2))
+
+	rl.DrawText(text, textX, textY, fontSize, color)
+
+	return false
 }

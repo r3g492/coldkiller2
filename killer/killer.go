@@ -209,7 +209,7 @@ func (k *Killer) movement(input input.Input, dt float32, obstacles []rl.Bounding
 
 func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	var bulletCmds []BulletCmd
-	if input.PunchHold && k.Ammo > 0 {
+	if input.PunchPressed && k.Ammo > 0 {
 		rl.PlaySound(sound.ShotgunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
@@ -231,7 +231,7 @@ func (k *Killer) ResolveAnimation() {
 	case animation.StateAttacking:
 		k.setAnim(2, 150, false)
 	case animation.StateDying:
-		k.setAnim(3, 96, false)
+		k.setAnim(3, 300, false)
 	case animation.StateReloading:
 		k.setAnim(2, 150, false)
 	default:
@@ -292,7 +292,7 @@ func (k *Killer) Damage(d int32) {
 	k.MaxActionTime = shotTime
 	if k.Health <= 0 {
 		k.AnimationState = animation.StateDying
-		var dyingTime float32 = 2
+		var dyingTime float32 = 1
 		k.ActionTimeLeft = dyingTime
 		k.MaxActionTime = dyingTime
 	}
