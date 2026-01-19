@@ -54,6 +54,23 @@ func main() {
 	}
 
 	for !rl.WindowShouldClose() {
+		if rl.IsCursorHidden() {
+			rl.EnableCursor()
+		}
+
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.Black)
+		buttonText := "Start Game"
+		if drawButton(btnRect, buttonText) {
+			showMenu = false
+			break
+		}
+
+		rl.EndDrawing()
+		continue
+	}
+
+	for !rl.WindowShouldClose() {
 		// seconds
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
@@ -68,11 +85,8 @@ func main() {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
 
-			buttonText := "Start Game"
-			if lost {
-				buttonText = "Restart Game"
-				rl.DrawText("YOU LOSE", int32(w/2-150), int32(h/2-150), 60, rl.Red)
-			}
+			buttonText := "Restart Game"
+			rl.DrawText("YOU LOSE", int32(w/2-150), int32(h/2-150), 60, rl.Red)
 
 			if drawButton(btnRect, buttonText) || ip.ResetGamePressed {
 				showMenu = false
@@ -177,12 +191,12 @@ func gameEnd(player *killer.Killer) bool {
 
 func drawButton(rect rl.Rectangle, text string) bool {
 	mousePoint := rl.GetMousePosition()
-	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)
+	isPressed := rl.CheckCollisionPointRec(mousePoint, rect) && (rl.IsMouseButtonDown(rl.MouseLeftButton) || rl.IsMouseButtonReleased(rl.MouseLeftButton))
 
 	color := rl.Red
-	if isHovered {
+	if isPressed {
 		color = rl.Maroon
-		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
+		if rl.IsMouseButtonReleased(rl.MouseLeftButton) {
 			return true
 		}
 	}

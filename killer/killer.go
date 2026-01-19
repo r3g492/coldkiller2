@@ -123,7 +123,7 @@ func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBo
 	if k.ActionTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
 		if attack {
-			var attackTime float32 = 0.25
+			var attackTime float32 = 0.1
 			k.ActionTimeLeft = attackTime
 			k.MaxActionTime = attackTime
 			k.AnimationState = animation.StateAttacking
