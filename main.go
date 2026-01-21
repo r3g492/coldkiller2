@@ -155,6 +155,7 @@ func main() {
 
 		drawCursor(mouseLocation, p)
 		rl.DrawText(strconv.Itoa(em.EnemyGenerationLevel), 500, 500, 30, rl.Purple)
+		rl.DrawText(strconv.Itoa(bm.PlayerXp), 700, 500, 30, rl.Red)
 		rl.EndDrawing()
 	}
 }

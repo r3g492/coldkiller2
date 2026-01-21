@@ -8,7 +8,8 @@ import (
 )
 
 type Manager struct {
-	Bullets []Bullet
+	Bullets  []Bullet
+	PlayerXp int
 }
 
 func CreateManager() *Manager {
@@ -64,6 +65,7 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
 					bm.Bullets[i].Active = false
+					bm.PlayerXp++
 				}
 			}
 
