@@ -93,4 +93,5 @@ func (bm *Manager) DrawBullets3D() {
 
 func (bm *Manager) Unload() {
 	bm.Bullets = []Bullet{}
+	bm.PlayerXp = 0
 }
