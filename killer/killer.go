@@ -97,7 +97,8 @@ func (k *Killer) DrawUI() {
 	fontSize := int32(20)
 	textWidth := rl.MeasureText(ammoText, fontSize)
 	rl.DrawText(ammoText, int32(screenPos.X)-textWidth/2, int32(screenPos.Y), fontSize, rl.White)
-
+	fpsText := fmt.Sprintf("%d", rl.GetFPS())
+	rl.DrawText(fpsText, int32(screenPos.X)-textWidth/2, int32(screenPos.Y)+100, fontSize, rl.Yellow)
 	if k.ActionTimeLeft > 0 && k.MaxActionTime > 0 {
 		barWidth := float32(60)
 		barHeight := float32(8)

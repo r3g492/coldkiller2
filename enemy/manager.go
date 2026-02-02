@@ -19,6 +19,7 @@ type Manager struct {
 	EnemyGenerateUnit          time.Duration
 	LastGenerated              time.Time
 	EnemyLimit                 int
+	BulletBuffer               []BulletCmd
 }
 
 func CreateManager() *Manager {
@@ -39,11 +40,11 @@ func (em *Manager) Init(p *killer.Killer) {
 }
 
 func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
-	var bulletCmds []BulletCmd
+	em.BulletBuffer = em.BulletBuffer[:0]
 
 	for i := 0; i < len(em.Enemies); i++ {
 		addBullets := em.Enemies[i].Mutate(dt, *p, em.Enemies, i)
-		bulletCmds = append(bulletCmds, addBullets...)
+		em.BulletBuffer = append(em.BulletBuffer, addBullets...)
 	}
 
 	for i := len(em.Enemies) - 1; i >= 0; i-- {
@@ -60,12 +61,14 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 		em.UpTheTempo()
 	}
 
-	return bulletCmds
+	return em.BulletBuffer
 }
 
 func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 	for i := range em.Enemies {
-		em.Enemies[i].Draw3D(p)
+		if rl.CheckCollisionSpheres(em.Enemies[i].Position, 1.0, p.Position, 30.0) {
+			em.Enemies[i].Draw3D(p)
+		}
 	}
 }
 
@@ -101,9 +104,15 @@ func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
 
 func (e *Enemy) isColliding(myIdx int, others []Enemy, killerObstacle rl.BoundingBox) bool {
 	myBox := e.GetBoundingBox()
+	threshold := (e.Size * 2.1) * (e.Size * 2.1)
 
 	for i, other := range others {
 		if i == myIdx || !other.IsAlive() {
+			continue
+		}
+
+		distSqr := rl.Vector3DistanceSqr(e.Position, other.Position)
+		if distSqr > threshold {
 			continue
 		}
 
@@ -112,8 +121,16 @@ func (e *Enemy) isColliding(myIdx int, others []Enemy, killerObstacle rl.Boundin
 		}
 	}
 
-	if rl.CheckCollisionBoxes(myBox, killerObstacle) {
-		return true
+	myPos := e.Position
+	for i, other := range others {
+		if i == myIdx || !other.IsAlive() {
+			continue
+		}
+		if rl.Vector3DistanceSqr(myPos, other.Position) < 4.0 {
+			if rl.CheckCollisionBoxes(e.GetBoundingBox(), other.GetBoundingBox()) {
+				return true
+			}
+		}
 	}
 	return false
 }
