@@ -20,7 +20,13 @@ type Manager struct {
 	LastGenerated              time.Time
 	EnemyLimit                 int
 	BulletBuffer               []BulletCmd
+	Grid                       map[int][]int
+	CellSize                   float32
 }
+
+const CELL_SIZE = 5.0
+const PLAYER_SEE_AREA = 35.0
+const PLAYER_3D_SEE_SQUARE = 1000
 
 func CreateManager() *Manager {
 	return &Manager{}
@@ -36,14 +42,17 @@ func (em *Manager) Init(p *killer.Killer) {
 	em.EnemyGenerateUnit = 4 * time.Second
 	em.LastGenerated = time.Now()
 	em.EnemyLimit = 100
+	em.CellSize = CELL_SIZE
+	em.Grid = make(map[int][]int)
 	em.Generate(p)
 }
 
 func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
+	em.updateGrid()
 	em.BulletBuffer = em.BulletBuffer[:0]
 
 	for i := 0; i < len(em.Enemies); i++ {
-		addBullets := em.Enemies[i].Mutate(dt, *p, em.Enemies, i)
+		addBullets := em.Enemies[i].Mutate(dt, *p, em, i)
 		em.BulletBuffer = append(em.BulletBuffer, addBullets...)
 	}
 
@@ -66,7 +75,7 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 
 func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 	for i := range em.Enemies {
-		if rl.CheckCollisionSpheres(em.Enemies[i].Position, 1.0, p.Position, 30.0) {
+		if rl.CheckCollisionSpheres(em.Enemies[i].Position, 1.0, p.Position, PLAYER_SEE_AREA) {
 			em.Enemies[i].Draw3D(p)
 		}
 	}
@@ -74,12 +83,17 @@ func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 
 func (em *Manager) DrawEnemiesUi(p *killer.Killer) {
 	for i := range em.Enemies {
-		em.Enemies[i].DrawUI(p)
+		if rl.Vector3DistanceSqr(em.Enemies[i].Position, p.Position) < PLAYER_3D_SEE_SQUARE {
+			em.Enemies[i].DrawUI(p)
+		}
 	}
 }
 
-func (em *Manager) ProcessAnimation(dt float32) {
-	for i, _ := range em.Enemies {
+func (em *Manager) ProcessAnimation(dt float32, p *killer.Killer) {
+	for i := range em.Enemies {
+		if rl.Vector3DistanceSqr(em.Enemies[i].Position, p.Position) > PLAYER_3D_SEE_SQUARE {
+			continue
+		}
 		em.Enemies[i].ResolveAnimation()
 		em.Enemies[i].PlanAnimate(dt)
 		em.Enemies[i].Animate()
@@ -100,39 +114,6 @@ func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
 		}
 	}
 	return boxes
-}
-
-func (e *Enemy) isColliding(myIdx int, others []Enemy, killerObstacle rl.BoundingBox) bool {
-	myBox := e.GetBoundingBox()
-	threshold := (e.Size * 2.1) * (e.Size * 2.1)
-
-	for i, other := range others {
-		if i == myIdx || !other.IsAlive() {
-			continue
-		}
-
-		distSqr := rl.Vector3DistanceSqr(e.Position, other.Position)
-		if distSqr > threshold {
-			continue
-		}
-
-		if rl.CheckCollisionBoxes(myBox, other.GetBoundingBox()) {
-			return true
-		}
-	}
-
-	myPos := e.Position
-	for i, other := range others {
-		if i == myIdx || !other.IsAlive() {
-			continue
-		}
-		if rl.Vector3DistanceSqr(myPos, other.Position) < 4.0 {
-			if rl.CheckCollisionBoxes(e.GetBoundingBox(), other.GetBoundingBox()) {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func (em *Manager) Generate(p *killer.Killer) {
@@ -167,24 +148,10 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 	}
 	trialLimit := 3
 	trial := 0
-	for ; candidate.isColliding(-1, em.Enemies, p.GetBoundingBox()) && trial < trialLimit; trial++ {
+	for trial < trialLimit && candidate.isCollidingWithGrid(-1, em, p.GetBoundingBox()) {
 		candidatePosition = getRandomPosition(p)
-		candidate = Enemy{
-			Model:           em.SharedModel,
-			ModelAngleDeg:   0,
-			Animation:       em.SharedAnimations,
-			MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
-			TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
-			Position:        candidatePosition,
-			Size:            1.0,
-			MoveSpeed:       10.0,
-			ActionTimeLeft:  0,
-			Health:          100,
-			IsDead:          false,
-			AttackRange:     10,
-			AimTimeLeft:     2,
-			AimTimeUnit:     2,
-		}
+		candidate.Position = candidatePosition
+		trial++
 	}
 	if trial >= trialLimit {
 		return
@@ -207,4 +174,50 @@ func getRandomPosition(p *killer.Killer) rl.Vector3 {
 func (em *Manager) UpTheTempo() {
 	em.EnemyGenerationLevel++
 	em.LastLevelUp = time.Now()
+}
+
+func (em *Manager) getGridID(pos rl.Vector3) int {
+	gx := int(math.Floor(float64(pos.X / em.CellSize)))
+	gz := int(math.Floor(float64(pos.Z / em.CellSize)))
+	return gx*73856093 ^ gz*19349663
+}
+
+func (em *Manager) updateGrid() {
+	for k := range em.Grid {
+		em.Grid[k] = em.Grid[k][:0]
+	}
+	for i, e := range em.Enemies {
+		if !e.IsAlive() {
+			continue
+		}
+		id := em.getGridID(e.Position)
+		em.Grid[id] = append(em.Grid[id], i)
+	}
+}
+
+func (e *Enemy) isCollidingWithGrid(myIdx int, em *Manager, playerBox rl.BoundingBox) bool {
+	myBox := e.GetBoundingBox()
+
+	for x := float32(-1); x <= 1; x++ {
+		for z := float32(-1); z <= 1; z++ {
+			checkPos := rl.Vector3{
+				X: e.Position.X + (x * em.CellSize),
+				Z: e.Position.Z + (z * em.CellSize),
+			}
+			gridID := em.getGridID(checkPos)
+
+			for _, otherIdx := range em.Grid[gridID] {
+				if otherIdx == myIdx {
+					continue
+				}
+
+				other := em.Enemies[otherIdx]
+				if rl.CheckCollisionBoxes(myBox, other.GetBoundingBox()) {
+					return true
+				}
+			}
+		}
+	}
+
+	return rl.CheckCollisionBoxes(myBox, playerBox)
 }

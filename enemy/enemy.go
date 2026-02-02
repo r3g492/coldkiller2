@@ -77,7 +77,7 @@ func (e *Enemy) DrawUI(p *killer.Killer) {
 func (e *Enemy) Mutate(
 	dt float32,
 	p killer.Killer,
-	others []Enemy,
+	em *Manager,
 	myIdx int,
 ) []BulletCmd {
 	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
@@ -137,11 +137,11 @@ func (e *Enemy) Mutate(
 
 	oldPos := e.Position
 	e.Position.X += moveAmount.X
-	if e.isColliding(myIdx, others, p.GetBoundingBox()) {
+	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) {
 		e.Position.X = oldPos.X
 	}
 	e.Position.Z += moveAmount.Z
-	if e.isColliding(myIdx, others, p.GetBoundingBox()) {
+	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) {
 		e.Position.Z = oldPos.Z
 	}
 
