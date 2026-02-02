@@ -96,7 +96,6 @@ func (em *Manager) ProcessAnimation(dt float32, p *killer.Killer) {
 		}
 		em.Enemies[i].ResolveAnimation()
 		em.Enemies[i].PlanAnimate(dt)
-		em.Enemies[i].Animate()
 	}
 }
 

@@ -42,9 +42,6 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 	rl.PushMatrix()
 	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
-	if e.IsAlive() {
-		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
-	}
 	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), 0.45, rl.Red)
@@ -209,11 +206,6 @@ func (e *Enemy) PlanAnimate(dt float32) {
 			return
 		}
 	}
-}
-
-func (e *Enemy) Animate() {
-	anim := e.Animation[e.AnimationIdx]
-	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 }
 
 func (e *Enemy) GetBoundingBox() rl.BoundingBox {
