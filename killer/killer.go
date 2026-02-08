@@ -35,6 +35,9 @@ type Killer struct {
 	Ammo            int32
 }
 
+const ModelRatio = 0.3
+const CharSize = 0.64
+
 func Init() *Killer {
 	playerModel := rl.LoadModel("resources/unit_v3.glb")
 	playerAnimation := rl.LoadModelAnimations("resources/unit_v3.glb")
@@ -46,8 +49,8 @@ func Init() *Killer {
 		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        playerPosition,
-		Size:            1.0,
-		MoveSpeed:       11,
+		Size:            CharSize,
+		MoveSpeed:       5,
 		Camera: rl.Camera3D{
 			Position:   rl.Vector3Add(playerPosition, rl.NewVector3(0.0, 10.0, 0.0)),
 			Target:     playerPosition,
@@ -76,7 +79,8 @@ func (k *Killer) Draw3D() {
 	)
 	rl.Rotatef(-60, 1, 0, 0)
 	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
-	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), 0.45, rl.Green)
+	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), ModelRatio, rl.Green)
+	rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
 	rl.PopMatrix()
 
 	rl.PushMatrix()
@@ -85,7 +89,6 @@ func (k *Killer) Draw3D() {
 		k.Position.Y,
 		k.Position.Z,
 	)
-	// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
 	rl.PopMatrix()
 }
 

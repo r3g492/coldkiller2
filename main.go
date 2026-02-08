@@ -125,10 +125,11 @@ func main() {
 		}
 
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.Black)
+		rl.ClearBackground(rl.NewColor(20, 20, 25, 255))
 
 		// enemy
 		rl.BeginMode3D(p.Camera)
+		rl.DrawPlane(rl.NewVector3(0, -2, 0), rl.NewVector2(1000, 1000), rl.DarkGray)
 		var ebc = em.Mutate(dt, p)
 		em.ProcessAnimation(dt, p)
 		em.DrawEnemies3D(p)
