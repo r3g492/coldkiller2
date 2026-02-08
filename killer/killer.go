@@ -36,7 +36,7 @@ type Killer struct {
 }
 
 const ModelRatio = 0.3
-const CharSize = 0.64
+const CharSize = 0.72
 
 func Init() *Killer {
 	playerModel := rl.LoadModel("resources/unit_v3.glb")

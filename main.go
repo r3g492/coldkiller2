@@ -1,6 +1,7 @@
 package main
 
 import (
+	"coldkiller2/background"
 	"coldkiller2/bullet"
 	"coldkiller2/enemy"
 	"coldkiller2/input"
@@ -52,6 +53,8 @@ func main() {
 		Width:  btnWidth,
 		Height: btnHeight,
 	}
+
+	background.InitEnvironment()
 
 	for !rl.WindowShouldClose() {
 		if rl.IsCursorHidden() {
@@ -125,11 +128,10 @@ func main() {
 		}
 
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.NewColor(20, 20, 25, 255))
-
+		rl.ClearBackground(rl.NewColor(10, 10, 15, 255))
+		background.DrawCleanEnvironment(p)
 		// enemy
 		rl.BeginMode3D(p.Camera)
-		rl.DrawPlane(rl.NewVector3(0, -2, 0), rl.NewVector2(1000, 1000), rl.DarkGray)
 		var ebc = em.Mutate(dt, p)
 		em.ProcessAnimation(dt, p)
 		em.DrawEnemies3D(p)
