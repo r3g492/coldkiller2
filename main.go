@@ -19,11 +19,21 @@ var lastLog = time.Now()
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable | rl.FlagWindowUndecorated)
 	rl.InitWindow(0, 0, "coldkiller2")
-	curr := rl.GetCurrentMonitor()
-	w := rl.GetMonitorWidth(curr)
-	h := rl.GetMonitorHeight(curr)
+
+	targetMonitor := 1
+	monitorCount := rl.GetMonitorCount()
+
+	if targetMonitor >= monitorCount {
+		targetMonitor = 0
+	}
+
+	w := rl.GetMonitorWidth(targetMonitor)
+	h := rl.GetMonitorHeight(targetMonitor)
+
+	monitorPos := rl.GetMonitorPosition(targetMonitor)
+	rl.SetWindowPosition(int(monitorPos.X), int(monitorPos.Y))
+
 	rl.SetWindowSize(w, h)
-	rl.ToggleBorderlessWindowed()
 	defer rl.CloseWindow()
 
 	rl.InitAudioDevice()
