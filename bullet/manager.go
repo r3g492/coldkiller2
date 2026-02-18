@@ -24,7 +24,7 @@ func (bm *Manager) KillerBulletCreate(
 			Position:  bc.Pos,
 			Direction: bc.Dir,
 			Speed:     100.0,
-			Radius:    0.05,
+			Radius:    0.03,
 			Active:    true,
 			LifeTime:  2.0,
 			Shooter:   Player,
@@ -43,7 +43,7 @@ func (bm *Manager) EnemyBulletCreate(
 			Position:  bc.Pos,
 			Direction: bc.Dir,
 			Speed:     50.0,
-			Radius:    0.05,
+			Radius:    0.03,
 			Active:    true,
 			LifeTime:  2.0,
 			Shooter:   Enemy,
@@ -61,9 +61,12 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 			enemyPos := el[j].Position
 			enemySize := el[j].Size
 			curBullet := bm.Bullets[i]
+			// TODO: draw explosion should be outside of this function
+			rl.BeginMode3D(p.Camera)
 			if curBullet.Shooter == Player && rl.Vector3Distance(enemyPos, curBullet.Position) < enemySize && el[j].Health > 0 {
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
+					rl.DrawSphere(bm.Bullets[i].Position, 0.5, rl.Yellow)
 					bm.Bullets[i].Active = false
 					bm.PlayerXp++
 				}
@@ -72,9 +75,11 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 			if curBullet.Shooter == Enemy && rl.Vector3Distance(p.Position, curBullet.Position) < p.Size && p.Health > 0 {
 				if bm.Bullets[i].Active {
 					p.Damage(bm.Bullets[i].Damage)
+					rl.DrawSphere(bm.Bullets[i].Position, 0.5, rl.Yellow)
 					bm.Bullets[i].Active = false
 				}
 			}
+			rl.EndMode3D()
 		}
 
 		if bm.Bullets[i].LifeTime <= 0 || !bm.Bullets[i].Active {
