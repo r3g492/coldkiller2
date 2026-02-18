@@ -196,7 +196,7 @@ func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 	rl.BeginMode3D(player.Camera)
 	// rl.DrawRay(rl.NewRay(player.Position, player.TargetDirection), rl.Green)
 	rl.EndMode3D()
-	rl.DrawCircle(int32(mouseLocation.X), int32(mouseLocation.Y), 5, rl.Green)
+	rl.DrawCircle(int32(mouseLocation.X), int32(mouseLocation.Y), 2.5, rl.Green)
 }
 
 func gameEnd(player *killer.Killer) bool {

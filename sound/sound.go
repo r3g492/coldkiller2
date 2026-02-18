@@ -11,6 +11,7 @@ var (
 	ReloadingSound rl.Sound
 	Track          rl.Sound
 	YouLose        rl.Sound
+	GettingShot    rl.Sound
 )
 
 func Init() {
@@ -19,5 +20,6 @@ func Init() {
 	ReloadingSound = util.LoadSoundFromEmbedded("1911-reload-6248.mp3")
 	rl.SetSoundVolume(ReloadingSound, 0.4)
 	Track = util.LoadSoundFromEmbedded("song2.mp3")
-	YouLose = util.LoadSoundFromEmbedded("you-lose-game-sound-230514.mp3")
+	YouLose = util.LoadSoundFromEmbedded("lost.mp3")
+	GettingShot = util.LoadSoundFromEmbedded("GettingShot.mp3")
 }

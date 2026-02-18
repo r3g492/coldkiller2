@@ -3,6 +3,7 @@ package bullet
 import (
 	"coldkiller2/enemy"
 	"coldkiller2/killer"
+	"coldkiller2/sound"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -67,6 +68,7 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
 					rl.DrawSphere(bm.Bullets[i].Position, 0.5, rl.Yellow)
+					rl.PlaySound(sound.GettingShot)
 					bm.Bullets[i].Active = false
 					bm.PlayerXp++
 				}

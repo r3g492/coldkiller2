@@ -98,27 +98,45 @@ func (k *Killer) DrawUI() {
 	uiWorldPos := rl.Vector3{X: k.Position.X, Y: k.Position.Y + 3.0, Z: k.Position.Z}
 	screenPos := rl.GetWorldToScreen(uiWorldPos, k.Camera)
 
-	ammoText := fmt.Sprintf("%d / %d", k.Ammo, k.AmmoCapacity)
 	fontSize := int32(20)
-	textWidth := rl.MeasureText(ammoText, fontSize)
-	rl.DrawText(ammoText, int32(screenPos.X)-textWidth/2, int32(screenPos.Y), fontSize, rl.White)
-	fpsText := fmt.Sprintf("%d", rl.GetFPS())
-	rl.DrawText(fpsText, int32(screenPos.X)-textWidth/2, int32(screenPos.Y)+100, fontSize, rl.Yellow)
+	barWidth := float32(60)
+	barHeight := float32(8)
+	barX := screenPos.X - barWidth/2
+
+	// 1. Ammo Bar (Sky Blue) - Positioned under the action bar
+	if k.AmmoCapacity > 0 {
+		ammoPct := float32(k.Ammo) / float32(k.AmmoCapacity)
+		ammoFillWidth := ammoPct * barWidth
+		// If the action bar is visible, we push this down further (25 + 8 height + 4 padding)
+		ammoBarY := screenPos.Y + 25
+
+		rl.DrawRectangleRec(rl.NewRectangle(barX, ammoBarY, barWidth, barHeight), rl.Fade(rl.DarkGray, 0.6))
+
+		// Color changes to Red when low on ammo (less than 20%)
+		ammoColor := rl.SkyBlue
+		if ammoPct < 0.2 {
+			ammoColor = rl.Red
+		}
+
+		rl.DrawRectangleRec(rl.NewRectangle(barX, ammoBarY, ammoFillWidth, barHeight), ammoColor)
+		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, ammoBarY, barWidth, barHeight), 1, rl.Black)
+	}
+
+	// 2. Action/Reload Bar (Yellow)
 	if k.ActionTimeLeft > 0 && k.MaxActionTime > 0 {
-		barWidth := float32(60)
-		barHeight := float32(8)
 		pct := k.ActionTimeLeft / k.MaxActionTime
 		fillWidth := pct * barWidth
+		barY := screenPos.Y + 37
 
-		barX := screenPos.X - barWidth/2
-		barY := screenPos.Y + 25
-
-		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.DarkGray)
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.Fade(rl.DarkGray, 0.6))
 		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, fillWidth, barHeight), rl.Yellow)
 		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
 	}
-}
 
+	// Optional: Keep the FPS counter at the bottom
+	fpsText := fmt.Sprintf("%d", rl.GetFPS())
+	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, fontSize, rl.Yellow)
+}
 func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {
 	var bulletCmds []BulletCmd
 
