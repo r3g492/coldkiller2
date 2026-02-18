@@ -34,8 +34,8 @@ func CreateManager() *Manager {
 
 func (em *Manager) Init(p *killer.Killer) {
 	em.Enemies = make([]Enemy, 0)
-	em.SharedModel = rl.LoadModel("resources/unit_v3.glb")
-	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v3.glb")
+	em.SharedModel = rl.LoadModel("resources/unit_v4.glb")
+	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v4.glb")
 	em.EnemyGenerationLevel = 0
 	em.EnemyGenerationLevelUpUnit = 8 * time.Second
 	em.LastLevelUp = time.Now()
