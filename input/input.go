@@ -55,3 +55,26 @@ func ReadInput(keyMap KeyMap) Input {
 		EndGamePressed:   rl.IsKeyDown(keyMap.EndGame),
 	}
 }
+
+func GetKeyName(key int32) string {
+	switch key {
+	case rl.KeyEscape:
+		return "ESC"
+	case rl.KeyF1:
+		return "F1"
+	case rl.KeySpace:
+		return "SPC"
+	case rl.KeyW: // Explicitly handle these if GetKeyName returns lowercase/null
+		return "W"
+	case rl.KeyA:
+		return "A"
+	case rl.KeyS:
+		return "S"
+	case rl.KeyD:
+		return "D"
+	case rl.KeyR:
+		return "R"
+	default:
+		return "?"
+	}
+}

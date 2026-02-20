@@ -8,13 +8,13 @@ import (
 	"coldkiller2/killer"
 	"coldkiller2/sound"
 	"fmt"
-	"strconv"
 	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 var lastLog = time.Now()
+var lastScore int
 
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable | rl.FlagWindowUndecorated)
@@ -84,7 +84,6 @@ func main() {
 	}
 
 	for !rl.WindowShouldClose() {
-		// seconds
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
 		log(mouseLocation, dt, p)
@@ -99,7 +98,11 @@ func main() {
 			rl.ClearBackground(rl.Black)
 
 			buttonText := "Restart Game"
-			rl.DrawText("YOU LOSE", int32(w/2-150), int32(h/2-150), 60, rl.Red)
+			xpText := fmt.Sprintf("%d KILL", lastScore)
+
+			fontSize := int32(60)
+			textWidth := rl.MeasureText(xpText, fontSize)
+			rl.DrawText(xpText, int32(w)/2-textWidth/2, int32(h/2-300), fontSize, rl.Red)
 
 			if drawButton(btnRect, buttonText) || ip.ResetGamePressed {
 				showMenu = false
@@ -118,6 +121,7 @@ func main() {
 			rl.PlaySound(sound.YouLose)
 			showMenu = true
 			lost = true
+			lastScore = bm.PlayerXp
 			p = resetGame(em, p, bm)
 		}
 
@@ -165,10 +169,10 @@ func main() {
 		rl.BeginMode3D(p.Camera)
 		bm.DrawBullets3D()
 		rl.EndMode3D()
-
+		drawInputOverlay(w, h, ip, keyMap)
 		drawCursor(mouseLocation, p)
-		rl.DrawText(strconv.Itoa(em.EnemyGenerationLevel), 500, 500, 30, rl.Purple)
-		rl.DrawText(strconv.Itoa(bm.PlayerXp), 700, 500, 30, rl.Red)
+		// rl.DrawText(strconv.Itoa(em.EnemyGenerationLevel), 500, 500, 30, rl.Purple)
+		// rl.DrawText(strconv.Itoa(bm.PlayerXp), 700, 500, 30, rl.Red)
 		rl.EndDrawing()
 	}
 }
@@ -226,4 +230,76 @@ func drawButton(rect rl.Rectangle, text string) bool {
 	rl.DrawText(text, textX, textY, fontSize, color)
 
 	return false
+}
+
+func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
+	const (
+		keySize      = 45
+		spacing      = 6
+		fontSize     = 18
+		descSize     = 9
+		rightMargin  = 40
+		bottomMargin = 90
+	)
+
+	labelUp := input.GetKeyName(keyMap.Up)
+	labelLeft := input.GetKeyName(keyMap.Left)
+	labelDown := input.GetKeyName(keyMap.Down)
+	labelRight := input.GetKeyName(keyMap.Right)
+	labelReload := input.GetKeyName(keyMap.Reload)
+	labelReset := input.GetKeyName(keyMap.ResetGame)
+	labelEnd := input.GetKeyName(keyMap.EndGame)
+
+	totalWidth := (keySize * 7) + (spacing * 6) + 20
+	baseX := float32(w) - float32(totalWidth) - rightMargin
+	baseY := float32(h) - (keySize * 2) - spacing - bottomMargin
+
+	drawKey := func(x, y float32, width float32, label string, desc string, active bool) {
+		rect := rl.Rectangle{X: x, Y: y, Width: width, Height: keySize}
+
+		alpha := uint8(100)
+		if active {
+			alpha = 180
+		}
+
+		bgColor := rl.NewColor(30, 30, 30, alpha)
+		borderCol := rl.Fade(rl.Gray, 0.4)
+		textCol := rl.Fade(rl.LightGray, 0.9)
+		descCol := rl.Fade(rl.Gray, 0.7)
+
+		if active {
+			bgColor = rl.NewColor(230, 41, 55, 160)
+			borderCol = rl.Red
+			textCol = rl.White
+			descCol = rl.Fade(rl.White, 0.8)
+		}
+
+		rl.DrawRectangleRec(rect, bgColor)
+		rl.DrawRectangleLinesEx(rect, 1, borderCol)
+
+		tw := rl.MeasureText(label, fontSize)
+		rl.DrawText(label, int32(x+width/2)-tw/2, int32(y+keySize/2)-fontSize/2-4, fontSize, textCol)
+
+		dtw := rl.MeasureText(desc, descSize)
+		rl.DrawText(desc, int32(x+width/2)-dtw/2, int32(y+keySize)-descSize-6, descSize, descCol)
+	}
+
+	drawKey(baseX, baseY, keySize, labelEnd, "END", rl.IsKeyDown(keyMap.EndGame))
+	drawKey(baseX+keySize+spacing, baseY, keySize, labelReset, "RESET", ip.ResetGamePressed)
+	drawKey(baseX+(keySize+spacing)*3, baseY, keySize, labelUp, "UP", ip.MoveUp)
+
+	currX := baseX + (keySize+spacing)*2
+	drawKey(currX, baseY+keySize+spacing, keySize, labelLeft, "LEFT", ip.MoveLeft)
+	currX += keySize + spacing
+
+	drawKey(currX, baseY+keySize+spacing, keySize, labelDown, "DOWN", ip.MoveDown)
+	currX += keySize + spacing
+
+	drawKey(currX, baseY+keySize+spacing, keySize, labelRight, "RIGHT", ip.MoveRight)
+	currX += keySize + spacing
+
+	drawKey(currX, baseY+keySize+spacing, keySize, labelReload, "RELOAD", ip.ReloadPressed)
+	currX += keySize + spacing
+
+	drawKey(currX, baseY+keySize+spacing, keySize+30, "LMB", "SHOOT", rl.IsMouseButtonDown(keyMap.PunchHold))
 }

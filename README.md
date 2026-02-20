@@ -1,3 +1,4 @@
-add level up by xp
-add kill count
-add skill selection when levelup
+TODO:
+- blast system
+- structure system
+- level design

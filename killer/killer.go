@@ -4,7 +4,6 @@ import (
 	"coldkiller2/animation"
 	"coldkiller2/input"
 	"coldkiller2/sound"
-	"fmt"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -98,21 +97,18 @@ func (k *Killer) DrawUI() {
 	uiWorldPos := rl.Vector3{X: k.Position.X, Y: k.Position.Y + 3.0, Z: k.Position.Z}
 	screenPos := rl.GetWorldToScreen(uiWorldPos, k.Camera)
 
-	fontSize := int32(20)
+	var _ = int32(20)
 	barWidth := float32(60)
 	barHeight := float32(8)
 	barX := screenPos.X - barWidth/2
 
-	// 1. Ammo Bar (Sky Blue) - Positioned under the action bar
 	if k.AmmoCapacity > 0 {
 		ammoPct := float32(k.Ammo) / float32(k.AmmoCapacity)
 		ammoFillWidth := ammoPct * barWidth
-		// If the action bar is visible, we push this down further (25 + 8 height + 4 padding)
 		ammoBarY := screenPos.Y + 25
 
 		rl.DrawRectangleRec(rl.NewRectangle(barX, ammoBarY, barWidth, barHeight), rl.Fade(rl.DarkGray, 0.6))
 
-		// Color changes to Red when low on ammo (less than 20%)
 		ammoColor := rl.SkyBlue
 		if ammoPct < 0.2 {
 			ammoColor = rl.Red
@@ -122,7 +118,6 @@ func (k *Killer) DrawUI() {
 		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, ammoBarY, barWidth, barHeight), 1, rl.Black)
 	}
 
-	// 2. Action/Reload Bar (Yellow)
 	if k.ActionTimeLeft > 0 && k.MaxActionTime > 0 {
 		pct := k.ActionTimeLeft / k.MaxActionTime
 		fillWidth := pct * barWidth
@@ -134,8 +129,8 @@ func (k *Killer) DrawUI() {
 	}
 
 	// Optional: Keep the FPS counter at the bottom
-	fpsText := fmt.Sprintf("%d", rl.GetFPS())
-	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, fontSize, rl.Yellow)
+	// fpsText := fmt.Sprintf("%d", rl.GetFPS())
+	// rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, fontSize, rl.Yellow)
 }
 func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {
 	var bulletCmds []BulletCmd

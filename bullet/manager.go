@@ -68,7 +68,7 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
 					rl.DrawSphere(bm.Bullets[i].Position, 0.5, rl.Yellow)
-					rl.PlaySound(sound.GettingShot)
+					rl.PlaySound(sound.ShotNew)
 					bm.Bullets[i].Active = false
 					bm.PlayerXp++
 				}
