@@ -7,10 +7,11 @@ var COLOR = rl.Yellow
 var LIFETIME float32 = 0.06
 
 type Blast struct {
-	Position rl.Vector3
-	Radius   float32
-	LifeTime float32
-	Color    rl.Color
+	Position    rl.Vector3
+	Radius      float32
+	MaxLifeTime float32
+	LifeTime    float32
+	Color       rl.Color
 }
 
 func (b *Blast) Draw() {
@@ -19,15 +20,21 @@ func (b *Blast) Draw() {
 
 func (b *Blast) Mutate(dt float32) {
 	b.LifeTime -= dt
+
+	lifeRatio := b.LifeTime / b.MaxLifeTime
+	if lifeRatio < 0 {
+		lifeRatio = 0
+	}
+
+	b.Radius = RADIUS * lifeRatio
 }
 
-func Create(
-	position rl.Vector3,
-) Blast {
+func Create(position rl.Vector3) Blast {
 	return Blast{
-		Position: position,
-		Radius:   RADIUS,
-		LifeTime: LIFETIME,
-		Color:    COLOR,
+		Position:    position,
+		Radius:      RADIUS,
+		MaxLifeTime: LIFETIME,
+		LifeTime:    LIFETIME,
+		Color:       COLOR,
 	}
 }
