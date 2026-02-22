@@ -14,7 +14,7 @@ type Blast struct {
 	Color       rl.Color
 }
 
-func (b *Blast) Draw() {
+func (b *Blast) Draw3D() {
 	rl.DrawSphere(b.Position, b.Radius, b.Color)
 }
 

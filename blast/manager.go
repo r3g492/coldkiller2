@@ -27,8 +27,8 @@ func (bm *Manager) Mutate(dt float32) {
 	}
 }
 
-func (bm *Manager) DrawBlasts3D() {
+func (bm *Manager) Draw3D() {
 	for _, b := range bm.Blasts {
-		b.Draw()
+		b.Draw3D()
 	}
 }

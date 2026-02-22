@@ -8,6 +8,7 @@ import (
 	"coldkiller2/input"
 	"coldkiller2/killer"
 	"coldkiller2/sound"
+	"coldkiller2/structure"
 	"fmt"
 	"time"
 
@@ -45,6 +46,20 @@ func main() {
 
 	blastManager := blast.CreateManager()
 	defer blastManager.Unload()
+
+	sm := structure.CreateManager()
+	defer sm.Unload()
+	// TODO: structure must stop movement and bullets
+	/*sm.Add(
+		[]structure.Structure{
+			{
+				Position:  rl.Vector3{},
+				Size:      rl.Vector3{X: 1, Y: 2, Z: 10},
+				Direction: rl.Vector3{X: 1, Y: 1, Z: 1},
+				Color:     rl.Green,
+			},
+		},
+	)*/
 
 	em := enemy.CreateManager()
 	defer em.Unload()
@@ -176,7 +191,8 @@ func main() {
 
 		rl.BeginMode3D(p.Camera)
 		bm.DrawBullets3D()
-		blastManager.DrawBlasts3D()
+		blastManager.Draw3D()
+		sm.Draw3D()
 		rl.EndMode3D()
 
 		drawInputOverlay(w, h, ip, keyMap)

@@ -6,6 +6,8 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+// Star TODO: add background
+
 type Star struct {
 	Position rl.Vector3
 	Size     float32
@@ -47,11 +49,6 @@ func DrawCleanEnvironment(p *killer.Killer) {
 	rl.DrawCircleV(rl.NewVector2(p.Position.X, p.Position.Z), 150, rl.Fade(rl.Black, 0.5))
 
 	rl.EndMode3D()
-}
-
-func DrawMonolith(pos rl.Vector3, width float32, height float32) {
-	rl.DrawCube(pos, width, height, width, rl.NewColor(5, 5, 5, 255))
-	rl.DrawCubeWires(pos, width, height, width, rl.DarkPurple)
 }
 
 func GenStarTexture() rl.Texture2D {

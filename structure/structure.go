@@ -1,0 +1,44 @@
+package structure
+
+import (
+	"math"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+type Structure struct {
+	Position  rl.Vector3
+	Size      rl.Vector3
+	Direction rl.Vector3
+	Color     rl.Color
+}
+
+func (s *Structure) Draw3D() {
+	rl.PushMatrix()
+	rl.Translatef(s.Position.X, s.Position.Y, s.Position.Z)
+
+	angle := float32(math.Atan2(float64(s.Direction.X), float64(s.Direction.Z))) * rl.Rad2deg
+	rl.Rotatef(angle, 0, 1, 0)
+	rl.DrawCube(rl.Vector3{}, s.Size.X, s.Size.Y, s.Size.Z, s.Color)
+	rl.DrawCubeWires(rl.Vector3{}, s.Size.X, s.Size.Y, s.Size.Z, rl.Black)
+	rl.PopMatrix()
+}
+
+func Create1(
+	position rl.Vector3,
+) Structure {
+	return Structure{
+		Position: position,
+		Size: rl.Vector3{
+			X: 1,
+			Y: 1,
+			Z: 1,
+		},
+		Direction: rl.Vector3{
+			X: -1,
+			Y: 1,
+			Z: 1,
+		},
+		Color: rl.Green,
+	}
+}

@@ -24,9 +24,9 @@ type Manager struct {
 	CellSize                   float32
 }
 
-const CELL_SIZE = 5.0
-const PLAYER_SEE_AREA = 35.0
-const PLAYER_3D_SEE_SQUARE = 1000
+const CellSize = 5.0
+const PlayerSeeArea = 35.0
+const Player3dSeeSquare = 1000
 
 func CreateManager() *Manager {
 	return &Manager{}
@@ -42,7 +42,7 @@ func (em *Manager) Init(p *killer.Killer) {
 	em.EnemyGenerateUnit = 4 * time.Second
 	em.LastGenerated = time.Now()
 	em.EnemyLimit = 100
-	em.CellSize = CELL_SIZE
+	em.CellSize = CellSize
 	em.Grid = make(map[int][]int)
 	em.Generate(p)
 }
@@ -75,7 +75,7 @@ func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
 
 func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 	for i := range em.Enemies {
-		if rl.CheckCollisionSpheres(em.Enemies[i].Position, 1.0, p.Position, PLAYER_SEE_AREA) {
+		if rl.CheckCollisionSpheres(em.Enemies[i].Position, 1.0, p.Position, PlayerSeeArea) {
 			em.Enemies[i].Draw3D(p)
 		}
 	}
@@ -83,7 +83,7 @@ func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 
 func (em *Manager) DrawEnemiesUi(p *killer.Killer) {
 	for i := range em.Enemies {
-		if rl.Vector3DistanceSqr(em.Enemies[i].Position, p.Position) < PLAYER_3D_SEE_SQUARE {
+		if rl.Vector3DistanceSqr(em.Enemies[i].Position, p.Position) < Player3dSeeSquare {
 			em.Enemies[i].DrawUI(p)
 		}
 	}
@@ -91,7 +91,7 @@ func (em *Manager) DrawEnemiesUi(p *killer.Killer) {
 
 func (em *Manager) ProcessAnimation(dt float32, p *killer.Killer) {
 	for i := range em.Enemies {
-		if rl.Vector3DistanceSqr(em.Enemies[i].Position, p.Position) > PLAYER_3D_SEE_SQUARE {
+		if rl.Vector3DistanceSqr(em.Enemies[i].Position, p.Position) > Player3dSeeSquare {
 			continue
 		}
 		em.Enemies[i].ResolveAnimation()
