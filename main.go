@@ -2,6 +2,7 @@ package main
 
 import (
 	"coldkiller2/background"
+	"coldkiller2/blast"
 	"coldkiller2/bullet"
 	"coldkiller2/enemy"
 	"coldkiller2/input"
@@ -41,6 +42,9 @@ func main() {
 	keyMap := input.DefaultWASD()
 	bm := bullet.CreateManager()
 	defer bm.Unload()
+
+	blastManager := blast.CreateManager()
+	defer blastManager.Unload()
 
 	em := enemy.CreateManager()
 	defer em.Unload()
@@ -165,10 +169,16 @@ func main() {
 		// bullet
 		bm.KillerBulletCreate(bc)
 		bm.EnemyBulletCreate(ebc)
-		bm.Mutate(dt, p, em.Enemies)
+		bulletBlasts := bm.Mutate(dt, p, em.Enemies)
+
+		blastManager.AddBlasts(bulletBlasts)
+		blastManager.Mutate(dt)
+
 		rl.BeginMode3D(p.Camera)
 		bm.DrawBullets3D()
+		blastManager.DrawBlasts3D()
 		rl.EndMode3D()
+
 		drawInputOverlay(w, h, ip, keyMap)
 		drawCursor(mouseLocation, p)
 		// rl.DrawText(strconv.Itoa(em.EnemyGenerationLevel), 500, 500, 30, rl.Purple)

@@ -1,6 +1,7 @@
 package bullet
 
 import (
+	"coldkiller2/blast"
 	"coldkiller2/enemy"
 	"coldkiller2/killer"
 	"coldkiller2/sound"
@@ -55,19 +56,19 @@ func (bm *Manager) EnemyBulletCreate(
 	}
 }
 
-func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
+func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) []blast.Blast {
+
+	var blasts []blast.Blast
 	for i := 0; i < len(bm.Bullets); i++ {
 		bm.Bullets[i].Mutate(dt)
 		for j := 0; j < len(el); j++ {
 			enemyPos := el[j].Position
 			enemySize := el[j].Size
 			curBullet := bm.Bullets[i]
-			// TODO: draw explosion should be outside of this function
-			rl.BeginMode3D(p.Camera)
 			if curBullet.Shooter == Player && rl.Vector3Distance(enemyPos, curBullet.Position) < enemySize && el[j].Health > 0 {
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
-					rl.DrawSphere(bm.Bullets[i].Position, 0.5, rl.Yellow)
+					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
 					rl.PlaySound(sound.ShotNew)
 					bm.Bullets[i].Active = false
 					bm.PlayerXp++
@@ -77,11 +78,10 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 			if curBullet.Shooter == Enemy && rl.Vector3Distance(p.Position, curBullet.Position) < p.Size && p.Health > 0 {
 				if bm.Bullets[i].Active {
 					p.Damage(bm.Bullets[i].Damage)
-					rl.DrawSphere(bm.Bullets[i].Position, 0.5, rl.Yellow)
+					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
 					bm.Bullets[i].Active = false
 				}
 			}
-			rl.EndMode3D()
 		}
 
 		if bm.Bullets[i].LifeTime <= 0 || !bm.Bullets[i].Active {
@@ -90,6 +90,7 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) {
 			i--
 		}
 	}
+	return blasts
 }
 
 func (bm *Manager) DrawBullets3D() {
