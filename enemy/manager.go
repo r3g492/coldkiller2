@@ -2,6 +2,7 @@ package enemy
 
 import (
 	"coldkiller2/killer"
+	"coldkiller2/structure"
 	"math"
 	"math/rand"
 	"time"
@@ -47,12 +48,16 @@ func (em *Manager) Init(p *killer.Killer) {
 	em.Generate(p)
 }
 
-func (em *Manager) Mutate(dt float32, p *killer.Killer) []BulletCmd {
+func (em *Manager) Mutate(
+	dt float32,
+	p *killer.Killer,
+	structureManager *structure.Manager,
+) []BulletCmd {
 	em.updateGrid()
 	em.BulletBuffer = em.BulletBuffer[:0]
 
 	for i := 0; i < len(em.Enemies); i++ {
-		addBullets := em.Enemies[i].Mutate(dt, *p, em, i)
+		addBullets := em.Enemies[i].Mutate(dt, *p, em, i, structureManager)
 		em.BulletBuffer = append(em.BulletBuffer, addBullets...)
 	}
 

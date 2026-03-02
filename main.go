@@ -165,7 +165,7 @@ func main() {
 		background.DrawCleanEnvironment(p)
 		// enemy
 		rl.BeginMode3D(p.Camera)
-		var ebc = em.Mutate(dt, p)
+		var ebc = em.Mutate(dt, p, sm)
 		em.ProcessAnimation(dt, p)
 		em.DrawEnemies3D(p)
 		rl.EndMode3D()

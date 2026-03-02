@@ -4,6 +4,7 @@ import (
 	"coldkiller2/animation"
 	"coldkiller2/killer"
 	"coldkiller2/sound"
+	"coldkiller2/structure"
 	"math"
 	"time"
 
@@ -78,6 +79,7 @@ func (e *Enemy) Mutate(
 	p killer.Killer,
 	em *Manager,
 	myIdx int,
+	structureManager *structure.Manager,
 ) []BulletCmd {
 	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
 	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
@@ -136,11 +138,11 @@ func (e *Enemy) Mutate(
 
 	oldPos := e.Position
 	e.Position.X += moveAmount.X
-	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) {
+	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
 		e.Position.X = oldPos.X
 	}
 	e.Position.Z += moveAmount.Z
-	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) {
+	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
 		e.Position.Z = oldPos.Z
 	}
 
