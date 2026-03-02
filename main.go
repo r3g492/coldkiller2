@@ -50,16 +50,16 @@ func main() {
 	sm := structure.CreateManager()
 	defer sm.Unload()
 	// TODO: structure must stop movement and bullets
-	/*sm.Add(
+	sm.Add(
 		[]structure.Structure{
 			{
-				Position:  rl.Vector3{},
-				Size:      rl.Vector3{X: 1, Y: 2, Z: 10},
+				Position:  rl.Vector3{X: 5, Y: 0, Z: 5},
+				Size:      rl.Vector3{X: 1, Y: 0, Z: 10},
 				Direction: rl.Vector3{X: 1, Y: 1, Z: 1},
 				Color:     rl.Green,
 			},
 		},
-	)*/
+	)
 
 	em := enemy.CreateManager()
 	defer em.Unload()
@@ -89,7 +89,7 @@ func main() {
 		if rl.IsCursorHidden() {
 			rl.EnableCursor()
 		}
-
+		ip := input.ReadInput(keyMap)
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
 		buttonText := "Start Game"
@@ -97,7 +97,7 @@ func main() {
 			showMenu = false
 			break
 		}
-
+		drawInputOverlay(w, h, ip, keyMap)
 		rl.EndDrawing()
 		continue
 	}
@@ -172,7 +172,7 @@ func main() {
 		em.DrawEnemiesUi(p)
 
 		// player
-		bc := p.Mutate(ip, dt, em.GetEnemyBoundingBoxes())
+		bc := p.Mutate(ip, dt, em.GetBoundingBoxes(), sm)
 		p.ResolveAnimation()
 		p.PlanAnimate(dt)
 		p.Animate()

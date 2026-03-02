@@ -105,7 +105,7 @@ func (em *Manager) Unload() {
 	em.Enemies = []Enemy{}
 }
 
-func (em *Manager) GetEnemyBoundingBoxes() []rl.BoundingBox {
+func (em *Manager) GetBoundingBoxes() []rl.BoundingBox {
 	boxes := make([]rl.BoundingBox, 0, len(em.Enemies))
 	for _, e := range em.Enemies {
 		if e.Health > 0 {

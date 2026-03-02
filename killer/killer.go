@@ -4,6 +4,7 @@ import (
 	"coldkiller2/animation"
 	"coldkiller2/input"
 	"coldkiller2/sound"
+	"coldkiller2/structure"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -132,7 +133,12 @@ func (k *Killer) DrawUI() {
 	// fpsText := fmt.Sprintf("%d", rl.GetFPS())
 	// rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, fontSize, rl.Yellow)
 }
-func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBox) []BulletCmd {
+func (k *Killer) Mutate(
+	input input.Input,
+	dt float32,
+	obstacles []rl.BoundingBox,
+	structureManager *structure.Manager,
+) []BulletCmd {
 	var bulletCmds []BulletCmd
 
 	if k.IsAlive() {
@@ -161,7 +167,7 @@ func (k *Killer) Mutate(input input.Input, dt float32, obstacles []rl.BoundingBo
 	}
 
 	if !attack && k.ActionTimeLeft <= 0 {
-		moving := k.movement(input, dt, obstacles)
+		moving := k.movement(input, dt, obstacles, structureManager)
 		k.Camera = rl.Camera3D{
 			Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
 			Target:     k.Position,
@@ -193,7 +199,12 @@ func mouseMovement(input input.Input, k *Killer) {
 	k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 }
 
-func (k *Killer) movement(input input.Input, dt float32, obstacles []rl.BoundingBox) bool {
+func (k *Killer) movement(
+	input input.Input,
+	dt float32,
+	obstacles []rl.BoundingBox,
+	structureManager *structure.Manager,
+) bool {
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
 		k.MoveDirection.Z -= 1
@@ -214,11 +225,11 @@ func (k *Killer) movement(input input.Input, dt float32, obstacles []rl.Bounding
 	if rl.Vector3Length(moveAmount) > 0 {
 		oldPos := k.Position
 		k.Position.X += moveAmount.X
-		if k.isColliding(obstacles) {
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
 			k.Position.X = oldPos.X
 		}
 		k.Position.Z += moveAmount.Z
-		if k.isColliding(obstacles) {
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
 			k.Position.Z = oldPos.Z
 		}
 		return k.Position != oldPos
