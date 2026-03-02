@@ -1,4 +1,3 @@
 TODO:
-- blast system
-- structure system
-- level design
+- structure generating system
+- enemy generating system
