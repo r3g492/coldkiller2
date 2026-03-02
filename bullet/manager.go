@@ -5,6 +5,7 @@ import (
 	"coldkiller2/enemy"
 	"coldkiller2/killer"
 	"coldkiller2/sound"
+	"coldkiller2/structure"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -56,7 +57,12 @@ func (bm *Manager) EnemyBulletCreate(
 	}
 }
 
-func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) []blast.Blast {
+func (bm *Manager) Mutate(
+	dt float32,
+	p *killer.Killer,
+	el []enemy.Enemy,
+	structureManager *structure.Manager,
+) []blast.Blast {
 
 	var blasts []blast.Blast
 	for i := 0; i < len(bm.Bullets); i++ {
@@ -65,6 +71,15 @@ func (bm *Manager) Mutate(dt float32, p *killer.Killer, el []enemy.Enemy) []blas
 			enemyPos := el[j].Position
 			enemySize := el[j].Size
 			curBullet := bm.Bullets[i]
+
+			if structureManager.CheckCollision(curBullet.Position, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
+				if bm.Bullets[i].Active {
+					// TODO: structure damage
+					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+					bm.Bullets[i].Active = false
+				}
+			}
+
 			if curBullet.Shooter == Player && rl.Vector3Distance(enemyPos, curBullet.Position) < enemySize && el[j].Health > 0 {
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)

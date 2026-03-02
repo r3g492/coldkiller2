@@ -184,7 +184,7 @@ func main() {
 		// bullet
 		bm.KillerBulletCreate(bc)
 		bm.EnemyBulletCreate(ebc)
-		bulletBlasts := bm.Mutate(dt, p, em.Enemies)
+		bulletBlasts := bm.Mutate(dt, p, em.Enemies, sm)
 
 		blastManager.AddBlasts(bulletBlasts)
 		blastManager.Mutate(dt)
