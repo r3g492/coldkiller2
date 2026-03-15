@@ -108,9 +108,9 @@ func (bm *Manager) Mutate(
 	return blasts
 }
 
-func (bm *Manager) DrawBullets3D() {
+func (bm *Manager) Draw3D() {
 	for _, b := range bm.Bullets {
-		b.DrawBullet()
+		b.Draw3D()
 	}
 }
 

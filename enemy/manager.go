@@ -78,7 +78,7 @@ func (em *Manager) Mutate(
 	return em.BulletBuffer
 }
 
-func (em *Manager) DrawEnemies3D(p *killer.Killer) {
+func (em *Manager) Draw3D(p *killer.Killer) {
 	for i := range em.Enemies {
 		if rl.CheckCollisionSpheres(em.Enemies[i].Position, 1.0, p.Position, PlayerSeeArea) {
 			em.Enemies[i].Draw3D(p)
@@ -86,7 +86,7 @@ func (em *Manager) DrawEnemies3D(p *killer.Killer) {
 	}
 }
 
-func (em *Manager) DrawEnemiesUi(p *killer.Killer) {
+func (em *Manager) DrawUi(p *killer.Killer) {
 	for i := range em.Enemies {
 		if rl.Vector3DistanceSqr(em.Enemies[i].Position, p.Position) < Player3dSeeSquare {
 			em.Enemies[i].DrawUI(p)

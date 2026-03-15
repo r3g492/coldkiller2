@@ -11,9 +11,15 @@ type Structure struct {
 	Size      rl.Vector3
 	Direction rl.Vector3
 	Color     rl.Color
+
+	IsHiddenFromKiller bool
 }
 
 func (s *Structure) Draw3D() {
+	if s.IsHiddenFromKiller {
+		return
+	}
+
 	rl.PushMatrix()
 	rl.Translatef(s.Position.X, s.Position.Y, s.Position.Z)
 

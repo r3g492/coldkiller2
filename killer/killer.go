@@ -94,7 +94,7 @@ func (k *Killer) Draw3D() {
 	rl.PopMatrix()
 }
 
-func (k *Killer) DrawUI() {
+func (k *Killer) DrawUi() {
 	uiWorldPos := rl.Vector3{X: k.Position.X, Y: k.Position.Y + 3.0, Z: k.Position.Z}
 	screenPos := rl.GetWorldToScreen(uiWorldPos, k.Camera)
 

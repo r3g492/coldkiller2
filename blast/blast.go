@@ -12,9 +12,15 @@ type Blast struct {
 	MaxLifeTime float32
 	LifeTime    float32
 	Color       rl.Color
+
+	IsHiddenFromKiller bool
 }
 
 func (b *Blast) Draw3D() {
+	if b.IsHiddenFromKiller {
+		return
+	}
+
 	rl.DrawSphere(b.Position, b.Radius, b.Color)
 }
 

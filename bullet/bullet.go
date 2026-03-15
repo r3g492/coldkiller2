@@ -14,6 +14,8 @@ type Bullet struct {
 	Shooter   Shooter
 	Color     rl.Color
 	Damage    int32
+
+	IsHiddenFromKiller bool
 }
 
 type Shooter int
@@ -23,7 +25,10 @@ const (
 	Enemy
 )
 
-func (b *Bullet) DrawBullet() {
+func (b *Bullet) Draw3D() {
+	if b.IsHiddenFromKiller {
+		return
+	}
 	rl.DrawSphere(b.Position, b.Radius, b.Color)
 }
 

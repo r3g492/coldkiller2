@@ -36,9 +36,15 @@ type Enemy struct {
 	AttackRange     float32
 	AimTimeLeft     float32
 	AimTimeUnit     float32
+
+	IsHiddenFromKiller bool
 }
 
 func (e *Enemy) Draw3D(p *killer.Killer) {
+	if e.IsHiddenFromKiller {
+		return
+	}
+
 	anim := e.Animation[e.AnimationIdx]
 	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 	rl.PushMatrix()

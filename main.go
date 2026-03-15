@@ -41,23 +41,23 @@ func main() {
 	rl.InitAudioDevice()
 	rl.SetTargetFPS(144)
 	keyMap := input.DefaultWASD()
-	bm := bullet.CreateManager()
-	defer bm.Unload()
+	bulletManager := bullet.CreateManager()
+	defer bulletManager.Unload()
 
 	blastManager := blast.CreateManager()
 	defer blastManager.Unload()
 
-	sm := structure.CreateManager()
-	defer sm.Unload()
-	sm.Init()
+	structureManager := structure.CreateManager()
+	defer structureManager.Unload()
+	structureManager.Init()
 
-	em := enemy.CreateManager()
-	defer em.Unload()
+	enemyManager := enemy.CreateManager()
+	defer enemyManager.Unload()
 
-	p := killer.Init()
-	defer p.Unload()
+	player := killer.Init()
+	defer player.Unload()
 
-	em.Init(p)
+	enemyManager.Init(player)
 	sound.Init()
 
 	rl.DisableCursor()
@@ -95,7 +95,7 @@ func main() {
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
-		log(mouseLocation, dt, p)
+		log(mouseLocation, dt, player)
 		ip := input.ReadInput(keyMap)
 
 		if showMenu {
@@ -116,7 +116,7 @@ func main() {
 			if drawButton(btnRect, buttonText) || ip.ResetGamePressed {
 				showMenu = false
 				if lost {
-					p = resetGame(em, p, bm)
+					player = resetGame(enemyManager, player, bulletManager)
 					lost = false
 				}
 			}
@@ -125,13 +125,13 @@ func main() {
 			continue
 		}
 
-		if gameEnd(p) {
+		if gameEnd(player) {
 			rl.StopSound(sound.Track)
 			rl.PlaySound(sound.YouLose)
 			showMenu = true
 			lost = true
-			lastScore = bm.PlayerXp
-			p = resetGame(em, p, bm)
+			lastScore = bulletManager.PlayerXp
+			player = resetGame(enemyManager, player, bulletManager)
 		}
 
 		if !rl.IsSoundPlaying(sound.Track) && !showMenu {
@@ -147,48 +147,45 @@ func main() {
 		}
 
 		if ip.ResetGamePressed {
-			p = resetGame(em, p, bm)
+			player = resetGame(enemyManager, player, bulletManager)
 		}
 
-		rl.BeginDrawing()
-		rl.ClearBackground(rl.NewColor(10, 10, 15, 255))
-		background.DrawCleanEnvironment(p)
 		// enemy
-		rl.BeginMode3D(p.Camera)
-		var ebc = em.Mutate(dt, p, sm)
-		em.ProcessAnimation(dt, p)
-		em.DrawEnemies3D(p)
-		rl.EndMode3D()
-		em.DrawEnemiesUi(p)
+		var ebc = enemyManager.Mutate(dt, player, structureManager)
+		enemyManager.ProcessAnimation(dt, player)
 
 		// player
-		bc := p.Mutate(ip, dt, em.GetBoundingBoxes(), sm)
-		p.ResolveAnimation()
-		p.PlanAnimate(dt)
-		p.Animate()
-		rl.BeginMode3D(p.Camera)
-		p.Draw3D()
-		rl.EndMode3D()
-		p.DrawUI()
+		bc := player.Mutate(ip, dt, enemyManager.GetBoundingBoxes(), structureManager)
+		player.ResolveAnimation()
+		player.PlanAnimate(dt)
+		player.Animate()
 
 		// bullet
-		bm.KillerBulletCreate(bc)
-		bm.EnemyBulletCreate(ebc)
-		bulletBlasts := bm.Mutate(dt, p, em.Enemies, sm)
+		bulletManager.KillerBulletCreate(bc)
+		bulletManager.EnemyBulletCreate(ebc)
+		bulletBlasts := bulletManager.Mutate(dt, player, enemyManager.Enemies, structureManager)
 
 		blastManager.AddBlasts(bulletBlasts)
 		blastManager.Mutate(dt)
 
-		rl.BeginMode3D(p.Camera)
-		bm.DrawBullets3D()
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.NewColor(10, 10, 15, 255))
+		background.DrawCleanEnvironment(player)
+
+		rl.BeginMode3D(player.Camera)
+
+		player.Draw3D()
+		enemyManager.Draw3D(player)
+		bulletManager.Draw3D()
 		blastManager.Draw3D()
-		sm.Draw3D()
+		structureManager.Draw3D()
 		rl.EndMode3D()
 
+		player.DrawUi()
+		enemyManager.DrawUi(player)
 		drawInputOverlay(w, h, ip, keyMap)
-		drawCursor(mouseLocation, p)
-		// rl.DrawText(strconv.Itoa(em.EnemyGenerationLevel), 500, 500, 30, rl.Purple)
-		// rl.DrawText(strconv.Itoa(bm.PlayerXp), 700, 500, 30, rl.Red)
+		drawCursor(mouseLocation, player)
+
 		rl.EndDrawing()
 	}
 }
