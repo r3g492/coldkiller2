@@ -7,6 +7,7 @@ import (
 	"coldkiller2/enemy"
 	"coldkiller2/input"
 	"coldkiller2/killer"
+	"coldkiller2/sight"
 	"coldkiller2/sound"
 	"coldkiller2/structure"
 	"fmt"
@@ -167,6 +168,14 @@ func main() {
 
 		blastManager.AddBlasts(bulletBlasts)
 		blastManager.Mutate(dt)
+
+		sight.UpdateSight(
+			blastManager,
+			bulletManager,
+			enemyManager,
+			structureManager,
+			player,
+		)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.NewColor(10, 10, 15, 255))

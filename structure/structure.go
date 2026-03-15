@@ -31,25 +31,6 @@ func (s *Structure) Draw3D() {
 	rl.PopMatrix()
 }
 
-func Create1(
-	position rl.Vector3,
-) Structure {
-	return Structure{
-		Position: position,
-		Size: rl.Vector3{
-			X: 1,
-			Y: 1,
-			Z: 1,
-		},
-		Direction: rl.Vector3{
-			X: -1,
-			Y: 1,
-			Z: 1,
-		},
-		Color: rl.Green,
-	}
-}
-
 func (s *Structure) CheckCollision(otherPos rl.Vector3, otherSize rl.Vector3) bool {
 	angleRad := math.Atan2(float64(s.Direction.X), float64(s.Direction.Z))
 
