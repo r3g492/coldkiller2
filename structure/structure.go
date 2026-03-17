@@ -53,3 +53,35 @@ func (s *Structure) CheckCollision(otherPos rl.Vector3, otherSize rl.Vector3) bo
 		math.Abs(localY) <= limitY &&
 		math.Abs(localZ) <= limitZ
 }
+
+func (s *Structure) RayCollisionOBB(ray rl.Ray) rl.RayCollision {
+	angleRad := math.Atan2(float64(s.Direction.X), float64(s.Direction.Z))
+
+	cosA := float32(math.Cos(-angleRad))
+	sinA := float32(math.Sin(-angleRad))
+
+	relPosX := ray.Position.X - s.Position.X
+	relPosY := ray.Position.Y - s.Position.Y
+	relPosZ := ray.Position.Z - s.Position.Z
+
+	localRayPos := rl.Vector3{
+		X: relPosX*cosA + relPosZ*sinA,
+		Y: relPosY,
+		Z: -relPosX*sinA + relPosZ*cosA,
+	}
+
+	localRayDir := rl.Vector3{
+		X: ray.Direction.X*cosA + ray.Direction.Z*sinA,
+		Y: ray.Direction.Y,
+		Z: -ray.Direction.X*sinA + ray.Direction.Z*cosA,
+	}
+
+	localRay := rl.Ray{Position: localRayPos, Direction: localRayDir}
+
+	localBox := rl.BoundingBox{
+		Min: rl.Vector3{X: -s.Size.X / 2, Y: -s.Size.Y / 2, Z: -s.Size.Z / 2},
+		Max: rl.Vector3{X: s.Size.X / 2, Y: s.Size.Y / 2, Z: s.Size.Z / 2},
+	}
+
+	return rl.GetRayCollisionBox(localRay, localBox)
+}
