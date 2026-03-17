@@ -23,20 +23,21 @@ type Enemy struct {
 	AnimationFrameSpeed   float32
 	AnimationReplay       bool
 
-	MoveDirection   rl.Vector3
-	TargetDirection rl.Vector3
-	Position        rl.Vector3
-	Size            float32
-	MoveSpeed       float32
-	ActionTimeLeft  float32
-	Health          int32
-	IsDead          bool
-	AttackCooldown  time.Duration
-	LastAttack      time.Time
-	AttackRange     float32
-	AimTimeLeft     float32
-	AimTimeUnit     float32
-
+	MoveDirection      rl.Vector3
+	TargetDirection    rl.Vector3
+	Position           rl.Vector3
+	Size               float32
+	MoveSpeed          float32
+	ActionTimeLeft     float32
+	Health             int32
+	IsDead             bool
+	AttackCooldown     time.Duration
+	LastAttack         time.Time
+	AttackRange        float32
+	AimTimeLeft        float32
+	AimTimeUnit        float32
+	FootstepCooldown   float32
+	FootstepSound      rl.Sound
 	IsHiddenFromKiller bool
 }
 
@@ -153,8 +154,19 @@ func (e *Enemy) Mutate(
 	}
 
 	moving := rl.Vector3Distance(oldPos, e.Position) > 0.01
+	if e.FootstepCooldown > 0 {
+		e.FootstepCooldown -= dt
+	}
+
 	if moving {
 		e.AnimationState = animation.StateRunning
+
+		if e.FootstepCooldown <= 0 {
+			sound.PlaySound3D(e.FootstepSound, e.Position, p.Position, 0.1)
+			e.FootstepCooldown = 0.4
+		}
+	} else {
+		e.FootstepCooldown = 0
 	}
 
 	e.TargetDirection = e.MoveDirection
@@ -176,6 +188,7 @@ func (e *Enemy) Damage(d int32) {
 func (e *Enemy) Unload() {
 	rl.UnloadModel(e.Model)
 	rl.UnloadModelAnimations(e.Animation)
+	rl.UnloadSoundAlias(e.FootstepSound)
 }
 
 func (e *Enemy) ResolveAnimation() {

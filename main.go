@@ -58,8 +58,8 @@ func main() {
 	player := killer.Init()
 	defer player.Unload()
 
-	enemyManager.Init(player)
 	sound.Init()
+	enemyManager.Init(player)
 
 	rl.DisableCursor()
 

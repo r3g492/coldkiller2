@@ -2,6 +2,7 @@ package enemy
 
 import (
 	"coldkiller2/killer"
+	"coldkiller2/sound"
 	"coldkiller2/structure"
 	"math"
 	"math/rand"
@@ -149,6 +150,7 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 		AttackRange:     10,
 		AimTimeLeft:     2,
 		AimTimeUnit:     2,
+		FootstepSound:   rl.LoadSoundAlias(sound.FootStep),
 	}
 	trialLimit := 3
 	trial := 0

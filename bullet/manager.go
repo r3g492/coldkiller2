@@ -74,7 +74,6 @@ func (bm *Manager) Mutate(
 
 			if structureManager.CheckCollision(curBullet.Position, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
 				if bm.Bullets[i].Active {
-					// TODO: structure damage
 					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
 					bm.Bullets[i].Active = false
 				}
@@ -84,7 +83,7 @@ func (bm *Manager) Mutate(
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
 					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
-					rl.PlaySound(sound.ShotNew)
+					sound.PlaySound3D(sound.ShotNew, bm.Bullets[i].Position, p.Position, 1)
 					bm.Bullets[i].Active = false
 					bm.PlayerXp++
 				}
