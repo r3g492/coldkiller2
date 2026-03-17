@@ -12,6 +12,10 @@ import (
 
 const MaxSightDistance float32 = 800.0
 
+var cachedShadowTiles []rl.Vector3
+var lastPlayerPos rl.Vector3
+var forceShadowUpdate = true
+
 func UpdateSight(
 	blastManager *blast.Manager,
 	bulletManager *bullet.Manager,
@@ -100,4 +104,60 @@ func hasLineOfSight3D(start, end rl.Vector3, sm *structure.Manager) bool {
 	}
 
 	return true
+}
+
+func DrawShadowFloor(playerPos rl.Vector3, sm *structure.Manager) {
+	tileSize := float32(0.3)
+	gridRadius := 95
+
+	if rl.Vector3Distance(lastPlayerPos, playerPos) > (tileSize / 2) {
+		forceShadowUpdate = true
+	}
+
+	if forceShadowUpdate {
+		lastPlayerPos = playerPos
+		cachedShadowTiles = make([]rl.Vector3, 0)
+
+		startX := int(playerPos.X/tileSize) - gridRadius
+		endX := int(playerPos.X/tileSize) + gridRadius
+		startZ := int(playerPos.Z/tileSize) - gridRadius
+		endZ := int(playerPos.Z/tileSize) + gridRadius
+
+		eyePos := playerPos
+		eyePos.Y = 0.0
+
+		for x := startX; x <= endX; x++ {
+			for z := startZ; z <= endZ; z++ {
+				tilePos := rl.Vector3{
+					X: float32(x) * tileSize,
+					Y: 0.0,
+					Z: float32(z) * tileSize,
+				}
+
+				targetPos := tilePos
+				targetPos.Y = 0.0
+				isVisible := false
+
+				if rl.Vector3Distance(eyePos, targetPos) < 1.0 {
+					isVisible = true
+				} else if isWithinDistance3D(eyePos, targetPos, MaxSightDistance) {
+					if hasLineOfSight3D(eyePos, targetPos, sm) {
+						isVisible = true
+					}
+				}
+
+				if !isVisible {
+					cachedShadowTiles = append(cachedShadowTiles, tilePos)
+				}
+			}
+		}
+		forceShadowUpdate = false
+	}
+
+	shadowColor := rl.NewColor(0, 0, 0, 255)
+	for i := 0; i < len(cachedShadowTiles); i++ {
+		drawPos := cachedShadowTiles[i]
+		drawPos.Y = 0.05
+		rl.DrawPlane(drawPos, rl.Vector2{X: tileSize + 0.1, Y: tileSize + 0.1}, shadowColor)
+	}
 }

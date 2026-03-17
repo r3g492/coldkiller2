@@ -182,7 +182,7 @@ func main() {
 		background.DrawCleanEnvironment(player)
 
 		rl.BeginMode3D(player.Camera)
-
+		sight.DrawShadowFloor(player.Position, structureManager)
 		player.Draw3D()
 		enemyManager.Draw3D(player)
 		bulletManager.Draw3D()
