@@ -4,7 +4,6 @@ import (
 	"coldkiller2/blast"
 	"coldkiller2/enemy"
 	"coldkiller2/killer"
-	"coldkiller2/sound"
 	"coldkiller2/structure"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -72,6 +71,10 @@ func (bm *Manager) Mutate(
 			enemySize := el[j].Size
 			curBullet := bm.Bullets[i]
 
+			if bm.Bullets[i].LifeTime >= 1.99 && bm.Bullets[i].Active {
+				blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+			}
+
 			if structureManager.CheckCollision(curBullet.Position, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
 				if bm.Bullets[i].Active {
 					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
@@ -83,7 +86,7 @@ func (bm *Manager) Mutate(
 				if bm.Bullets[i].Active {
 					el[j].Damage(bm.Bullets[i].Damage)
 					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
-					sound.PlaySound3D(sound.ShotNew, bm.Bullets[i].Position, p.Position, 1)
+					// sound.PlaySound3D(sound.ShotNew, bm.Bullets[i].Position, p.Position, 1)
 					bm.Bullets[i].Active = false
 					bm.PlayerXp++
 				}
