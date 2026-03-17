@@ -136,21 +136,23 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 
 	candidatePosition := getRandomPosition(p)
 	candidate := Enemy{
-		Model:           em.SharedModel,
-		ModelAngleDeg:   0,
-		Animation:       em.SharedAnimations,
-		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:        candidatePosition,
-		Size:            killer.CharSize,
-		MoveSpeed:       4,
-		ActionTimeLeft:  0,
-		Health:          100,
-		IsDead:          false,
-		AttackRange:     10,
-		AimTimeLeft:     2,
-		AimTimeUnit:     2,
-		FootstepSound:   rl.LoadSoundAlias(sound.FootStep),
+		Model:                 em.SharedModel,
+		ModelAngleDeg:         0,
+		Animation:             em.SharedAnimations,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Position:              candidatePosition,
+		Size:                  killer.CharSize,
+		MoveSpeed:             4,
+		ActionTimeLeft:        0,
+		Health:                100,
+		IsDead:                false,
+		AttackRange:           10,
+		AimTimeLeft:           2,
+		AimTimeUnit:           2,
+		FootstepSoundTimeLeft: 0.4,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
 	}
 	trialLimit := 3
 	trial := 0

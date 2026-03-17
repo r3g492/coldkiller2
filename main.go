@@ -40,6 +40,8 @@ func main() {
 	defer rl.CloseWindow()
 
 	rl.InitAudioDevice()
+	sound.Init()
+
 	rl.SetTargetFPS(144)
 	keyMap := input.DefaultWASD()
 	bulletManager := bullet.CreateManager()
@@ -58,7 +60,6 @@ func main() {
 	player := killer.Init()
 	defer player.Unload()
 
-	sound.Init()
 	enemyManager.Init(player)
 
 	rl.DisableCursor()

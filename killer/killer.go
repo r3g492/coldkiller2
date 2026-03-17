@@ -23,17 +23,21 @@ type Killer struct {
 	AnimationFrameSpeed   float32
 	AnimationReplay       bool
 
-	MoveDirection   rl.Vector3
-	TargetDirection rl.Vector3
-	Position        rl.Vector3
-	Size            float32
-	MoveSpeed       float32
-	Camera          rl.Camera3D
-	ActionTimeLeft  float32
-	MaxActionTime   float32
-	Health          int32
-	AmmoCapacity    int32
-	Ammo            int32
+	MoveDirection         rl.Vector3
+	TargetDirection       rl.Vector3
+	Position              rl.Vector3
+	Size                  float32
+	MoveSpeed             float32
+	Camera                rl.Camera3D
+	ActionTimeLeft        float32
+	MaxActionTime         float32
+	Health                int32
+	AmmoCapacity          int32
+	Ammo                  int32
+	FootstepSoundTimeLeft float32
+	FootstepSoundTimeUnit float32
+	float32
+	FootstepSound rl.Sound
 }
 
 const ModelRatio = 0.2
@@ -59,10 +63,13 @@ func Init() *Killer {
 			Fovy:       30.0,
 			Projection: rl.CameraOrthographic,
 		},
-		ActionTimeLeft: 0,
-		Health:         100,
-		AmmoCapacity:   30,
-		Ammo:           30,
+		ActionTimeLeft:        0,
+		Health:                100,
+		AmmoCapacity:          30,
+		Ammo:                  30,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSoundTimeLeft: 0.4,
+		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
 	}
 }
 
@@ -176,10 +183,21 @@ func (k *Killer) Mutate(
 			Fovy:       30.0,
 			Projection: rl.CameraOrthographic,
 		}
+
+		if k.FootstepSoundTimeLeft > 0 {
+			k.FootstepSoundTimeLeft -= dt
+		}
+
 		if moving {
 			k.AnimationState = animation.StateRunning
+
+			if k.FootstepSoundTimeLeft <= 0 {
+				sound.PlaySound3D(k.FootstepSound, k.Position, k.Position, 1)
+				k.FootstepSoundTimeLeft = k.FootstepSoundTimeUnit
+			}
 		} else {
 			k.AnimationState = animation.StateIdle
+			k.FootstepSoundTimeLeft = 0
 		}
 	}
 
