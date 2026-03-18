@@ -60,7 +60,7 @@ func (bm *Manager) Mutate(
 	dt float32,
 	p *killer.Killer,
 	el []enemy.Enemy,
-	structureManager *structure.Manager,
+	structureManager *structure.SpatialManager,
 ) []blast.Blast {
 
 	var blasts []blast.Blast

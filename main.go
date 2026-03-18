@@ -50,9 +50,9 @@ func main() {
 	blastManager := blast.CreateManager()
 	defer blastManager.Unload()
 
-	structureManager := structure.CreateManager()
-	defer structureManager.Unload()
-	structureManager.Init()
+	spatialManager := structure.CreateSpatialManager(structure.RADIUS)
+	defer spatialManager.Unload()
+	spatialManager.Init()
 
 	enemyManager := enemy.CreateManager()
 	defer enemyManager.Unload()
@@ -153,11 +153,11 @@ func main() {
 		}
 
 		// enemy
-		var ebc = enemyManager.Mutate(dt, player, structureManager)
+		var ebc = enemyManager.Mutate(dt, player, spatialManager)
 		enemyManager.ProcessAnimation(dt, player)
 
 		// player
-		bc := player.Mutate(ip, dt, enemyManager.GetBoundingBoxes(), structureManager)
+		bc := player.Mutate(ip, dt, enemyManager.GetBoundingBoxes(), spatialManager)
 		player.ResolveAnimation()
 		player.PlanAnimate(dt)
 		player.Animate()
@@ -165,7 +165,7 @@ func main() {
 		// bullet
 		bulletManager.KillerBulletCreate(bc)
 		bulletManager.EnemyBulletCreate(ebc)
-		bulletBlasts := bulletManager.Mutate(dt, player, enemyManager.Enemies, structureManager)
+		bulletBlasts := bulletManager.Mutate(dt, player, enemyManager.Enemies, spatialManager)
 
 		blastManager.AddBlasts(bulletBlasts)
 		blastManager.Mutate(dt)
@@ -174,7 +174,7 @@ func main() {
 			blastManager,
 			bulletManager,
 			enemyManager,
-			structureManager,
+			spatialManager,
 			player,
 		)
 
@@ -183,12 +183,12 @@ func main() {
 		background.DrawCleanEnvironment(player)
 
 		rl.BeginMode3D(player.Camera)
-		sight.DrawShadowFloor(player.Position, structureManager)
+		sight.DrawShadowFloor(player.Position, spatialManager)
 		player.Draw3D()
 		enemyManager.Draw3D(player)
 		bulletManager.Draw3D()
 		blastManager.Draw3D()
-		structureManager.Draw3D()
+		spatialManager.Draw3D(player.Position)
 		rl.EndMode3D()
 
 		player.DrawUi()

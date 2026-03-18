@@ -52,7 +52,7 @@ func (em *Manager) Init(p *killer.Killer) {
 func (em *Manager) Mutate(
 	dt float32,
 	p *killer.Killer,
-	structureManager *structure.Manager,
+	structureManager *structure.SpatialManager,
 ) []BulletCmd {
 	em.updateGrid()
 	em.BulletBuffer = em.BulletBuffer[:0]

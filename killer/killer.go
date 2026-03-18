@@ -145,7 +145,7 @@ func (k *Killer) Mutate(
 	input input.Input,
 	dt float32,
 	obstacles []rl.BoundingBox,
-	structureManager *structure.Manager,
+	structureManager *structure.SpatialManager,
 ) []BulletCmd {
 	var bulletCmds []BulletCmd
 
@@ -222,7 +222,7 @@ func (k *Killer) movement(
 	input input.Input,
 	dt float32,
 	obstacles []rl.BoundingBox,
-	structureManager *structure.Manager,
+	structureManager *structure.SpatialManager,
 ) bool {
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
