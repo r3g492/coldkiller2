@@ -40,7 +40,13 @@ func (sm *Manager) Init() {
 				Position:  rl.Vector3{X: 5, Y: 0, Z: 5},
 				Size:      rl.Vector3{X: 1, Y: 1, Z: 10},
 				Direction: rl.Vector3{X: 1, Y: 1, Z: 1},
-				Color:     rl.Green,
+				Color:     rl.DarkGray,
+			},
+			{
+				Position:  rl.Vector3{X: -5, Y: 0, Z: -5},
+				Size:      rl.Vector3{X: 1, Y: 1, Z: 10},
+				Direction: rl.Vector3{X: 0, Y: 0, Z: 0},
+				Color:     rl.DarkGray,
 			},
 		},
 	)

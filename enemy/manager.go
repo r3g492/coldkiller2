@@ -154,6 +154,7 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
 	}
+
 	trialLimit := 3
 	trial := 0
 	for trial < trialLimit && candidate.isCollidingWithGrid(-1, em, p.GetBoundingBox()) {
@@ -165,6 +166,9 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 		return
 	}
 	em.Enemies = append(em.Enemies, candidate)
+	newEnemyIndex := len(em.Enemies) - 1
+	gridID := em.getGridID(candidate.Position)
+	em.Grid[gridID] = append(em.Grid[gridID], newEnemyIndex)
 }
 
 func getRandomPosition(p *killer.Killer) rl.Vector3 {
