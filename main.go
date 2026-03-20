@@ -177,7 +177,7 @@ func main() {
 
 		rl.BeginDrawing()
 		// rl.NewColor(10, 10, 15, 255)
-		rl.ClearBackground(rl.DarkGray)
+		rl.ClearBackground(rl.Gray)
 
 		rl.BeginMode3D(player.Camera)
 		sight.DrawSolidShadows(player.Position, spatialManager)
