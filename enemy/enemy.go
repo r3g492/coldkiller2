@@ -53,9 +53,11 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
 	rl.Rotatef(-30, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
-	rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), killer.ModelRatio, rl.Red)
 	if e.Health > 0 {
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), killer.ModelRatio, rl.Red)
 		//rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
+	} else {
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), killer.ModelRatio, rl.DarkGray)
 	}
 	rl.PopMatrix()
 	if e.AnimationState == animation.StateAiming {
