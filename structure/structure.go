@@ -85,3 +85,71 @@ func (s *Structure) RayCollisionOBB(ray rl.Ray) rl.RayCollision {
 
 	return rl.GetRayCollisionBox(localRay, localBox)
 }
+
+func (s *Structure) getStructureCorners() []rl.Vector3 {
+	halfX := float64(s.Size.X / 2.0)
+	halfZ := float64(s.Size.Z / 2.0)
+
+	angle := math.Atan2(float64(s.Direction.X), float64(s.Direction.Z))
+	cosA := math.Cos(angle)
+	sinA := math.Sin(angle)
+
+	localCorners := [4][2]float64{
+		{-halfX, -halfZ},
+		{halfX, -halfZ},
+		{halfX, halfZ},
+		{-halfX, halfZ},
+	}
+
+	worldCorners := make([]rl.Vector3, 4)
+	for i := 0; i < 4; i++ {
+		lx := localCorners[i][0]
+		lz := localCorners[i][1]
+
+		rotX := lx*cosA + lz*sinA
+		rotZ := -lx*sinA + lz*cosA
+
+		worldCorners[i] = rl.Vector3{
+			X: s.Position.X + float32(rotX),
+			Y: 0.0,
+			Z: s.Position.Z + float32(rotZ),
+		}
+	}
+	return worldCorners
+}
+
+func GetBoundaryRays(playerPos rl.Vector3, structures []*Structure) []rl.Ray {
+	var rays []rl.Ray
+	uniqueAngles := make(map[float64]bool)
+
+	for i := 0; i < len(structures); i++ {
+		corners := structures[i].getStructureCorners()
+
+		for _, corner := range corners {
+			dx := float64(corner.X - playerPos.X)
+			dz := float64(corner.Z - playerPos.Z)
+			angle := math.Atan2(dz, dx)
+
+			uniqueAngles[angle-0.0001] = true
+			uniqueAngles[angle] = true
+			uniqueAngles[angle+0.0001] = true
+		}
+	}
+
+	eyePos := playerPos
+	eyePos.Y = 0.0
+
+	for angle := range uniqueAngles {
+		dirX := float32(math.Cos(angle))
+		dirZ := float32(math.Sin(angle))
+
+		dir := rl.Vector3{X: dirX, Y: 0.0, Z: dirZ}
+
+		rays = append(rays, rl.Ray{
+			Position:  eyePos,
+			Direction: dir,
+		})
+	}
+
+	return rays
+}

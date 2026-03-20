@@ -23,7 +23,7 @@ func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable | rl.FlagWindowUndecorated)
 	rl.InitWindow(0, 0, "coldkiller2")
 
-	targetMonitor := 1
+	targetMonitor := 0
 	monitorCount := rl.GetMonitorCount()
 
 	if targetMonitor >= monitorCount {
@@ -183,7 +183,7 @@ func main() {
 		background.DrawCleanEnvironment(player)
 
 		rl.BeginMode3D(player.Camera)
-		sight.DrawShadowFloor(player.Position, spatialManager)
+		sight.DrawBoundaryRayToStructures(player.Position, spatialManager)
 		player.Draw3D()
 		enemyManager.Draw3D(player)
 		bulletManager.Draw3D()

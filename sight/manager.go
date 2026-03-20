@@ -12,10 +12,6 @@ import (
 
 const MaxSightDistance float32 = 800.0
 
-var cachedShadowTiles []rl.Vector3
-var lastPlayerPos rl.Vector3
-var forceShadowUpdate = true
-
 func UpdateSight(
 	blastManager *blast.Manager,
 	bulletManager *bullet.Manager,
@@ -107,58 +103,45 @@ func hasLineOfSight3D(start, end rl.Vector3, sm *structure.SpatialManager) bool 
 	return true
 }
 
-func DrawShadowFloor(playerPos rl.Vector3, sm *structure.SpatialManager) {
-	tileSize := float32(0.3)
-	gridRadius := 95
+func DrawBoundaryRayToStructures(playerPos rl.Vector3, sm *structure.SpatialManager) {
+	eyePos := playerPos
+	eyePos.Y = 0.0
 
-	if rl.Vector3Distance(lastPlayerPos, playerPos) > (tileSize / 2) {
-		forceShadowUpdate = true
-	}
+	structures := sm.GetStructuresNearPosition(eyePos, structure.RADIUS)
+	rays := structure.GetBoundaryRays(eyePos, structures)
 
-	if forceShadowUpdate {
-		lastPlayerPos = playerPos
-		cachedShadowTiles = make([]rl.Vector3, 0)
+	// Changed to red to represent the "shadow" or "blocked" path
+	shadowRayColor := rl.NewColor(255, 0, 0, 150)
 
-		startX := int(playerPos.X/tileSize) - gridRadius
-		endX := int(playerPos.X/tileSize) + gridRadius
-		startZ := int(playerPos.Z/tileSize) - gridRadius
-		endZ := int(playerPos.Z/tileSize) + gridRadius
+	for i := 0; i < len(rays); i++ {
+		ray := rays[i]
+		closestHitDist := MaxSightDistance
 
-		eyePos := playerPos
-		eyePos.Y = 0.0
-
-		for x := startX; x <= endX; x++ {
-			for z := startZ; z <= endZ; z++ {
-				tilePos := rl.Vector3{
-					X: float32(x) * tileSize,
-					Y: 0.0,
-					Z: float32(z) * tileSize,
-				}
-
-				targetPos := tilePos
-				targetPos.Y = 0.0
-				isVisible := false
-
-				if rl.Vector3Distance(eyePos, targetPos) < 1.0 {
-					isVisible = true
-				} else if isWithinDistance3D(eyePos, targetPos, MaxSightDistance) {
-					if hasLineOfSight3D(eyePos, targetPos, sm) {
-						isVisible = true
-					}
-				}
-
-				if !isVisible {
-					cachedShadowTiles = append(cachedShadowTiles, tilePos)
-				}
+		for j := 0; j < len(structures); j++ {
+			hitInfo := structures[j].RayCollisionOBB(ray)
+			if hitInfo.Hit && hitInfo.Distance < closestHitDist {
+				closestHitDist = hitInfo.Distance
 			}
 		}
-		forceShadowUpdate = false
-	}
 
-	shadowColor := rl.NewColor(0, 0, 0, 255)
-	for i := 0; i < len(cachedShadowTiles); i++ {
-		drawPos := cachedShadowTiles[i]
-		drawPos.Y = 0.05
-		rl.DrawPlane(drawPos, rl.Vector2{X: tileSize + 0.1, Y: tileSize + 0.1}, shadowColor)
+		// If the ray actually hit a structure before reaching the max distance...
+		if closestHitDist < MaxSightDistance {
+			// 1. Calculate where the ray hit the wall (The New Start Point)
+			hitPos := rl.Vector3{
+				X: ray.Position.X + ray.Direction.X*closestHitDist,
+				Y: 0.0,
+				Z: ray.Position.Z + ray.Direction.Z*closestHitDist,
+			}
+
+			// 2. Calculate the absolute edge of the vision range (The New End Point)
+			maxPos := rl.Vector3{
+				X: ray.Position.X + ray.Direction.X*MaxSightDistance,
+				Y: 0.0,
+				Z: ray.Position.Z + ray.Direction.Z*MaxSightDistance,
+			}
+
+			// 3. Draw the line extending outward from the back of the structure
+			rl.DrawLine3D(hitPos, maxPos, shadowRayColor)
+		}
 	}
 }
