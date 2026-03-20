@@ -103,45 +103,65 @@ func hasLineOfSight3D(start, end rl.Vector3, sm *structure.SpatialManager) bool 
 	return true
 }
 
-func DrawBoundaryRayToStructures(playerPos rl.Vector3, sm *structure.SpatialManager) {
+func DrawSolidShadows(playerPos rl.Vector3, sm *structure.SpatialManager) {
 	eyePos := playerPos
 	eyePos.Y = 0.0
 
+	shadowColor := rl.NewColor(0, 0, 0, 255) // Solid Black
+
 	structures := sm.GetStructuresNearPosition(eyePos, structure.RADIUS)
-	rays := structure.GetBoundaryRays(eyePos, structures)
 
-	// Changed to red to represent the "shadow" or "blocked" path
-	shadowRayColor := rl.NewColor(255, 0, 0, 150)
+	for _, s := range structures {
+		// 1. Get the 4 corners of the structure
+		corners := s.GetStructureCorners()
 
-	for i := 0; i < len(rays); i++ {
-		ray := rays[i]
-		closestHitDist := MaxSightDistance
+		// 2. Iterate through the 4 edges of the structure
+		for i := 0; i < 4; i++ {
+			A := corners[i]
+			B := corners[(i+1)%4]
 
-		for j := 0; j < len(structures); j++ {
-			hitInfo := structures[j].RayCollisionOBB(ray)
-			if hitInfo.Hit && hitInfo.Distance < closestHitDist {
-				closestHitDist = hitInfo.Distance
+			// Calculate the vector of the edge
+			dx := B.X - A.X
+			dz := B.Z - A.Z
+
+			// Calculate the OUTWARD normal of the edge
+			nx := float32(dz)
+			nz := float32(-dx)
+
+			// Calculate the vector from the player to the center of the edge
+			cx := float32((A.X+B.X)/2.0) - eyePos.X
+			cz := float32((A.Z+B.Z)/2.0) - eyePos.Z
+
+			// DOT PRODUCT: This checks if the edge faces AWAY from the player
+			dot := cx*nx + cz*nz
+
+			if dot > 0 {
+				// 3. This is a back-facing edge! Connect the boundary rays to form a shadow.
+
+				dirA := rl.Vector3Normalize(rl.Vector3Subtract(A, eyePos))
+				dirB := rl.Vector3Normalize(rl.Vector3Subtract(B, eyePos))
+
+				// Project the corners outwards to max sight distance
+				projA := rl.Vector3{
+					X: A.X + dirA.X*MaxSightDistance,
+					Y: 0.01, // Slightly raised so it doesn't z-fight/glitch with the floor
+					Z: A.Z + dirA.Z*MaxSightDistance,
+				}
+				projB := rl.Vector3{
+					X: B.X + dirB.X*MaxSightDistance,
+					Y: 0.01,
+					Z: B.Z + dirB.Z*MaxSightDistance,
+				}
+
+				A.Y = 0.01
+				B.Y = 0.01
+
+				rl.DrawTriangle3D(A, B, projA, shadowColor)
+				rl.DrawTriangle3D(B, projB, projA, shadowColor)
+
+				rl.DrawTriangle3D(A, projA, B, shadowColor)
+				rl.DrawTriangle3D(B, projA, projB, shadowColor)
 			}
-		}
-
-		// If the ray actually hit a structure before reaching the max distance...
-		if closestHitDist < MaxSightDistance {
-			// 1. Calculate where the ray hit the wall (The New Start Point)
-			hitPos := rl.Vector3{
-				X: ray.Position.X + ray.Direction.X*closestHitDist,
-				Y: 0.0,
-				Z: ray.Position.Z + ray.Direction.Z*closestHitDist,
-			}
-
-			// 2. Calculate the absolute edge of the vision range (The New End Point)
-			maxPos := rl.Vector3{
-				X: ray.Position.X + ray.Direction.X*MaxSightDistance,
-				Y: 0.0,
-				Z: ray.Position.Z + ray.Direction.Z*MaxSightDistance,
-			}
-
-			// 3. Draw the line extending outward from the back of the structure
-			rl.DrawLine3D(hitPos, maxPos, shadowRayColor)
 		}
 	}
 }

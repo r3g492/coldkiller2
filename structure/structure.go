@@ -153,3 +153,37 @@ func GetBoundaryRays(playerPos rl.Vector3, structures []*Structure) []rl.Ray {
 
 	return rays
 }
+
+func (s *Structure) GetStructureCorners() []rl.Vector3 {
+	halfX := float64(s.Size.X / 2.0)
+	halfZ := float64(s.Size.Z / 2.0)
+
+	// FIX 1: Match the Atan2(X, Z) order used in Draw3D and RayCollisionOBB
+	angle := math.Atan2(float64(s.Direction.X), float64(s.Direction.Z))
+	cosA := math.Cos(angle)
+	sinA := math.Sin(angle)
+
+	localCorners := [4][2]float64{
+		{-halfX, -halfZ},
+		{halfX, -halfZ},
+		{halfX, halfZ},
+		{-halfX, halfZ},
+	}
+
+	worldCorners := make([]rl.Vector3, 4)
+	for i := 0; i < 4; i++ {
+		lx := localCorners[i][0]
+		lz := localCorners[i][1]
+
+		// FIX 2: The exact mathematical inverse of your CheckCollision rotation logic
+		rotX := lx*cosA + lz*sinA
+		rotZ := -lx*sinA + lz*cosA
+
+		worldCorners[i] = rl.Vector3{
+			X: s.Position.X + float32(rotX),
+			Y: 0.0,
+			Z: s.Position.Z + float32(rotZ),
+		}
+	}
+	return worldCorners
+}
