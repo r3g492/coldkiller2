@@ -112,36 +112,28 @@ func DrawSolidShadows(playerPos rl.Vector3, sm *structure.SpatialManager) {
 	structures := sm.GetStructuresNearPosition(eyePos, structure.RADIUS)
 
 	for _, s := range structures {
-		// 1. Get the 4 corners of the structure
 		corners := s.GetStructureCorners()
 
-		// 2. Iterate through the 4 edges of the structure
 		for i := 0; i < 4; i++ {
 			A := corners[i]
 			B := corners[(i+1)%4]
 
-			// Calculate the vector of the edge
 			dx := B.X - A.X
 			dz := B.Z - A.Z
 
-			// Calculate the OUTWARD normal of the edge
-			nx := float32(dz)
-			nz := float32(-dx)
+			nx := dz
+			nz := -dx
 
-			// Calculate the vector from the player to the center of the edge
-			cx := float32((A.X+B.X)/2.0) - eyePos.X
-			cz := float32((A.Z+B.Z)/2.0) - eyePos.Z
+			cx := (A.X+B.X)/2.0 - eyePos.X
+			cz := (A.Z+B.Z)/2.0 - eyePos.Z
 
-			// DOT PRODUCT: This checks if the edge faces AWAY from the player
 			dot := cx*nx + cz*nz
 
 			if dot > 0 {
-				// 3. This is a back-facing edge! Connect the boundary rays to form a shadow.
 
 				dirA := rl.Vector3Normalize(rl.Vector3Subtract(A, eyePos))
 				dirB := rl.Vector3Normalize(rl.Vector3Subtract(B, eyePos))
 
-				// Project the corners outwards to max sight distance
 				projA := rl.Vector3{
 					X: A.X + dirA.X*MaxSightDistance,
 					Y: 0.01, // Slightly raised so it doesn't z-fight/glitch with the floor
