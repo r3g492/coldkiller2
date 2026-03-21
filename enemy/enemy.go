@@ -26,6 +26,7 @@ type Enemy struct {
 	MoveDirection         rl.Vector3
 	TargetDirection       rl.Vector3
 	Position              rl.Vector3
+	PrevPosition          rl.Vector3
 	Size                  float32
 	MoveSpeed             float32
 	ActionTimeLeft        float32
@@ -146,13 +147,14 @@ func (e *Enemy) Mutate(
 
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 
+	e.PrevPosition = e.Position
 	oldPos := e.Position
 	e.Position.X += moveAmount.X
-	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
 		e.Position.X = oldPos.X
 	}
 	e.Position.Z += moveAmount.Z
-	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
 		e.Position.Z = oldPos.Z
 	}
 

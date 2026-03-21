@@ -68,35 +68,40 @@ func (bm *Manager) Mutate(
 		bm.Bullets[i].Mutate(dt)
 		for j := 0; j < len(el); j++ {
 			enemyPos := el[j].Position
-			enemySize := el[j].Size
 			curBullet := bm.Bullets[i]
 
 			if bm.Bullets[i].LifeTime >= 1.99 && bm.Bullets[i].Active {
 				blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
 			}
 
-			if structureManager.CheckCollision(curBullet.Position, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
+			if structureManager.CheckCollision(curBullet.Position, curBullet.PrevPosition, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
 				if bm.Bullets[i].Active {
 					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
 					bm.Bullets[i].Active = false
 				}
 			}
 
-			if curBullet.Shooter == Player && rl.Vector3Distance(enemyPos, curBullet.Position) < enemySize && el[j].Health > 0 {
-				if bm.Bullets[i].Active {
-					el[j].Damage(bm.Bullets[i].Damage)
-					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
-					// sound.PlaySound3D(sound.ShotNew, bm.Bullets[i].Position, p.Position, 1)
-					bm.Bullets[i].Active = false
-					bm.PlayerXp++
+			if curBullet.Shooter == Player && el[j].Health > 0 {
+				hitRadius := el[j].Size + curBullet.Radius
+				if checkSegmentSphereCollision(curBullet.PrevPosition, curBullet.Position, enemyPos, hitRadius) {
+					if bm.Bullets[i].Active {
+						el[j].Damage(bm.Bullets[i].Damage)
+						blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+						// sound.PlaySound3D(sound.ShotNew, bm.Bullets[i].Position, p.Position, 1)
+						bm.Bullets[i].Active = false
+						bm.PlayerXp++
+					}
 				}
 			}
 
-			if curBullet.Shooter == Enemy && rl.Vector3Distance(p.Position, curBullet.Position) < p.Size && p.Health > 0 {
-				if bm.Bullets[i].Active {
-					p.Damage(bm.Bullets[i].Damage)
-					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
-					bm.Bullets[i].Active = false
+			if curBullet.Shooter == Enemy && p.Health > 0 {
+				hitRadius := p.Size + curBullet.Radius
+				if checkSegmentSphereCollision(curBullet.PrevPosition, curBullet.Position, p.Position, hitRadius) {
+					if bm.Bullets[i].Active {
+						p.Damage(bm.Bullets[i].Damage)
+						blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+						bm.Bullets[i].Active = false
+					}
 				}
 			}
 		}
@@ -119,4 +124,27 @@ func (bm *Manager) Draw3D() {
 func (bm *Manager) Unload() {
 	bm.Bullets = []Bullet{}
 	bm.PlayerXp = 0
+}
+
+func checkSegmentSphereCollision(start, end, sphereCenter rl.Vector3, radius float32) bool {
+	ab := rl.Vector3Subtract(end, start)
+	ap := rl.Vector3Subtract(sphereCenter, start)
+
+	abLenSq := rl.Vector3DotProduct(ab, ab)
+	if abLenSq == 0 {
+		return rl.Vector3Distance(start, sphereCenter) < radius
+	}
+
+	t := rl.Vector3DotProduct(ap, ab) / abLenSq
+
+	if t < 0.0 {
+		t = 0.0
+	}
+	if t > 1.0 {
+		t = 1.0
+	}
+
+	closestPoint := rl.Vector3Add(start, rl.Vector3Scale(ab, t))
+
+	return rl.Vector3Distance(closestPoint, sphereCenter) < radius
 }

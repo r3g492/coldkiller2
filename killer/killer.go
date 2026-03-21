@@ -26,6 +26,7 @@ type Killer struct {
 	MoveDirection         rl.Vector3
 	TargetDirection       rl.Vector3
 	Position              rl.Vector3
+	PrevPosition          rl.Vector3
 	Size                  float32
 	MoveSpeed             float32
 	Camera                rl.Camera3D
@@ -224,6 +225,7 @@ func (k *Killer) movement(
 	obstacles []rl.BoundingBox,
 	structureManager *structure.SpatialManager,
 ) bool {
+	k.PrevPosition = k.Position
 	k.MoveDirection = rl.Vector3{}
 	if input.MoveUp {
 		k.MoveDirection.Z -= 1
@@ -244,11 +246,11 @@ func (k *Killer) movement(
 	if rl.Vector3Length(moveAmount) > 0 {
 		oldPos := k.Position
 		k.Position.X += moveAmount.X
-		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
 			k.Position.X = oldPos.X
 		}
 		k.Position.Z += moveAmount.Z
-		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
 			k.Position.Z = oldPos.Z
 		}
 		return k.Position != oldPos

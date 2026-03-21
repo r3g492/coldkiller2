@@ -63,9 +63,9 @@ func (sm *SpatialManager) GetStructuresNearPosition(pos rl.Vector3, searchRadius
 	return nearby
 }
 
-func (sm *SpatialManager) CheckCollision(otherPos rl.Vector3, otherSize rl.Vector3) bool {
+func (sm *SpatialManager) CheckCollision(otherPos rl.Vector3, prevPos rl.Vector3, otherSize rl.Vector3) bool {
 	for _, s := range sm.GetStructuresNearPosition(otherPos, RADIUS) {
-		if s.CheckCollision(otherPos, otherSize) {
+		if s.CheckCollision(otherPos, prevPos, otherSize) {
 			return true
 		}
 	}
