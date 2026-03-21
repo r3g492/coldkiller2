@@ -41,6 +41,7 @@ type Enemy struct {
 	FootstepSoundTimeUnit float32
 	FootstepSound         rl.Sound
 	IsHiddenFromKiller    bool
+	AiType                AiType
 }
 
 func (e *Enemy) Draw3D(p *killer.Killer) {
@@ -126,8 +127,8 @@ func (e *Enemy) Mutate(
 		return bulletCmds
 	}
 
-	// TODO: aim 조건 변경
-	if e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && e.IsAlive() {
+	var aimStartCondition = deriveAimCondition(e, distToPlayer)
+	if aimStartCondition {
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
@@ -139,13 +140,7 @@ func (e *Enemy) Mutate(
 	}
 	e.AimTimeLeft = e.AimTimeUnit
 
-	// TODO: 이동 방향 결정 로직 수정
-	e.MoveDirection = rl.Vector3Normalize(
-		rl.Vector3Subtract(
-			p.Position,
-			e.Position,
-		),
-	)
+	e.MoveDirection = deriveMovementDirection(e, &p)
 
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 

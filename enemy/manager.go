@@ -153,6 +153,7 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 		FootstepSoundTimeLeft: 0.4,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
+		AiType:                SimpleZombie,
 	}
 
 	trialLimit := 3
