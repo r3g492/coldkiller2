@@ -126,6 +126,7 @@ func (e *Enemy) Mutate(
 		return bulletCmds
 	}
 
+	// TODO: aim 조건 변경
 	if e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && e.IsAlive() {
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
@@ -138,6 +139,7 @@ func (e *Enemy) Mutate(
 	}
 	e.AimTimeLeft = e.AimTimeUnit
 
+	// TODO: 이동 방향 결정 로직 수정
 	e.MoveDirection = rl.Vector3Normalize(
 		rl.Vector3Subtract(
 			p.Position,
