@@ -217,10 +217,26 @@ func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 }
 
 func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
+	mouseRay := rl.GetScreenToWorldRay(mouseLocation, player.Camera)
+
+	t := float32(0.0)
+	if mouseRay.Direction.Y != 0 {
+		t = (player.Position.Y - mouseRay.Position.Y) / mouseRay.Direction.Y
+	}
+
+	target3D := rl.Vector3{
+		X: mouseRay.Position.X + mouseRay.Direction.X*t,
+		Y: player.Position.Y,
+		Z: mouseRay.Position.Z + mouseRay.Direction.Z*t,
+	}
+
 	rl.BeginMode3D(player.Camera)
-	// rl.DrawRay(rl.NewRay(player.Position, player.TargetDirection), rl.Green)
+
+	rl.DrawLine3D(player.Position, target3D, rl.Green)
+
+	rl.DrawSphere(target3D, 0.1, rl.Green)
+
 	rl.EndMode3D()
-	rl.DrawCircle(int32(mouseLocation.X), int32(mouseLocation.Y), 2.5, rl.Green)
 }
 
 func gameEnd(player *killer.Killer) bool {
