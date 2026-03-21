@@ -127,7 +127,7 @@ func (e *Enemy) Mutate(
 		return bulletCmds
 	}
 
-	var aimStartCondition = deriveAimCondition(e, distToPlayer)
+	var aimStartCondition = deriveAimCondition(e, em, myIdx, &p, structureManager)
 	if aimStartCondition {
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
@@ -140,7 +140,7 @@ func (e *Enemy) Mutate(
 	}
 	e.AimTimeLeft = e.AimTimeUnit
 
-	e.MoveDirection = deriveMovementDirection(e, &p)
+	e.MoveDirection = deriveMovementDirection(e, em, myIdx, &p, structureManager)
 
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 
