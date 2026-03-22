@@ -4,6 +4,7 @@ import (
 	"coldkiller2/killer"
 	"coldkiller2/sound"
 	"coldkiller2/structure"
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -69,12 +70,14 @@ func (em *Manager) Mutate(
 			em.Enemies = append(em.Enemies[:i], em.Enemies[i+1:]...)
 			continue
 		}
-		em.AliveEnemyCount++
+		if em.Enemies[i].Health > 0 {
+			em.AliveEnemyCount++
+		}
 	}
 
-	if time.Since(em.LastGenerated) > em.EnemyGenerateUnit {
+	/*if time.Since(em.LastGenerated) > em.EnemyGenerateUnit {
 		em.Generate(p)
-	}
+	}*/
 
 	if time.Since(em.LastLevelUp) > em.EnemyGenerationLevelUpUnit {
 		em.UpTheTempo()
@@ -97,6 +100,10 @@ func (em *Manager) DrawUi(p *killer.Killer) {
 			em.Enemies[i].DrawUI(p)
 		}
 	}
+	uiWorldPos := rl.Vector3{X: p.Position.X, Y: p.Position.Y + 3.0, Z: p.Position.Z}
+	screenPos := rl.GetWorldToScreen(uiWorldPos, p.Camera)
+	fpsText := fmt.Sprintf("%d", em.AliveEnemyCount)
+	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+120, 1, rl.Yellow)
 }
 
 func (em *Manager) ProcessAnimation(dt float32, p *killer.Killer) {
