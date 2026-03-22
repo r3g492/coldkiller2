@@ -66,11 +66,11 @@ func (em *Manager) Mutate(
 	}
 
 	for i := len(em.Enemies) - 1; i >= 0; i-- {
-		if em.Enemies[i].IsDead {
+		if em.Enemies[i].ShouldBeDeleted {
 			em.Enemies = append(em.Enemies[:i], em.Enemies[i+1:]...)
 			continue
 		}
-		if em.Enemies[i].Health > 0 {
+		if em.Enemies[i].IsAlive() {
 			em.AliveEnemyCount++
 		}
 	}
@@ -125,7 +125,7 @@ func (em *Manager) Unload() {
 func (em *Manager) GetBoundingBoxes() []rl.BoundingBox {
 	boxes := make([]rl.BoundingBox, 0, len(em.Enemies))
 	for _, e := range em.Enemies {
-		if e.Health > 0 {
+		if e.IsAlive() {
 			boxes = append(boxes, e.GetBoundingBox())
 		}
 	}
@@ -157,7 +157,7 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 		MoveSpeed:             4,
 		ActionTimeLeft:        0,
 		Health:                100,
-		IsDead:                false,
+		ShouldBeDeleted:       false,
 		AttackRange:           10,
 		AimTimeLeft:           1,
 		AimTimeUnit:           1,

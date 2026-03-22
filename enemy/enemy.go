@@ -31,7 +31,7 @@ type Enemy struct {
 	MoveSpeed             float32
 	ActionTimeLeft        float32
 	Health                int32
-	IsDead                bool
+	ShouldBeDeleted       bool
 	AttackCooldown        time.Duration
 	LastAttack            time.Time
 	AttackRange           float32
@@ -42,6 +42,10 @@ type Enemy struct {
 	FootstepSound         rl.Sound
 	IsHiddenFromKiller    bool
 	AiType                AiType
+}
+
+func (e *Enemy) IsAlive() bool {
+	return e.Health > 0
 }
 
 func (e *Enemy) Draw3D(p *killer.Killer) {
@@ -55,7 +59,7 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
 	rl.Rotatef(-30, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
-	if e.Health > 0 {
+	if e.IsAlive() {
 		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), killer.ModelRatio, rl.Red)
 		rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
 	} else {
@@ -107,8 +111,8 @@ func (e *Enemy) Mutate(
 	if e.ActionTimeLeft <= 0 {
 		e.AnimationState = animation.StateIdle
 	}
-	if e.ActionTimeLeft <= 0 && e.Health <= 0 {
-		e.IsDead = true
+	if e.ActionTimeLeft <= 0 && !e.IsAlive() {
+		e.ShouldBeDeleted = true
 	}
 
 	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, &p, structureManager)
@@ -182,7 +186,7 @@ func (e *Enemy) Damage(d int32) {
 	e.Health -= d
 	e.AnimationState = animation.StateDying
 	e.ActionTimeLeft = 0.1
-	if e.Health <= 0 {
+	if !e.IsAlive() {
 		e.AnimationState = animation.StateDying
 		e.ActionTimeLeft = 10
 	}
@@ -239,8 +243,4 @@ func (e *Enemy) GetBoundingBox() rl.BoundingBox {
 		Min: rl.Vector3{X: e.Position.X - e.Size, Y: e.Position.Y - e.Size, Z: e.Position.Z - e.Size},
 		Max: rl.Vector3{X: e.Position.X + e.Size, Y: e.Position.Y + e.Size, Z: e.Position.Z + e.Size},
 	}
-}
-
-func (e *Enemy) IsAlive() bool {
-	return e.Health > 0
 }
