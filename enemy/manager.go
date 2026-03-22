@@ -24,6 +24,7 @@ type Manager struct {
 	BulletBuffer               []BulletCmd
 	Grid                       map[int][]int
 	CellSize                   float32
+	AliveEnemyCount            int
 }
 
 const CellSize = 5.0
@@ -54,6 +55,7 @@ func (em *Manager) Mutate(
 	p *killer.Killer,
 	structureManager *structure.SpatialManager,
 ) []BulletCmd {
+	em.AliveEnemyCount = 0
 	em.updateGrid()
 	em.BulletBuffer = em.BulletBuffer[:0]
 
@@ -65,7 +67,9 @@ func (em *Manager) Mutate(
 	for i := len(em.Enemies) - 1; i >= 0; i-- {
 		if em.Enemies[i].IsDead {
 			em.Enemies = append(em.Enemies[:i], em.Enemies[i+1:]...)
+			continue
 		}
+		em.AliveEnemyCount++
 	}
 
 	if time.Since(em.LastGenerated) > em.EnemyGenerateUnit {
