@@ -89,7 +89,7 @@ func (k *Killer) Draw3D() {
 	rl.Rotatef(-30, 1, 0, 0)
 	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
 	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), ModelRatio, rl.DarkGreen)
-	if k.Health > 0 {
+	if k.IsAlive() {
 		rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
 	}
 	rl.PopMatrix()
@@ -341,7 +341,7 @@ func (k *Killer) Damage(d int32) {
 	var shotTime float32 = 0.1
 	k.ActionTimeLeft = shotTime
 	k.MaxActionTime = shotTime
-	if k.Health <= 0 {
+	if !k.IsAlive() {
 		k.AnimationState = animation.StateDying
 		var dyingTime float32 = 1
 		k.ActionTimeLeft = dyingTime

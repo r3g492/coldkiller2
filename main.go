@@ -8,6 +8,7 @@ import (
 	"coldkiller2/killer"
 	"coldkiller2/sight"
 	"coldkiller2/sound"
+	"coldkiller2/stage"
 	"coldkiller2/structure"
 	"fmt"
 	"time"
@@ -49,17 +50,23 @@ func main() {
 	blastManager := blast.CreateManager()
 	defer blastManager.Unload()
 
-	spatialManager := structure.CreateSpatialManager(structure.RADIUS)
-	defer spatialManager.Unload()
-	spatialManager.Init()
-
-	enemyManager := enemy.CreateManager()
-	defer enemyManager.Unload()
+	structureManager := structure.CreateSpatialManager(structure.RADIUS)
+	defer structureManager.Unload()
+	structureManager.Init()
 
 	player := killer.Init()
 	defer player.Unload()
 
+	enemyManager := enemy.CreateManager()
+	defer enemyManager.Unload()
 	enemyManager.Init(player)
+
+	stageManager := stage.CreateManager()
+	defer stageManager.Unload()
+	stageManager.Init(
+		structureManager,
+		enemyManager,
+	)
 
 	rl.DisableCursor()
 
@@ -150,11 +157,11 @@ func main() {
 		}
 
 		// enemy
-		var ebc = enemyManager.Mutate(dt, player, spatialManager)
+		var ebc = enemyManager.Mutate(dt, player, structureManager)
 		enemyManager.ProcessAnimation(dt, player)
 
 		// player
-		bc := player.Mutate(ip, dt, enemyManager.GetBoundingBoxes(), spatialManager)
+		bc := player.Mutate(ip, dt, enemyManager.GetBoundingBoxes(), structureManager)
 		player.ResolveAnimation()
 		player.PlanAnimate(dt)
 		player.Animate()
@@ -162,7 +169,7 @@ func main() {
 		// bullet
 		bulletManager.KillerBulletCreate(bc)
 		bulletManager.EnemyBulletCreate(ebc)
-		bulletBlasts := bulletManager.Mutate(dt, player, enemyManager.Enemies, spatialManager)
+		bulletBlasts := bulletManager.Mutate(dt, player, enemyManager.Enemies, structureManager)
 
 		blastManager.AddBlasts(bulletBlasts)
 		blastManager.Mutate(dt)
@@ -171,7 +178,7 @@ func main() {
 			blastManager,
 			bulletManager,
 			enemyManager,
-			spatialManager,
+			structureManager,
 			player,
 		)
 
@@ -180,12 +187,12 @@ func main() {
 		rl.ClearBackground(rl.Gray)
 
 		rl.BeginMode3D(player.Camera)
-		sight.DrawSolidShadows(player.Position, spatialManager)
+		sight.DrawSolidShadows(player.Position, structureManager)
 		player.Draw3D()
 		enemyManager.Draw3D(player)
 		bulletManager.Draw3D()
 		blastManager.Draw3D()
-		spatialManager.Draw3D(player.Position)
+		structureManager.Draw3D(player.Position)
 		rl.EndMode3D()
 
 		player.DrawUi()
@@ -240,7 +247,7 @@ func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 }
 
 func gameEnd(player *killer.Killer) bool {
-	return player.Health <= 0 && player.ActionTimeLeft <= 0
+	return !player.IsAlive() && player.ActionTimeLeft <= 0
 }
 
 func drawButton(rect rl.Rectangle, text string) bool {

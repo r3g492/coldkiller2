@@ -94,7 +94,7 @@ func (bm *Manager) Mutate(
 				}
 			}
 
-			if curBullet.Shooter == Enemy && p.Health > 0 {
+			if curBullet.Shooter == Enemy && p.IsAlive() {
 				hitRadius := p.Size + curBullet.Radius
 				if checkSegmentSphereCollision(curBullet.PrevPosition, curBullet.Position, p.Position, hitRadius) {
 					if bm.Bullets[i].Active {
