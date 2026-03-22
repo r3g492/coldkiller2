@@ -68,6 +68,10 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 }
 
 func (e *Enemy) DrawUI(p *killer.Killer) {
+	if e.IsHiddenFromKiller {
+		return
+	}
+
 	uiWorldPos := rl.Vector3{X: e.Position.X, Y: e.Position.Y + 3.0, Z: e.Position.Z}
 	screenPos := rl.GetWorldToScreen(uiWorldPos, p.Camera)
 
