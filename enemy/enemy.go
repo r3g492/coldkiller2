@@ -95,8 +95,6 @@ func (e *Enemy) Mutate(
 ) []BulletCmd {
 	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
 	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
-	var _ = rl.Vector3Normalize(vecToPlayer)
-
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
 		e.ActionTimeLeft -= dt
@@ -105,20 +103,20 @@ func (e *Enemy) Mutate(
 	if e.ActionTimeLeft <= 0 {
 		e.AnimationState = animation.StateIdle
 	}
-
 	if e.ActionTimeLeft <= 0 && e.Health <= 0 {
 		e.IsDead = true
 	}
 
+	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, &p, structureManager)
+
 	if e.AimTimeLeft <= 0 && distToPlayer <= e.AttackRange {
+		// shot
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
-
 		e.ActionTimeLeft = 1
 		e.AnimationState = animation.StateAttacking
 		e.AnimationCurrentFrame = 0
-
 		e.AimTimeLeft = e.AimTimeUnit
 		rl.PlaySound(sound.ShotgunSound)
 		dir := rl.Vector3Normalize(e.TargetDirection)
@@ -127,20 +125,19 @@ func (e *Enemy) Mutate(
 		return bulletCmds
 	}
 
-	var aimStartCondition = deriveAimCondition(e, em, myIdx, &p, structureManager)
-	if aimStartCondition {
+	if derivedAimStart {
+		// aim
 		e.TargetDirection = vecToPlayer
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
-
 		e.AimTimeLeft -= dt
 		e.AnimationState = animation.StateAiming
 		e.AnimationCurrentFrame = 0
 		return []BulletCmd{}
 	}
-	e.AimTimeLeft = e.AimTimeUnit
 
-	e.MoveDirection = deriveMovementDirection(e, em, myIdx, &p, structureManager)
+	e.AimTimeLeft = e.AimTimeUnit
+	e.MoveDirection = derivedMovement
 
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
 
