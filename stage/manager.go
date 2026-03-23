@@ -32,3 +32,13 @@ func (m *Manager) Init(
 	m.structureManager = structureManager
 	m.enemyManager = enemyManager
 }
+
+func (m *Manager) SetDifficulty(
+	difficulty int,
+) {
+	m.Difficulty = difficulty
+}
+
+func (m *Manager) ResetScore() {
+	m.StageWon = 0
+}

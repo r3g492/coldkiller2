@@ -70,16 +70,20 @@ func main() {
 
 	rl.DisableCursor()
 
-	showMenu := true
+	showLostMenu := true
 	lost := false
 
 	btnWidth, btnHeight := float32(400), float32(80)
 	btnRect := rl.Rectangle{
 		X:      float32(w)/2 - btnWidth/2,
-		Y:      float32(h)/2 - btnHeight/2,
+		Y:      float32(h)/2 + 60,
 		Width:  btnWidth,
 		Height: btnHeight,
 	}
+	difficulty := 0
+	sqSize := float32(50)
+	spacing := float32(20)
+	diffY := float32(h)/2 - 80
 
 	for !rl.WindowShouldClose() {
 		if rl.IsCursorHidden() {
@@ -88,9 +92,29 @@ func main() {
 		ip := input.ReadInput(keyMap)
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Black)
+
+		diffText := fmt.Sprintf("Difficulty: %d", difficulty)
+		fontSize := int32(40)
+		textWidth := rl.MeasureText(diffText, fontSize)
+		textX := float32(w)/2 - float32(textWidth)/2
+
+		rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSize, rl.RayWhite)
+
+		minusRect := rl.Rectangle{X: textX - sqSize - spacing, Y: diffY, Width: sqSize, Height: sqSize}
+		plusRect := rl.Rectangle{X: textX + float32(textWidth) + spacing, Y: diffY, Width: sqSize, Height: sqSize}
+
+		if drawButton(minusRect, "-", rl.DarkGray, rl.Gray, rl.White) && difficulty > 0 {
+			difficulty--
+		}
+		if drawButton(plusRect, "+", rl.DarkGray, rl.Gray, rl.White) {
+			difficulty++
+		}
+
 		buttonText := "Start Game"
-		if drawButton(btnRect, buttonText) {
-			showMenu = false
+		if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) {
+			showLostMenu = false
+			stageManager.SetDifficulty(difficulty)
+			stageManager.ResetScore()
 			break
 		}
 		drawInputOverlay(w, h, ip, keyMap)
@@ -104,7 +128,7 @@ func main() {
 		log(mouseLocation, dt, player)
 		ip := input.ReadInput(keyMap)
 
-		if showMenu {
+		if showLostMenu {
 			if rl.IsCursorHidden() {
 				rl.EnableCursor()
 			}
@@ -112,15 +136,36 @@ func main() {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
 
+			diffText := fmt.Sprintf("Difficulty: %d", difficulty)
+			fontSizeDiff := int32(40)
+			textWidthDiff := rl.MeasureText(diffText, fontSizeDiff)
+			textX := float32(w)/2 - float32(textWidthDiff)/2
+
+			rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, rl.RayWhite)
+
+			minusRect := rl.Rectangle{X: textX - sqSize - spacing, Y: diffY, Width: sqSize, Height: sqSize}
+			plusRect := rl.Rectangle{X: textX + float32(textWidthDiff) + spacing, Y: diffY, Width: sqSize, Height: sqSize}
+
+			if drawButton(minusRect, "-", rl.DarkGray, rl.Gray, rl.White) && difficulty > 0 {
+				difficulty--
+			}
+			if drawButton(plusRect, "+", rl.DarkGray, rl.Gray, rl.White) {
+				difficulty++
+			}
+
 			buttonText := "Restart Game"
-			xpText := fmt.Sprintf("%d KILL", lastScore)
+			xpText := fmt.Sprintf("%d Stages Cleared", stageManager.StageWon)
 
-			fontSize := int32(60)
-			textWidth := rl.MeasureText(xpText, fontSize)
-			rl.DrawText(xpText, int32(w)/2-textWidth/2, int32(h/2-300), fontSize, rl.Red)
+			fontSizeScore := int32(60)
+			textWidthScore := rl.MeasureText(xpText, fontSizeScore)
+			rl.DrawText(xpText, int32(w)/2-textWidthScore/2, int32(h)/2-180, fontSizeScore, rl.Red)
 
-			if drawButton(btnRect, buttonText) || ip.ResetGamePressed {
-				showMenu = false
+			if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) || ip.ResetGamePressed {
+				showLostMenu = false
+
+				stageManager.SetDifficulty(difficulty)
+				stageManager.ResetScore()
+
 				if lost {
 					player = resetGame(enemyManager, player, bulletManager)
 					lost = false
@@ -131,16 +176,16 @@ func main() {
 			continue
 		}
 
-		if gameEnd(player) {
+		if gameLost(player) {
 			rl.StopSound(sound.Track)
 			rl.PlaySound(sound.YouLose)
-			showMenu = true
+			showLostMenu = true
 			lost = true
 			lastScore = bulletManager.PlayerXp
 			player = resetGame(enemyManager, player, bulletManager)
 		}
 
-		if !rl.IsSoundPlaying(sound.Track) && !showMenu {
+		if !rl.IsSoundPlaying(sound.Track) && !showLostMenu {
 			rl.PlaySound(sound.Track)
 		}
 
@@ -149,7 +194,7 @@ func main() {
 		}
 
 		if ip.EndGamePressed {
-			showMenu = true
+			showLostMenu = true
 		}
 
 		if ip.ResetGamePressed {
@@ -246,31 +291,34 @@ func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 	rl.EndMode3D()
 }
 
-func gameEnd(player *killer.Killer) bool {
+func gameLost(player *killer.Killer) bool {
 	return !player.IsAlive() && player.ActionTimeLeft <= 0
 }
 
-func drawButton(rect rl.Rectangle, text string) bool {
+func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {
 	mousePoint := rl.GetMousePosition()
-	isPressed := rl.CheckCollisionPointRec(mousePoint, rect) && (rl.IsMouseButtonDown(rl.MouseLeftButton) || rl.IsMouseButtonReleased(rl.MouseLeftButton))
+	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)
+	isPressed := isHovered && (rl.IsMouseButtonDown(rl.MouseLeftButton) || rl.IsMouseButtonReleased(rl.MouseLeftButton))
 
-	color := rl.Red
+	currentColor := baseColor
 	if isPressed {
-		color = rl.Maroon
+		currentColor = rl.Maroon
 		if rl.IsMouseButtonReleased(rl.MouseLeftButton) {
 			return true
 		}
+	} else if isHovered {
+		currentColor = hoverColor
 	}
 
-	rl.DrawRectangleRec(rect, rl.Fade(color, 0.3))
-	rl.DrawRectangleLinesEx(rect, 3, color)
+	rl.DrawRectangleRec(rect, rl.Fade(currentColor, 0.3))
+	rl.DrawRectangleLinesEx(rect, 3, currentColor)
 
 	fontSize := int32(30)
 	textWidth := rl.MeasureText(text, fontSize)
 	textX := int32(rect.X + (rect.Width / 2) - float32(textWidth/2))
 	textY := int32(rect.Y + (rect.Height / 2) - float32(fontSize/2))
 
-	rl.DrawText(text, textX, textY, fontSize, color)
+	rl.DrawText(text, textX, textY, fontSize, textColor)
 
 	return false
 }
