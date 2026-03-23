@@ -70,9 +70,6 @@ func main() {
 
 	rl.DisableCursor()
 
-	showLostMenu := true
-	lost := false
-
 	btnWidth, btnHeight := float32(400), float32(80)
 	btnRect := rl.Rectangle{
 		X:      float32(w)/2 - btnWidth/2,
@@ -112,7 +109,6 @@ func main() {
 
 		buttonText := "Start Game"
 		if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) {
-			showLostMenu = false
 			stageManager.SetDifficulty(difficulty)
 			stageManager.ResetScore()
 			break
@@ -121,6 +117,11 @@ func main() {
 		rl.EndDrawing()
 		continue
 	}
+
+	showLostMenu := false
+	lost := false
+	intermission := false
+	var intermissionTimer float32 = 0.0
 
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
@@ -154,7 +155,7 @@ func main() {
 			}
 
 			buttonText := "Restart Game"
-			xpText := fmt.Sprintf("%d Stages Cleared", stageManager.StageWon)
+			xpText := fmt.Sprintf("Score: %d", stageManager.StageWon)
 
 			fontSizeScore := int32(60)
 			textWidthScore := rl.MeasureText(xpText, fontSizeScore)
@@ -183,6 +184,7 @@ func main() {
 			lost = true
 			lastScore = bulletManager.PlayerXp
 			player = resetGame(enemyManager, player, bulletManager)
+			difficulty = stageManager.Difficulty
 		}
 
 		if !rl.IsSoundPlaying(sound.Track) && !showLostMenu {
@@ -201,9 +203,52 @@ func main() {
 			player = resetGame(enemyManager, player, bulletManager)
 		}
 
+		if intermission {
+			intermissionTimer += dt
+
+			rl.BeginDrawing()
+			rl.ClearBackground(rl.DarkGray)
+
+			stageText := fmt.Sprintf("Score: %d", stageManager.StageWon)
+			stageSize := int32(40)
+			stageWidth := rl.MeasureText(stageText, stageSize)
+			rl.DrawText(stageText, int32(w)/2-stageWidth/2, int32(h)/2-80, stageSize, rl.RayWhite)
+
+			diffInfoText := fmt.Sprintf("Current Difficulty: %d", stageManager.Difficulty)
+			diffInfoSize := int32(30)
+			diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
+			rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-30, diffInfoSize, rl.LightGray)
+
+			timeLeft := 1.0 - intermissionTimer
+			if timeLeft < 0 {
+				timeLeft = 0
+			}
+			timerText := fmt.Sprintf("%.1f...", timeLeft)
+			timerSize := int32(30)
+			timerWidth := rl.MeasureText(timerText, timerSize)
+			rl.DrawText(timerText, int32(w)/2-timerWidth/2, int32(h)/2+40, timerSize, rl.Gray)
+
+			if intermissionTimer >= 1.0 {
+				intermission = false
+				intermissionTimer = 0
+				stageManager.GenerateNewStage()
+				player = resetGame(enemyManager, player, bulletManager)
+			}
+
+			rl.EndDrawing()
+			continue
+		}
+
 		// enemy
 		var ebc = enemyManager.Mutate(dt, player, structureManager)
 		enemyManager.ProcessAnimation(dt, player)
+
+		if gameWon(enemyManager) {
+			intermission = true
+			rl.PlaySound(sound.ThreeTwoOne)
+			player = resetGame(enemyManager, player, bulletManager)
+			stageManager.ScoreUp()
+		}
 
 		// player
 		bc := player.Mutate(ip, dt, enemyManager.GetBoundingBoxes(), structureManager)
@@ -293,6 +338,10 @@ func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 
 func gameLost(player *killer.Killer) bool {
 	return !player.IsAlive() && player.ActionTimeLeft <= 0
+}
+
+func gameWon(enemyManager *enemy.Manager) bool {
+	return enemyManager.AliveEnemyCount == 0
 }
 
 func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {

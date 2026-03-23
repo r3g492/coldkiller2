@@ -42,3 +42,7 @@ func (m *Manager) SetDifficulty(
 func (m *Manager) ResetScore() {
 	m.StageWon = 0
 }
+
+func (m *Manager) ScoreUp() {
+	m.StageWon++
+}
