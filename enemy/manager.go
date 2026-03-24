@@ -48,7 +48,6 @@ func (em *Manager) Init(p *killer.Killer) {
 	em.EnemyLimit = 100
 	em.CellSize = CellSize
 	em.Grid = make(map[int][]int)
-	em.Generate(p)
 }
 
 func (em *Manager) Mutate(
@@ -74,10 +73,6 @@ func (em *Manager) Mutate(
 			em.AliveEnemyCount++
 		}
 	}
-
-	/*if time.Since(em.LastGenerated) > em.EnemyGenerateUnit {
-		em.Generate(p)
-	}*/
 
 	if time.Since(em.LastLevelUp) > em.EnemyGenerationLevelUpUnit {
 		em.UpTheTempo()
@@ -132,20 +127,12 @@ func (em *Manager) GetBoundingBoxes() []rl.BoundingBox {
 	return boxes
 }
 
-func (em *Manager) Generate(p *killer.Killer) {
-	for i := 0; i <= em.EnemyGenerationLevel; i++ {
-		em.addEnemy(p)
-		em.addEnemy(p)
-	}
-	em.LastGenerated = time.Now()
-}
-
-func (em *Manager) addEnemy(p *killer.Killer) {
+func (em *Manager) AddEnemy(pPos rl.Vector3) {
 	if em.EnemyLimit < len(em.Enemies) {
 		return
 	}
 
-	candidatePosition := getRandomPosition(p)
+	candidatePosition := getRandomPosition(pPos)
 	candidate := Enemy{
 		Model:                 em.SharedModel,
 		ModelAngleDeg:         0,
@@ -166,32 +153,21 @@ func (em *Manager) addEnemy(p *killer.Killer) {
 		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
 		AiType:                Elite,
 	}
-
-	trialLimit := 3
-	trial := 0
-	for trial < trialLimit && candidate.isCollidingWithGrid(-1, em, p.GetBoundingBox()) {
-		candidatePosition = getRandomPosition(p)
-		candidate.Position = candidatePosition
-		trial++
-	}
-	if trial >= trialLimit {
-		return
-	}
 	em.Enemies = append(em.Enemies, candidate)
 	newEnemyIndex := len(em.Enemies) - 1
 	gridID := em.getGridID(candidate.Position)
 	em.Grid[gridID] = append(em.Grid[gridID], newEnemyIndex)
 }
 
-func getRandomPosition(p *killer.Killer) rl.Vector3 {
+func getRandomPosition(pPos rl.Vector3) rl.Vector3 {
 	angle := rand.Float64() * 2 * math.Pi
 	distance := float32(28.0)
 	offsetX := float32(math.Cos(angle)) * distance
 	offsetZ := float32(math.Sin(angle)) * distance
 	return rl.Vector3{
-		X: p.Position.X + offsetX,
+		X: pPos.X + offsetX,
 		Y: 0,
-		Z: p.Position.Z + offsetZ,
+		Z: pPos.Z + offsetZ,
 	}
 }
 

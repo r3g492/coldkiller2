@@ -3,6 +3,8 @@ package stage
 import (
 	"coldkiller2/enemy"
 	"coldkiller2/structure"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type Manager struct {
@@ -31,6 +33,10 @@ func (m *Manager) Init(
 	m.StageWon = 0
 	m.structureManager = structureManager
 	m.enemyManager = enemyManager
+}
+
+func (m *Manager) CreateNewStage(pPos rl.Vector3) {
+	m.enemyManager.AddEnemy(pPos)
 }
 
 func (m *Manager) SetDifficulty(

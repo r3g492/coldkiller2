@@ -18,6 +18,9 @@ func CreateManager() *Manager {
 	return &Manager{}
 }
 
+func (bm *Manager) Init() {
+}
+
 func (bm *Manager) KillerBulletCreate(
 	bulletCmds []killer.BulletCmd,
 ) {
