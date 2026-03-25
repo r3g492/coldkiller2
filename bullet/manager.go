@@ -72,12 +72,12 @@ func (bm *Manager) Mutate(
 		curBullet := bm.Bullets[i]
 
 		if bm.Bullets[i].LifeTime >= 1.99 && bm.Bullets[i].Active {
-			blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+			blasts = append(blasts, blast.Create(bm.Bullets[i].Position, bm.Bullets[i].Shooter == Player))
 		}
 
 		if structureManager.CheckCollision(curBullet.Position, curBullet.PrevPosition, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
 			if bm.Bullets[i].Active {
-				blasts = append(blasts, blast.CreateBig(bm.Bullets[i].Position))
+				blasts = append(blasts, blast.CreateBig(bm.Bullets[i].Position, bm.Bullets[i].Shooter == Player))
 				bm.Bullets[i].Active = false
 			}
 		}
@@ -90,7 +90,7 @@ func (bm *Manager) Mutate(
 				if checkSegmentSphereCollision(curBullet.PrevPosition, curBullet.Position, enemyPos, hitRadius) {
 					if bm.Bullets[i].Active {
 						el[j].Damage(bm.Bullets[i].Damage)
-						blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+						blasts = append(blasts, blast.Create(bm.Bullets[i].Position, bm.Bullets[i].Shooter == Player))
 						bm.Bullets[i].Active = false
 						bm.PlayerXp++
 					}
@@ -102,7 +102,7 @@ func (bm *Manager) Mutate(
 				if checkSegmentSphereCollision(curBullet.PrevPosition, curBullet.Position, p.Position, hitRadius) {
 					if bm.Bullets[i].Active {
 						p.Damage(bm.Bullets[i].Damage)
-						blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+						blasts = append(blasts, blast.Create(bm.Bullets[i].Position, bm.Bullets[i].Shooter == Player))
 						bm.Bullets[i].Active = false
 					}
 				}

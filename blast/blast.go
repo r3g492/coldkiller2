@@ -8,17 +8,17 @@ var COLOR = rl.Yellow
 var LIFETIME float32 = 0.06
 
 type Blast struct {
-	Position    rl.Vector3
-	Radius      float32
-	MaxLifeTime float32
-	LifeTime    float32
-	Color       rl.Color
-
+	Position           rl.Vector3
+	Radius             float32
+	MaxLifeTime        float32
+	LifeTime           float32
+	Color              rl.Color
+	AlwaysShow         bool
 	IsHiddenFromKiller bool
 }
 
 func (b *Blast) Draw3D() {
-	if b.IsHiddenFromKiller {
+	if !b.AlwaysShow && b.IsHiddenFromKiller {
 		return
 	}
 
@@ -33,25 +33,27 @@ func (b *Blast) Mutate(dt float32) {
 		lifeRatio = 0
 	}
 
-	b.Radius = Radius * lifeRatio
+	b.Radius = b.Radius * lifeRatio
 }
 
-func Create(position rl.Vector3) Blast {
+func Create(position rl.Vector3, isByPlayer bool) Blast {
 	return Blast{
 		Position:    position,
 		Radius:      Radius,
 		MaxLifeTime: LIFETIME,
 		LifeTime:    LIFETIME,
 		Color:       COLOR,
+		AlwaysShow:  isByPlayer,
 	}
 }
 
-func CreateBig(position rl.Vector3) Blast {
+func CreateBig(position rl.Vector3, isByPlayer bool) Blast {
 	return Blast{
 		Position:    position,
 		Radius:      BigRadius,
 		MaxLifeTime: LIFETIME,
 		LifeTime:    LIFETIME,
 		Color:       COLOR,
+		AlwaysShow:  isByPlayer,
 	}
 }
