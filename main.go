@@ -59,16 +59,6 @@ func main() {
 		enemyManager,
 		stageManager,
 	)
-
-	initNewGame(
-		bulletManager,
-		blastManager,
-		structureManager,
-		player,
-		enemyManager,
-		stageManager,
-	)
-
 	rl.DisableCursor()
 
 	btnWidth, btnHeight := float32(400), float32(80)
@@ -78,49 +68,13 @@ func main() {
 		Width:  btnWidth,
 		Height: btnHeight,
 	}
-	difficulty := 0
+	startingDiffLowerBound := 0
+	startingDiffUpperBound := 10
 	sqSize := float32(50)
 	spacing := float32(20)
 	diffY := float32(h)/2 - 80
 
-	for !rl.WindowShouldClose() {
-		if rl.IsCursorHidden() {
-			rl.EnableCursor()
-		}
-		ip := input.ReadInput(keyMap)
-		rl.BeginDrawing()
-		rl.ClearBackground(rl.Black)
-
-		diffText := fmt.Sprintf("Difficulty: %d", difficulty)
-		fontSize := int32(40)
-		textWidth := rl.MeasureText(diffText, fontSize)
-		textX := float32(w)/2 - float32(textWidth)/2
-
-		rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSize, rl.RayWhite)
-
-		minusRect := rl.Rectangle{X: textX - sqSize - spacing, Y: diffY, Width: sqSize, Height: sqSize}
-		plusRect := rl.Rectangle{X: textX + float32(textWidth) + spacing, Y: diffY, Width: sqSize, Height: sqSize}
-
-		if drawButton(minusRect, "-", rl.DarkGray, rl.Gray, rl.White) && difficulty > 0 {
-			difficulty--
-		}
-		if drawButton(plusRect, "+", rl.DarkGray, rl.Gray, rl.White) {
-			difficulty++
-		}
-
-		buttonText := "Start Game"
-		if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) {
-			stageManager.SetDifficulty(difficulty)
-			stageManager.ResetScore()
-			break
-		}
-		drawInputOverlay(w, h, ip, keyMap)
-		rl.EndDrawing()
-		continue
-	}
-
-	showLostMenu := false
-	lost := false
+	showInitMenu := true
 	intermission := false
 	var intermissionTimer float32 = 0.0
 
@@ -130,7 +84,14 @@ func main() {
 		log(mouseLocation, dt, player)
 		ip := input.ReadInput(keyMap)
 
-		if showLostMenu {
+		if showInitMenu {
+			if stageManager.Difficulty < startingDiffLowerBound {
+				stageManager.Difficulty = startingDiffLowerBound
+			}
+			if stageManager.Difficulty > startingDiffUpperBound {
+				stageManager.Difficulty = startingDiffUpperBound
+			}
+
 			if rl.IsCursorHidden() {
 				rl.EnableCursor()
 			}
@@ -138,47 +99,32 @@ func main() {
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.Black)
 
-			diffText := fmt.Sprintf("Difficulty: %d", difficulty)
+			diffText := fmt.Sprintf("Starting Difficulty: %d", stageManager.Difficulty)
 			fontSizeDiff := int32(40)
 			textWidthDiff := rl.MeasureText(diffText, fontSizeDiff)
 			textX := float32(w)/2 - float32(textWidthDiff)/2
-
 			rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, rl.RayWhite)
 
 			minusRect := rl.Rectangle{X: textX - sqSize - spacing, Y: diffY, Width: sqSize, Height: sqSize}
 			plusRect := rl.Rectangle{X: textX + float32(textWidthDiff) + spacing, Y: diffY, Width: sqSize, Height: sqSize}
-
-			if drawButton(minusRect, "-", rl.DarkGray, rl.Gray, rl.White) && difficulty > 0 {
-				difficulty--
+			if drawButton(minusRect, "-", rl.DarkGray, rl.Gray, rl.White) && stageManager.Difficulty > startingDiffLowerBound {
+				stageManager.Difficulty = stageManager.Difficulty - 1
 			}
-			if drawButton(plusRect, "+", rl.DarkGray, rl.Gray, rl.White) {
-				difficulty++
+			if drawButton(plusRect, "+", rl.DarkGray, rl.Gray, rl.White) && stageManager.Difficulty < startingDiffUpperBound {
+				stageManager.Difficulty = stageManager.Difficulty + 1
 			}
 
-			buttonText := "Restart Game"
-			xpText := fmt.Sprintf("Score: %d", stageManager.StageWon)
-
-			fontSizeScore := int32(60)
-			textWidthScore := rl.MeasureText(xpText, fontSizeScore)
-			rl.DrawText(xpText, int32(w)/2-textWidthScore/2, int32(h)/2-180, fontSizeScore, rl.Red)
-
+			buttonText := "Start Game"
 			if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) || ip.ResetGamePressed {
-				showLostMenu = false
-
-				stageManager.SetDifficulty(difficulty)
-				stageManager.ResetScore()
-
-				if lost {
-					initNewGame(
-						bulletManager,
-						blastManager,
-						structureManager,
-						player,
-						enemyManager,
-						stageManager,
-					)
-					lost = false
-				}
+				showInitMenu = false
+				initNewGame(
+					bulletManager,
+					blastManager,
+					structureManager,
+					player,
+					enemyManager,
+					stageManager,
+				)
 			}
 
 			rl.EndDrawing()
@@ -188,21 +134,11 @@ func main() {
 		if gameLost(player) {
 			rl.StopSound(sound.Track)
 			rl.PlaySound(sound.YouLose)
-			showLostMenu = true
-			lost = true
+			showInitMenu = true
 			lastScore = bulletManager.PlayerXp
-			initNewGame(
-				bulletManager,
-				blastManager,
-				structureManager,
-				player,
-				enemyManager,
-				stageManager,
-			)
-			difficulty = stageManager.Difficulty
 		}
 
-		if !rl.IsSoundPlaying(sound.Track) && !showLostMenu {
+		if !rl.IsSoundPlaying(sound.Track) && !showInitMenu {
 			rl.PlaySound(sound.Track)
 		}
 
@@ -211,7 +147,7 @@ func main() {
 		}
 
 		if ip.EndGamePressed {
-			showLostMenu = true
+			showInitMenu = true
 		}
 
 		if ip.ResetGamePressed {
@@ -230,11 +166,6 @@ func main() {
 
 			rl.BeginDrawing()
 			rl.ClearBackground(rl.DarkGray)
-
-			stageText := fmt.Sprintf("Score: %d", stageManager.StageWon)
-			stageSize := int32(40)
-			stageWidth := rl.MeasureText(stageText, stageSize)
-			rl.DrawText(stageText, int32(w)/2-stageWidth/2, int32(h)/2-80, stageSize, rl.RayWhite)
 
 			diffInfoText := fmt.Sprintf("Current Difficulty: %d", stageManager.Difficulty)
 			diffInfoSize := int32(30)
@@ -275,15 +206,6 @@ func main() {
 		if gameWon(enemyManager) {
 			intermission = true
 			rl.PlaySound(sound.ThreeTwoOne)
-			initNewGame(
-				bulletManager,
-				blastManager,
-				structureManager,
-				player,
-				enemyManager,
-				stageManager,
-			)
-			stageManager.ScoreUp()
 		}
 
 		// player
@@ -363,6 +285,7 @@ func initNewGame(
 		structureManager,
 		enemyManager,
 	)
+	enemyManager.Init(player)
 	stageManager.CreateNewStage(player.Position)
 }
 

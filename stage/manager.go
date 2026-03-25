@@ -9,7 +9,6 @@ import (
 
 type Manager struct {
 	Difficulty       int
-	StageWon         int
 	structureManager *structure.Manager
 	enemyManager     *enemy.Manager
 }
@@ -29,26 +28,10 @@ func (m *Manager) Init(
 	structureManager *structure.Manager,
 	enemyManager *enemy.Manager,
 ) {
-	m.Difficulty = 0
-	m.StageWon = 0
 	m.structureManager = structureManager
 	m.enemyManager = enemyManager
 }
 
 func (m *Manager) CreateNewStage(pPos rl.Vector3) {
 	m.enemyManager.AddEnemy(pPos)
-}
-
-func (m *Manager) SetDifficulty(
-	difficulty int,
-) {
-	m.Difficulty = difficulty
-}
-
-func (m *Manager) ResetScore() {
-	m.StageWon = 0
-}
-
-func (m *Manager) ScoreUp() {
-	m.StageWon++
 }
