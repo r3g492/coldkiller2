@@ -76,6 +76,7 @@ func Create() *Killer {
 func (k *Killer) Init() {
 	k.Position = rl.Vector3{X: 0, Y: 0, Z: 0}
 	k.Health = 100
+	k.Ammo = k.AmmoCapacity
 	k.MoveDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
 	k.TargetDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
 	k.ModelAngleDeg = 0
