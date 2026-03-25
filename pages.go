@@ -76,11 +76,12 @@ func doInitMenu(
 	structureManager *structure.Manager,
 	player *killer.Killer,
 	enemyManager *enemy.Manager,
-	startingDiffLowerBound int,
-	startingDiffUpperBound int,
 	w int,
 	h int,
 ) {
+	startingDiffLowerBound := 0
+	startingDiffUpperBound := 10
+
 	btnRect := rl.Rectangle{
 		X:      float32(w)/2 - btnWidth/2,
 		Y:      float32(h)/2 + 60,

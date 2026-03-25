@@ -40,7 +40,7 @@ func main() {
 
 	bulletManager := bullet.CreateManager()
 	blastManager := blast.CreateManager()
-	structureManager := structure.CreateManager(structure.RADIUS)
+	structureManager := structure.CreateManager()
 	enemyManager := enemy.CreateManager()
 	stageManager := stage.CreateManager()
 	player := killer.Create()
@@ -53,14 +53,11 @@ func main() {
 		stageManager,
 	)
 
-	startingDiffLowerBound := 0
-	startingDiffUpperBound := 10
-
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
 		mouseLocation := rl.GetMousePosition()
-		log(mouseLocation, dt, player)
 		ip := input.ReadInput(keyMap)
+		log(mouseLocation, dt, player)
 
 		if ip.EndGamePressed {
 			if showInitMenu {
@@ -78,15 +75,13 @@ func main() {
 				structureManager,
 				player,
 				enemyManager,
-				startingDiffLowerBound,
-				startingDiffUpperBound,
 				w,
 				h,
 			)
 			continue
 		}
 
-		if stageLost(player) {
+		if stageManager.StageLost() {
 			rl.StopSound(sound.Track)
 			rl.PlaySound(sound.YouLose)
 			showInitMenu = true
@@ -119,7 +114,11 @@ func main() {
 		var ebc = enemyManager.Mutate(dt, player, structureManager)
 		enemyManager.ProcessAnimation(dt, player)
 
-		if stageWon(enemyManager) {
+		if stageManager.GameWon() {
+			// TODO:
+		}
+
+		if stageManager.StageWon() {
 			intermission = true
 			rl.PlaySound(sound.ThreeTwoOne)
 		}

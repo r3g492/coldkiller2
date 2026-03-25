@@ -2,6 +2,7 @@ package stage
 
 import (
 	"coldkiller2/enemy"
+	"coldkiller2/killer"
 	"coldkiller2/structure"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -9,8 +10,9 @@ import (
 
 type Manager struct {
 	Difficulty       int
-	structureManager *structure.Manager
-	enemyManager     *enemy.Manager
+	StructureManager *structure.Manager
+	EnemyManager     *enemy.Manager
+	Player           *killer.Killer
 }
 
 func CreateManager() *Manager {
@@ -27,14 +29,16 @@ func (m *Manager) Unload() {
 func (m *Manager) Init(
 	structureManager *structure.Manager,
 	enemyManager *enemy.Manager,
+	player *killer.Killer,
 ) {
-	m.structureManager = structureManager
-	m.enemyManager = enemyManager
+	m.StructureManager = structureManager
+	m.EnemyManager = enemyManager
+	m.Player = player
 }
 
 func (m *Manager) CreateNewStage(pPos rl.Vector3) {
-	// Difficulty에 따라 enemy와 structure 변주 추가
-	m.enemyManager.AddEnemy(pPos)
+	// TODO: Difficulty에 따라 enemy와 structure 변주 추가
+	m.EnemyManager.AddEnemy(pPos)
 	initialStructures := []structure.Structure{
 		{
 			Position:  rl.Vector3{X: 5, Y: 0, Z: 5},
@@ -69,6 +73,18 @@ func (m *Manager) CreateNewStage(pPos rl.Vector3) {
 	}
 
 	for i := range initialStructures {
-		m.structureManager.Add(&initialStructures[i])
+		m.StructureManager.Add(&initialStructures[i])
 	}
+}
+
+func (m *Manager) StageWon() bool {
+	return m.EnemyManager.AliveEnemyCount == 0
+}
+
+func (m *Manager) GameWon() bool {
+	return m.EnemyManager.AliveEnemyCount == 0 && m.Difficulty >= 100
+}
+
+func (m *Manager) StageLost() bool {
+	return !m.Player.IsAlive() && m.Player.ActionTimeLeft <= 0
 }

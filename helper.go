@@ -36,14 +36,6 @@ func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 	}
 }
 
-func stageLost(player *killer.Killer) bool {
-	return !player.IsAlive() && player.ActionTimeLeft <= 0
-}
-
-func stageWon(enemyManager *enemy.Manager) bool {
-	return enemyManager.AliveEnemyCount == 0
-}
-
 func unloadGame(
 	bulletManager *bullet.Manager,
 	blastManager *blast.Manager,
@@ -76,5 +68,6 @@ func initNewGame(
 	stageManager.Init(
 		structureManager,
 		enemyManager,
+		player,
 	)
 }

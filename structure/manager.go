@@ -17,9 +17,9 @@ type Manager struct {
 	Grid     map[GridCoord][]*Structure
 }
 
-func CreateManager(cellSize float32) *Manager {
+func CreateManager() *Manager {
 	return &Manager{
-		CellSize: cellSize,
+		CellSize: RADIUS,
 		Grid:     make(map[GridCoord][]*Structure),
 	}
 }
