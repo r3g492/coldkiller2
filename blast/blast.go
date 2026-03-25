@@ -2,7 +2,8 @@ package blast
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
-var RADIUS float32 = 0.25
+var Radius float32 = 0.25
+var BigRadius float32 = 0.75
 var COLOR = rl.Yellow
 var LIFETIME float32 = 0.06
 
@@ -32,13 +33,23 @@ func (b *Blast) Mutate(dt float32) {
 		lifeRatio = 0
 	}
 
-	b.Radius = RADIUS * lifeRatio
+	b.Radius = Radius * lifeRatio
 }
 
 func Create(position rl.Vector3) Blast {
 	return Blast{
 		Position:    position,
-		Radius:      RADIUS,
+		Radius:      Radius,
+		MaxLifeTime: LIFETIME,
+		LifeTime:    LIFETIME,
+		Color:       COLOR,
+	}
+}
+
+func CreateBig(position rl.Vector3) Blast {
+	return Blast{
+		Position:    position,
+		Radius:      BigRadius,
 		MaxLifeTime: LIFETIME,
 		LifeTime:    LIFETIME,
 		Color:       COLOR,

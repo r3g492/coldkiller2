@@ -69,20 +69,21 @@ func (bm *Manager) Mutate(
 	var blasts []blast.Blast
 	for i := 0; i < len(bm.Bullets); i++ {
 		bm.Bullets[i].Mutate(dt)
+		curBullet := bm.Bullets[i]
+
+		if bm.Bullets[i].LifeTime >= 1.99 && bm.Bullets[i].Active {
+			blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
+		}
+
+		if structureManager.CheckCollision(curBullet.Position, curBullet.PrevPosition, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
+			if bm.Bullets[i].Active {
+				blasts = append(blasts, blast.CreateBig(bm.Bullets[i].Position))
+				bm.Bullets[i].Active = false
+			}
+		}
+
 		for j := 0; j < len(el); j++ {
 			enemyPos := el[j].Position
-			curBullet := bm.Bullets[i]
-
-			if bm.Bullets[i].LifeTime >= 1.99 && bm.Bullets[i].Active {
-				blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
-			}
-
-			if structureManager.CheckCollision(curBullet.Position, curBullet.PrevPosition, rl.Vector3{X: curBullet.Radius, Y: curBullet.Radius, Z: curBullet.Radius}) {
-				if bm.Bullets[i].Active {
-					blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
-					bm.Bullets[i].Active = false
-				}
-			}
 
 			if curBullet.Shooter == Player && el[j].IsAlive() {
 				hitRadius := el[j].Size + curBullet.Radius
@@ -90,7 +91,6 @@ func (bm *Manager) Mutate(
 					if bm.Bullets[i].Active {
 						el[j].Damage(bm.Bullets[i].Damage)
 						blasts = append(blasts, blast.Create(bm.Bullets[i].Position))
-						// sound.PlaySound3D(sound.ShotNew, bm.Bullets[i].Position, p.Position, 1)
 						bm.Bullets[i].Active = false
 						bm.PlayerXp++
 					}

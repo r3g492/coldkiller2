@@ -32,12 +32,11 @@ func (s *Structure) Draw3D() {
 }
 
 func (s *Structure) CheckCollision(curPos rl.Vector3, prevPos rl.Vector3, otherSize rl.Vector3) bool {
-	// 1. Calculate the local orientation of the structure
+
 	angleRad := math.Atan2(float64(s.Direction.X), float64(s.Direction.Z))
 	cosA := math.Cos(-angleRad)
 	sinA := math.Sin(-angleRad)
 
-	// Helper function to transform a global position into the structure's local space
 	toLocal := func(pos rl.Vector3) (float64, float64, float64) {
 		relX := float64(pos.X - s.Position.X)
 		relY := float64(pos.Y - s.Position.Y)
@@ -49,23 +48,18 @@ func (s *Structure) CheckCollision(curPos rl.Vector3, prevPos rl.Vector3, otherS
 		return localX, localY, localZ
 	}
 
-	// 2. Transform both previous and current positions
 	prevX, prevY, prevZ := toLocal(prevPos)
 	curX, curY, curZ := toLocal(curPos)
 
-	// 3. Define the bounding limits (Minkowski sum of both half-sizes)
 	limitX := float64((s.Size.X + otherSize.X) / 2)
 	limitY := float64((s.Size.Y + otherSize.Y) / 2)
 	limitZ := float64((s.Size.Z + otherSize.Z) / 2)
 
-	// 4. Perform Line-Segment vs AABB intersection (Slab Method)
-	// tMin and tMax represent the segment from prevPos (t=0.0) to curPos (t=1.0)
 	tMin := 0.0
 	tMax := 1.0
 
-	// X-Axis check
 	dx := curX - prevX
-	if math.Abs(dx) < 1e-8 { // Parallel to the plane
+	if math.Abs(dx) < 1e-8 {
 		if prevX < -limitX || prevX > limitX {
 			return false
 		}
@@ -73,7 +67,7 @@ func (s *Structure) CheckCollision(curPos rl.Vector3, prevPos rl.Vector3, otherS
 		t1 := (-limitX - prevX) / dx
 		t2 := (limitX - prevX) / dx
 		if t1 > t2 {
-			t1, t2 = t2, t1 // Swap so t1 is always the smaller intersection
+			t1, t2 = t2, t1
 		}
 		if t1 > tMin {
 			tMin = t1
@@ -83,10 +77,9 @@ func (s *Structure) CheckCollision(curPos rl.Vector3, prevPos rl.Vector3, otherS
 		}
 		if tMin > tMax {
 			return false
-		} // Ray misses the box
+		}
 	}
 
-	// Y-Axis check
 	dy := curY - prevY
 	if math.Abs(dy) < 1e-8 {
 		if prevY < -limitY || prevY > limitY {
@@ -109,7 +102,6 @@ func (s *Structure) CheckCollision(curPos rl.Vector3, prevPos rl.Vector3, otherS
 		}
 	}
 
-	// Z-Axis check
 	dz := curZ - prevZ
 	if math.Abs(dz) < 1e-8 {
 		if prevZ < -limitZ || prevZ > limitZ {
@@ -132,7 +124,6 @@ func (s *Structure) CheckCollision(curPos rl.Vector3, prevPos rl.Vector3, otherS
 		}
 	}
 
-	// If we make it here, the segment [0, 1] overlaps the bounding box limits
 	return true
 }
 
