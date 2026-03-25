@@ -282,8 +282,8 @@ func main() {
 		player.Draw3D()
 		enemyManager.Draw3D(player)
 		bulletManager.Draw3D()
-		blastManager.Draw3D()
 		structureManager.Draw3D(player.Position)
+		blastManager.Draw3D()
 		rl.EndMode3D()
 
 		player.DrawUi()
