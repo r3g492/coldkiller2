@@ -16,7 +16,7 @@ func UpdateSight(
 	blastManager *blast.Manager,
 	bulletManager *bullet.Manager,
 	enemyManager *enemy.Manager,
-	structureManager *structure.SpatialManager,
+	structureManager *structure.Manager,
 	player *killer.Killer,
 ) {
 	for i := 0; i < len(blastManager.Blasts); i++ {
@@ -75,7 +75,7 @@ func isWithinDistance3D(p1, p2 rl.Vector3, maxDist float32) bool {
 	return (dx*dx + dy*dy + dz*dz) <= (maxDist * maxDist)
 }
 
-func hasLineOfSight3D(start, end rl.Vector3, sm *structure.SpatialManager) bool {
+func hasLineOfSight3D(start, end rl.Vector3, sm *structure.Manager) bool {
 	direction := rl.Vector3Subtract(end, start)
 
 	distanceToTarget := rl.Vector3Length(direction)
@@ -103,7 +103,7 @@ func hasLineOfSight3D(start, end rl.Vector3, sm *structure.SpatialManager) bool 
 	return true
 }
 
-func DrawSolidShadows(playerPos rl.Vector3, sm *structure.SpatialManager) {
+func DrawSolidShadows(playerPos rl.Vector3, sm *structure.Manager) {
 	eyePos := playerPos
 	eyePos.Y = 0.0
 

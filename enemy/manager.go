@@ -53,7 +53,7 @@ func (em *Manager) Init(p *killer.Killer) {
 func (em *Manager) Mutate(
 	dt float32,
 	p *killer.Killer,
-	structureManager *structure.SpatialManager,
+	structureManager *structure.Manager,
 ) []BulletCmd {
 	em.AliveEnemyCount = 0
 	em.updateGrid()

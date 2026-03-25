@@ -44,7 +44,7 @@ type Killer struct {
 const ModelRatio = 0.2
 const CharSize = 0.72
 
-func Init() *Killer {
+func Create() *Killer {
 	playerModel := rl.LoadModel("resources/unit_v4.glb")
 	playerAnimation := rl.LoadModelAnimations("resources/unit_v4.glb")
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
@@ -65,13 +65,20 @@ func Init() *Killer {
 			Projection: rl.CameraOrthographic,
 		},
 		ActionTimeLeft:        0,
-		Health:                100,
 		AmmoCapacity:          15,
 		Ammo:                  15,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSoundTimeLeft: 0.4,
 		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
 	}
+}
+
+func (k *Killer) Init() {
+	k.Position = rl.Vector3{X: 0, Y: 0, Z: 0}
+	k.Health = 100
+	k.MoveDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
+	k.TargetDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
+	k.ModelAngleDeg = 0
 }
 
 func (k *Killer) Unload() {
@@ -146,7 +153,7 @@ func (k *Killer) Mutate(
 	input input.Input,
 	dt float32,
 	obstacles []rl.BoundingBox,
-	structureManager *structure.SpatialManager,
+	structureManager *structure.Manager,
 ) []BulletCmd {
 	var bulletCmds []BulletCmd
 
@@ -223,7 +230,7 @@ func (k *Killer) movement(
 	input input.Input,
 	dt float32,
 	obstacles []rl.BoundingBox,
-	structureManager *structure.SpatialManager,
+	structureManager *structure.Manager,
 ) bool {
 	k.PrevPosition = k.Position
 	k.MoveDirection = rl.Vector3{}

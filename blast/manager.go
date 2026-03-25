@@ -8,6 +8,9 @@ func CreateManager() *Manager {
 	return &Manager{}
 }
 
+func (bm *Manager) Init() {
+}
+
 func (bm *Manager) AddBlasts(addingBlasts []Blast) {
 	bm.Blasts = append(bm.Blasts, addingBlasts...)
 }

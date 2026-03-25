@@ -20,7 +20,7 @@ func deriveAi(
 	em *Manager,
 	myIdx int,
 	p *killer.Killer,
-	structureManager *structure.SpatialManager,
+	structureManager *structure.Manager,
 ) (bool, rl.Vector3) {
 	if !e.IsAlive() {
 		return false, rl.Vector3{}

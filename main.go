@@ -44,30 +44,30 @@ func main() {
 
 	rl.SetTargetFPS(144)
 	keyMap := input.DefaultWASD()
+
 	bulletManager := bullet.CreateManager()
-	defer bulletManager.Unload()
-
 	blastManager := blast.CreateManager()
-	defer blastManager.Unload()
-
-	structureManager := structure.CreateSpatialManager(structure.RADIUS)
-	defer structureManager.Unload()
-	structureManager.Init()
-
-	player := killer.Init()
-	defer player.Unload()
-
+	structureManager := structure.CreateManager(structure.RADIUS)
 	enemyManager := enemy.CreateManager()
-	defer enemyManager.Unload()
-	enemyManager.Init(player)
-
 	stageManager := stage.CreateManager()
-	defer stageManager.Unload()
-	stageManager.Init(
+	player := killer.Create()
+	defer unloadGame(
+		bulletManager,
+		blastManager,
 		structureManager,
+		player,
 		enemyManager,
+		stageManager,
 	)
-	stageManager.CreateNewStage(player.Position)
+
+	initNewGame(
+		bulletManager,
+		blastManager,
+		structureManager,
+		player,
+		enemyManager,
+		stageManager,
+	)
 
 	rl.DisableCursor()
 
@@ -169,7 +169,14 @@ func main() {
 				stageManager.ResetScore()
 
 				if lost {
-					player = resetGame(enemyManager, player, bulletManager, stageManager)
+					initNewGame(
+						bulletManager,
+						blastManager,
+						structureManager,
+						player,
+						enemyManager,
+						stageManager,
+					)
 					lost = false
 				}
 			}
@@ -184,7 +191,14 @@ func main() {
 			showLostMenu = true
 			lost = true
 			lastScore = bulletManager.PlayerXp
-			player = resetGame(enemyManager, player, bulletManager, stageManager)
+			initNewGame(
+				bulletManager,
+				blastManager,
+				structureManager,
+				player,
+				enemyManager,
+				stageManager,
+			)
 			difficulty = stageManager.Difficulty
 		}
 
@@ -201,7 +215,14 @@ func main() {
 		}
 
 		if ip.ResetGamePressed {
-			player = resetGame(enemyManager, player, bulletManager, stageManager)
+			initNewGame(
+				bulletManager,
+				blastManager,
+				structureManager,
+				player,
+				enemyManager,
+				stageManager,
+			)
 		}
 
 		if intermission {
@@ -233,7 +254,14 @@ func main() {
 				intermission = false
 				intermissionTimer = 0
 				stageManager.GenerateNewStage()
-				player = resetGame(enemyManager, player, bulletManager, stageManager)
+				initNewGame(
+					bulletManager,
+					blastManager,
+					structureManager,
+					player,
+					enemyManager,
+					stageManager,
+				)
 			}
 
 			rl.EndDrawing()
@@ -247,7 +275,14 @@ func main() {
 		if gameWon(enemyManager) {
 			intermission = true
 			rl.PlaySound(sound.ThreeTwoOne)
-			player = resetGame(enemyManager, player, bulletManager, stageManager)
+			initNewGame(
+				bulletManager,
+				blastManager,
+				structureManager,
+				player,
+				enemyManager,
+				stageManager,
+			)
 			stageManager.ScoreUp()
 		}
 
@@ -295,24 +330,40 @@ func main() {
 	}
 }
 
-func resetGame(
-	em *enemy.Manager,
-	p *killer.Killer,
-	bm *bullet.Manager,
-	sm *stage.Manager,
-) *killer.Killer {
+func unloadGame(
+	bulletManager *bullet.Manager,
+	blastManager *blast.Manager,
+	structureManager *structure.Manager,
+	player *killer.Killer,
+	enemyManager *enemy.Manager,
+	stageManager *stage.Manager,
+) {
+	bulletManager.Unload()
+	blastManager.Unload()
+	structureManager.Unload()
+	player.Unload()
+	enemyManager.Unload()
+	stageManager.Unload()
+}
 
-	p.Unload()
-	p = killer.Init()
-
-	em.Unload()
-	em.Init(p)
-
-	bm.Unload()
-	bm.Init()
-
-	sm.CreateNewStage(p.Position)
-	return p
+func initNewGame(
+	bulletManager *bullet.Manager,
+	blastManager *blast.Manager,
+	structureManager *structure.Manager,
+	player *killer.Killer,
+	enemyManager *enemy.Manager,
+	stageManager *stage.Manager,
+) {
+	bulletManager.Init()
+	blastManager.Init()
+	structureManager.Init()
+	player.Init()
+	enemyManager.Init(player)
+	stageManager.Init(
+		structureManager,
+		enemyManager,
+	)
+	stageManager.CreateNewStage(player.Position)
 }
 
 func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {

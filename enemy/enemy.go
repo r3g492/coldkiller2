@@ -99,7 +99,7 @@ func (e *Enemy) Mutate(
 	p killer.Killer,
 	em *Manager,
 	myIdx int,
-	structureManager *structure.SpatialManager,
+	structureManager *structure.Manager,
 ) []BulletCmd {
 	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
 	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)

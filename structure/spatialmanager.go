@@ -12,19 +12,19 @@ type GridCoord struct {
 	X, Y, Z int
 }
 
-type SpatialManager struct {
+type Manager struct {
 	CellSize float32
 	Grid     map[GridCoord][]*Structure
 }
 
-func CreateSpatialManager(cellSize float32) *SpatialManager {
-	return &SpatialManager{
+func CreateManager(cellSize float32) *Manager {
+	return &Manager{
 		CellSize: cellSize,
 		Grid:     make(map[GridCoord][]*Structure),
 	}
 }
 
-func (sm *SpatialManager) GetCoord(pos rl.Vector3) GridCoord {
+func (sm *Manager) GetCoord(pos rl.Vector3) GridCoord {
 	return GridCoord{
 		X: int(math.Floor(float64(pos.X / sm.CellSize))),
 		Y: int(math.Floor(float64(pos.Y / sm.CellSize))),
@@ -32,12 +32,12 @@ func (sm *SpatialManager) GetCoord(pos rl.Vector3) GridCoord {
 	}
 }
 
-func (sm *SpatialManager) Add(s *Structure) {
+func (sm *Manager) Add(s *Structure) {
 	coord := sm.GetCoord(s.Position)
 	sm.Grid[coord] = append(sm.Grid[coord], s)
 }
 
-func (sm *SpatialManager) GetStructuresNearPosition(pos rl.Vector3, searchRadius float32) []*Structure {
+func (sm *Manager) GetStructuresNearPosition(pos rl.Vector3, searchRadius float32) []*Structure {
 	var nearby []*Structure
 	centerCoord := sm.GetCoord(pos)
 	for x := -1; x <= 1; x++ {
@@ -63,7 +63,7 @@ func (sm *SpatialManager) GetStructuresNearPosition(pos rl.Vector3, searchRadius
 	return nearby
 }
 
-func (sm *SpatialManager) CheckCollision(otherPos rl.Vector3, prevPos rl.Vector3, otherSize rl.Vector3) bool {
+func (sm *Manager) CheckCollision(otherPos rl.Vector3, prevPos rl.Vector3, otherSize rl.Vector3) bool {
 	for _, s := range sm.GetStructuresNearPosition(otherPos, RADIUS) {
 		if s.CheckCollision(otherPos, prevPos, otherSize) {
 			return true
@@ -72,11 +72,11 @@ func (sm *SpatialManager) CheckCollision(otherPos rl.Vector3, prevPos rl.Vector3
 	return false
 }
 
-func (sm *SpatialManager) Unload() {
+func (sm *Manager) Unload() {
 	clear(sm.Grid)
 }
 
-func (sm *SpatialManager) Init() {
+func (sm *Manager) Init() {
 	initialStructures := []Structure{
 		{
 			Position:  rl.Vector3{X: 5, Y: 0, Z: 5},
@@ -115,7 +115,7 @@ func (sm *SpatialManager) Init() {
 	}
 }
 
-func (sm *SpatialManager) Draw3D(playerPosition rl.Vector3) {
+func (sm *Manager) Draw3D(playerPosition rl.Vector3) {
 	for _, s := range sm.GetStructuresNearPosition(playerPosition, RADIUS) {
 		s.Draw3D()
 	}

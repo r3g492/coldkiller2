@@ -10,7 +10,7 @@ import (
 type Manager struct {
 	Difficulty       int
 	StageWon         int
-	structureManager *structure.SpatialManager
+	structureManager *structure.Manager
 	enemyManager     *enemy.Manager
 }
 
@@ -26,7 +26,7 @@ func (m *Manager) Unload() {
 }
 
 func (m *Manager) Init(
-	structureManager *structure.SpatialManager,
+	structureManager *structure.Manager,
 	enemyManager *enemy.Manager,
 ) {
 	m.Difficulty = 0
