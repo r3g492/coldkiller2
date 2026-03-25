@@ -33,5 +33,6 @@ func (m *Manager) Init(
 }
 
 func (m *Manager) CreateNewStage(pPos rl.Vector3) {
+	// Difficulty에 따라 enemy와 structure 변주 추가
 	m.enemyManager.AddEnemy(pPos)
 }
