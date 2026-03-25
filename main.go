@@ -10,40 +10,32 @@ import (
 	"coldkiller2/sound"
 	"coldkiller2/stage"
 	"coldkiller2/structure"
-	"fmt"
 	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 var lastLog = time.Now()
-var lastScore int
+var showInitMenu = true
+var intermission = false
+var intermissionTimer float32 = 0.0
 
 func main() {
+	// setting
 	rl.SetConfigFlags(rl.FlagWindowResizable | rl.FlagWindowUndecorated)
 	rl.InitWindow(0, 0, "coldkiller2")
+	defer rl.CloseWindow()
+
+	rl.SetTargetFPS(144)
 	rl.SetExitKey(0)
 
-	targetMonitor := 0
-	monitorCount := rl.GetMonitorCount()
-
-	if targetMonitor >= monitorCount {
-		targetMonitor = 0
-	}
-
-	w := rl.GetMonitorWidth(targetMonitor)
-	h := rl.GetMonitorHeight(targetMonitor)
-
-	monitorPos := rl.GetMonitorPosition(targetMonitor)
-	rl.SetWindowPosition(int(monitorPos.X), int(monitorPos.Y))
-
-	rl.SetWindowSize(w, h)
-	defer rl.CloseWindow()
+	// TODO: monitor change feature?
+	w, h := setMonitor()
+	rl.DisableCursor()
 
 	rl.InitAudioDevice()
 	sound.Init()
 
-	rl.SetTargetFPS(144)
 	keyMap := input.DefaultWASD()
 
 	bulletManager := bullet.CreateManager()
@@ -60,24 +52,9 @@ func main() {
 		enemyManager,
 		stageManager,
 	)
-	rl.DisableCursor()
 
-	btnWidth, btnHeight := float32(400), float32(80)
-	btnRect := rl.Rectangle{
-		X:      float32(w)/2 - btnWidth/2,
-		Y:      float32(h)/2 + 60,
-		Width:  btnWidth,
-		Height: btnHeight,
-	}
 	startingDiffLowerBound := 0
 	startingDiffUpperBound := 10
-	sqSize := float32(50)
-	spacing := float32(20)
-	diffY := float32(h)/2 - 80
-
-	showInitMenu := true
-	intermission := false
-	var intermissionTimer float32 = 0.0
 
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
@@ -94,62 +71,28 @@ func main() {
 		}
 
 		if showInitMenu {
-			rl.StopSound(sound.Track)
-			if stageManager.Difficulty < startingDiffLowerBound {
-				stageManager.Difficulty = startingDiffLowerBound
-			}
-			if stageManager.Difficulty > startingDiffUpperBound {
-				stageManager.Difficulty = startingDiffUpperBound
-			}
-
-			if rl.IsCursorHidden() {
-				rl.EnableCursor()
-			}
-
-			rl.BeginDrawing()
-			rl.ClearBackground(rl.Black)
-
-			diffText := fmt.Sprintf("Starting Difficulty: %d", stageManager.Difficulty)
-			fontSizeDiff := int32(40)
-			textWidthDiff := rl.MeasureText(diffText, fontSizeDiff)
-			textX := float32(w)/2 - float32(textWidthDiff)/2
-			rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, rl.RayWhite)
-
-			minusRect := rl.Rectangle{X: textX - sqSize - spacing, Y: diffY, Width: sqSize, Height: sqSize}
-			plusRect := rl.Rectangle{X: textX + float32(textWidthDiff) + spacing, Y: diffY, Width: sqSize, Height: sqSize}
-			if drawButton(minusRect, "-", rl.DarkGray, rl.Gray, rl.White) && stageManager.Difficulty > startingDiffLowerBound {
-				stageManager.Difficulty = stageManager.Difficulty - 1
-			}
-			if drawButton(plusRect, "+", rl.DarkGray, rl.Gray, rl.White) && stageManager.Difficulty < startingDiffUpperBound {
-				stageManager.Difficulty = stageManager.Difficulty + 1
-			}
-
-			buttonText := "Start Game"
-			if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) {
-				showInitMenu = false
-				initNewGame(
-					bulletManager,
-					blastManager,
-					structureManager,
-					player,
-					enemyManager,
-					stageManager,
-				)
-				stageManager.CreateNewStage(player.Position)
-			}
-
-			rl.EndDrawing()
+			doInitMenu(
+				stageManager,
+				bulletManager,
+				blastManager,
+				structureManager,
+				player,
+				enemyManager,
+				startingDiffLowerBound,
+				startingDiffUpperBound,
+				w,
+				h,
+			)
 			continue
 		}
 
-		if gameLost(player) {
+		if stageLost(player) {
 			rl.StopSound(sound.Track)
 			rl.PlaySound(sound.YouLose)
 			showInitMenu = true
-			lastScore = bulletManager.PlayerXp
 		}
 
-		if !rl.IsSoundPlaying(sound.Track) && !showInitMenu {
+		if !rl.IsSoundPlaying(sound.Track) {
 			rl.PlaySound(sound.Track)
 		}
 
@@ -158,41 +101,17 @@ func main() {
 		}
 
 		if intermission {
-			intermissionTimer += dt
-
-			rl.BeginDrawing()
-			rl.ClearBackground(rl.DarkGray)
-
-			diffInfoText := fmt.Sprintf("Current Difficulty: %d", stageManager.Difficulty)
-			diffInfoSize := int32(30)
-			diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
-			rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-30, diffInfoSize, rl.LightGray)
-
-			timeLeft := 1.0 - intermissionTimer
-			if timeLeft < 0 {
-				timeLeft = 0
-			}
-			timerText := fmt.Sprintf("%.1f...", timeLeft)
-			timerSize := int32(30)
-			timerWidth := rl.MeasureText(timerText, timerSize)
-			rl.DrawText(timerText, int32(w)/2-timerWidth/2, int32(h)/2+40, timerSize, rl.Gray)
-
-			if intermissionTimer >= 1.0 {
-				intermission = false
-				intermissionTimer = 0
-				stageManager.GenerateNewStage()
-				initNewGame(
-					bulletManager,
-					blastManager,
-					structureManager,
-					player,
-					enemyManager,
-					stageManager,
-				)
-				stageManager.CreateNewStage(player.Position)
-			}
-
-			rl.EndDrawing()
+			doIntermission(
+				dt,
+				stageManager,
+				bulletManager,
+				blastManager,
+				structureManager,
+				player,
+				enemyManager,
+				w,
+				h,
+			)
 			continue
 		}
 
@@ -200,7 +119,7 @@ func main() {
 		var ebc = enemyManager.Mutate(dt, player, structureManager)
 		enemyManager.ProcessAnimation(dt, player)
 
-		if gameWon(enemyManager) {
+		if stageWon(enemyManager) {
 			intermission = true
 			rl.PlaySound(sound.ThreeTwoOne)
 		}
@@ -228,7 +147,6 @@ func main() {
 		)
 
 		rl.BeginDrawing()
-		// rl.NewColor(10, 10, 15, 255)
 		rl.ClearBackground(rl.Gray)
 
 		rl.BeginMode3D(player.Camera)
@@ -247,178 +165,4 @@ func main() {
 
 		rl.EndDrawing()
 	}
-}
-
-func unloadGame(
-	bulletManager *bullet.Manager,
-	blastManager *blast.Manager,
-	structureManager *structure.Manager,
-	player *killer.Killer,
-	enemyManager *enemy.Manager,
-	stageManager *stage.Manager,
-) {
-	bulletManager.Unload()
-	blastManager.Unload()
-	structureManager.Unload()
-	player.Unload()
-	enemyManager.Unload()
-	stageManager.Unload()
-}
-
-func initNewGame(
-	bulletManager *bullet.Manager,
-	blastManager *blast.Manager,
-	structureManager *structure.Manager,
-	player *killer.Killer,
-	enemyManager *enemy.Manager,
-	stageManager *stage.Manager,
-) {
-	bulletManager.Init()
-	blastManager.Init()
-	structureManager.Init()
-	player.Init()
-	enemyManager.Init(player)
-	stageManager.Init(
-		structureManager,
-		enemyManager,
-	)
-}
-
-func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
-	if time.Since(lastLog) >= 1000*time.Millisecond {
-		msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
-		fmt.Println(msg)
-		fmt.Println(player.MoveDirection)
-		lastLog = time.Now()
-	}
-}
-
-func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
-	mouseRay := rl.GetScreenToWorldRay(mouseLocation, player.Camera)
-
-	t := float32(0.0)
-	if mouseRay.Direction.Y != 0 {
-		t = (player.Position.Y - mouseRay.Position.Y) / mouseRay.Direction.Y
-	}
-
-	target3D := rl.Vector3{
-		X: mouseRay.Position.X + mouseRay.Direction.X*t,
-		Y: player.Position.Y,
-		Z: mouseRay.Position.Z + mouseRay.Direction.Z*t,
-	}
-
-	rl.BeginMode3D(player.Camera)
-
-	rl.DrawLine3D(player.Position, target3D, rl.Green)
-
-	rl.DrawSphere(target3D, 0.1, rl.Green)
-
-	rl.EndMode3D()
-}
-
-func gameLost(player *killer.Killer) bool {
-	return !player.IsAlive() && player.ActionTimeLeft <= 0
-}
-
-func gameWon(enemyManager *enemy.Manager) bool {
-	return enemyManager.AliveEnemyCount == 0
-}
-
-func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {
-	mousePoint := rl.GetMousePosition()
-	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)
-	isPressed := isHovered && (rl.IsMouseButtonDown(rl.MouseLeftButton) || rl.IsMouseButtonReleased(rl.MouseLeftButton))
-
-	currentColor := baseColor
-	if isPressed {
-		currentColor = rl.Maroon
-		if rl.IsMouseButtonReleased(rl.MouseLeftButton) {
-			return true
-		}
-	} else if isHovered {
-		currentColor = hoverColor
-	}
-
-	rl.DrawRectangleRec(rect, rl.Fade(currentColor, 0.3))
-	rl.DrawRectangleLinesEx(rect, 3, currentColor)
-
-	fontSize := int32(30)
-	textWidth := rl.MeasureText(text, fontSize)
-	textX := int32(rect.X + (rect.Width / 2) - float32(textWidth/2))
-	textY := int32(rect.Y + (rect.Height / 2) - float32(fontSize/2))
-
-	rl.DrawText(text, textX, textY, fontSize, textColor)
-
-	return false
-}
-
-func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
-	const (
-		keySize      = 45
-		spacing      = 6
-		fontSize     = 18
-		descSize     = 9
-		rightMargin  = 40
-		bottomMargin = 90
-	)
-
-	labelUp := input.GetKeyName(keyMap.Up)
-	labelLeft := input.GetKeyName(keyMap.Left)
-	labelDown := input.GetKeyName(keyMap.Down)
-	labelRight := input.GetKeyName(keyMap.Right)
-	labelReload := input.GetKeyName(keyMap.Reload)
-	labelEnd := input.GetKeyName(keyMap.EndGame)
-
-	totalWidth := (keySize * 7) + (spacing * 6) + 20
-	baseX := float32(w) - float32(totalWidth) - rightMargin
-	baseY := float32(h) - (keySize * 2) - spacing - bottomMargin
-
-	drawKey := func(x, y float32, width float32, label string, desc string, active bool) {
-		rect := rl.Rectangle{X: x, Y: y, Width: width, Height: keySize}
-
-		alpha := uint8(100)
-		if active {
-			alpha = 180
-		}
-
-		bgColor := rl.NewColor(30, 30, 30, alpha)
-		borderCol := rl.Fade(rl.Gray, 0.4)
-		textCol := rl.Fade(rl.LightGray, 0.9)
-		descCol := rl.Fade(rl.Gray, 0.7)
-
-		if active {
-			bgColor = rl.NewColor(230, 41, 55, 160)
-			borderCol = rl.Red
-			textCol = rl.White
-			descCol = rl.Fade(rl.White, 0.8)
-		}
-
-		rl.DrawRectangleRec(rect, bgColor)
-		rl.DrawRectangleLinesEx(rect, 1, borderCol)
-
-		tw := rl.MeasureText(label, fontSize)
-		rl.DrawText(label, int32(x+width/2)-tw/2, int32(y+keySize/2)-fontSize/2-4, fontSize, textCol)
-
-		dtw := rl.MeasureText(desc, descSize)
-		rl.DrawText(desc, int32(x+width/2)-dtw/2, int32(y+keySize)-descSize-6, descSize, descCol)
-	}
-
-	drawKey(baseX, baseY, keySize, labelEnd, "END", rl.IsKeyDown(keyMap.EndGame))
-
-	drawKey(baseX+(keySize+spacing)*3, baseY, keySize, labelUp, "UP", ip.MoveUp)
-
-	currX := baseX + (keySize+spacing)*2
-	drawKey(currX, baseY+keySize+spacing, keySize, labelLeft, "LEFT", ip.MoveLeft)
-	currX += keySize + spacing
-
-	drawKey(currX, baseY+keySize+spacing, keySize, labelDown, "DOWN", ip.MoveDown)
-	currX += keySize + spacing
-
-	drawKey(currX, baseY+keySize+spacing, keySize, labelRight, "RIGHT", ip.MoveRight)
-	currX += keySize + spacing
-
-	drawKey(currX, baseY+keySize+spacing, keySize, labelReload, "RELOAD", ip.ReloadPressed)
-	currX += keySize + spacing
-
-	drawKey(currX, baseY+keySize+spacing, keySize+30, "LMB", "SHOOT", rl.IsMouseButtonDown(keyMap.PunchHold))
 }
