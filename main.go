@@ -22,6 +22,7 @@ var lastScore int
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable | rl.FlagWindowUndecorated)
 	rl.InitWindow(0, 0, "coldkiller2")
+	rl.SetExitKey(0)
 
 	targetMonitor := 0
 	monitorCount := rl.GetMonitorCount()
@@ -84,6 +85,14 @@ func main() {
 		log(mouseLocation, dt, player)
 		ip := input.ReadInput(keyMap)
 
+		if ip.EndGamePressed {
+			if showInitMenu {
+				break
+			} else {
+				showInitMenu = true
+			}
+		}
+
 		if showInitMenu {
 			if stageManager.Difficulty < startingDiffLowerBound {
 				stageManager.Difficulty = startingDiffLowerBound
@@ -115,7 +124,7 @@ func main() {
 			}
 
 			buttonText := "Start Game"
-			if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) || ip.ResetGamePressed {
+			if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) {
 				showInitMenu = false
 				initNewGame(
 					bulletManager,
@@ -144,21 +153,6 @@ func main() {
 
 		if !rl.IsCursorHidden() {
 			rl.DisableCursor()
-		}
-
-		if ip.EndGamePressed {
-			showInitMenu = true
-		}
-
-		if ip.ResetGamePressed {
-			initNewGame(
-				bulletManager,
-				blastManager,
-				structureManager,
-				player,
-				enemyManager,
-				stageManager,
-			)
 		}
 
 		if intermission {
@@ -372,7 +366,6 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
 	labelDown := input.GetKeyName(keyMap.Down)
 	labelRight := input.GetKeyName(keyMap.Right)
 	labelReload := input.GetKeyName(keyMap.Reload)
-	labelReset := input.GetKeyName(keyMap.ResetGame)
 	labelEnd := input.GetKeyName(keyMap.EndGame)
 
 	totalWidth := (keySize * 7) + (spacing * 6) + 20
@@ -410,7 +403,7 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
 	}
 
 	drawKey(baseX, baseY, keySize, labelEnd, "END", rl.IsKeyDown(keyMap.EndGame))
-	drawKey(baseX+keySize+spacing, baseY, keySize, labelReset, "RESET", ip.ResetGamePressed)
+
 	drawKey(baseX+(keySize+spacing)*3, baseY, keySize, labelUp, "UP", ip.MoveUp)
 
 	currX := baseX + (keySize+spacing)*2
