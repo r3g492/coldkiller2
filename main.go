@@ -94,6 +94,7 @@ func main() {
 		}
 
 		if showInitMenu {
+			rl.StopSound(sound.Track)
 			if stageManager.Difficulty < startingDiffLowerBound {
 				stageManager.Difficulty = startingDiffLowerBound
 			}
@@ -134,6 +135,7 @@ func main() {
 					enemyManager,
 					stageManager,
 				)
+				stageManager.CreateNewStage(player.Position)
 			}
 
 			rl.EndDrawing()
@@ -187,6 +189,7 @@ func main() {
 					enemyManager,
 					stageManager,
 				)
+				stageManager.CreateNewStage(player.Position)
 			}
 
 			rl.EndDrawing()
@@ -279,8 +282,6 @@ func initNewGame(
 		structureManager,
 		enemyManager,
 	)
-	enemyManager.Init(player)
-	stageManager.CreateNewStage(player.Position)
 }
 
 func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {

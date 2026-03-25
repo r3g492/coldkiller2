@@ -77,42 +77,6 @@ func (sm *Manager) Unload() {
 }
 
 func (sm *Manager) Init() {
-	initialStructures := []Structure{
-		{
-			Position:  rl.Vector3{X: 5, Y: 0, Z: 5},
-			Size:      rl.Vector3{X: 1, Y: 1, Z: 10},
-			Direction: rl.Vector3{X: 1, Y: 0.2, Z: 1},
-			Color:     rl.DarkGray,
-		},
-		{
-			Position:  rl.Vector3{X: -5, Y: 0, Z: -5},
-			Size:      rl.Vector3{X: 1, Y: 1, Z: 10},
-			Direction: rl.Vector3{X: 0, Y: 0, Z: 0},
-			Color:     rl.DarkGray,
-		},
-		{
-			Position:  rl.Vector3{X: 10, Y: 0, Z: 0},
-			Size:      rl.Vector3{X: 2, Y: 2, Z: 2},
-			Direction: rl.Vector3{X: 0, Y: 0, Z: 0},
-			Color:     rl.DarkGray,
-		},
-		{
-			Position:  rl.Vector3{X: 15, Y: 0, Z: 0},
-			Size:      rl.Vector3{X: 2, Y: 2, Z: 2},
-			Direction: rl.Vector3{X: 0, Y: 0, Z: 0},
-			Color:     rl.DarkGray,
-		},
-		{
-			Position:  rl.Vector3{X: 15, Y: 0, Z: 10},
-			Size:      rl.Vector3{X: 2, Y: 2, Z: 2},
-			Direction: rl.Vector3{X: 0, Y: 0, Z: 0},
-			Color:     rl.DarkGray,
-		},
-	}
-
-	for i := range initialStructures {
-		sm.Add(&initialStructures[i])
-	}
 }
 
 func (sm *Manager) Draw3D(playerPosition rl.Vector3) {
