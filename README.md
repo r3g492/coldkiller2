@@ -1,3 +1,2 @@
 TODO:
-- structure generating system
-- enemy generating system
+- win condition  && win screen by difficulty
