@@ -120,6 +120,7 @@ func main() {
 
 		if stageManager.StageWon() {
 			intermission = true
+			stageManager.Difficulty++
 			rl.PlaySound(sound.ThreeTwoOne)
 		}
 

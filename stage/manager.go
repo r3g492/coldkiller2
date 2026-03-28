@@ -9,10 +9,11 @@ import (
 )
 
 type Manager struct {
-	Difficulty       int
-	StructureManager *structure.Manager
-	EnemyManager     *enemy.Manager
-	Player           *killer.Killer
+	Difficulty           int
+	GameEndingDifficulty int
+	StructureManager     *structure.Manager
+	EnemyManager         *enemy.Manager
+	Player               *killer.Killer
 }
 
 func CreateManager() *Manager {
@@ -31,6 +32,7 @@ func (m *Manager) Init(
 	enemyManager *enemy.Manager,
 	player *killer.Killer,
 ) {
+	m.GameEndingDifficulty = 100
 	m.StructureManager = structureManager
 	m.EnemyManager = enemyManager
 	m.Player = player
@@ -82,7 +84,7 @@ func (m *Manager) StageWon() bool {
 }
 
 func (m *Manager) GameWon() bool {
-	return m.EnemyManager.AliveEnemyCount == 0 && m.Difficulty >= 100
+	return m.EnemyManager.AliveEnemyCount == 0 && m.Difficulty >= m.GameEndingDifficulty
 }
 
 func (m *Manager) StageLost() bool {

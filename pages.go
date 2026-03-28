@@ -37,7 +37,7 @@ func doIntermission(
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.DarkGray)
 
-	diffInfoText := fmt.Sprintf("Current Difficulty: %d", stageManager.Difficulty)
+	diffInfoText := fmt.Sprintf("Current Difficulty: %d/%d", stageManager.Difficulty, stageManager.GameEndingDifficulty)
 	diffInfoSize := int32(30)
 	diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
 	rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-30, diffInfoSize, rl.LightGray)
