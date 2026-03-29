@@ -101,6 +101,7 @@ func InitStages() {
 				{
 					Model:                 model.UnitV4Model,
 					Position:              rl.Vector3{X: 5, Y: 0, Z: 5},
+					Animation:             model.UnitV4Animation,
 					Size:                  killer.CharSize,
 					MoveSpeed:             4,
 					Health:                100,
@@ -115,6 +116,7 @@ func InitStages() {
 				{
 					Model:                 model.UnitV4Model,
 					Position:              rl.Vector3{X: -5, Y: 0, Z: 5},
+					Animation:             model.UnitV4Animation,
 					Size:                  killer.CharSize,
 					MoveSpeed:             4,
 					Health:                100,
@@ -129,6 +131,7 @@ func InitStages() {
 				{
 					Model:                 model.UnitV4Model,
 					Position:              rl.Vector3{X: -5, Y: 0, Z: 8},
+					Animation:             model.UnitV4Animation,
 					Size:                  killer.CharSize,
 					MoveSpeed:             4,
 					Health:                100,
