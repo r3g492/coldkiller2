@@ -37,7 +37,7 @@ func (m *Manager) Init(
 }
 
 func (m *Manager) CreateNewStage(pPos rl.Vector3) {
-	stageData := Stages[m.Difficulty]
+	stageData := Stages[m.Difficulty-1]
 
 	for _, e := range stageData.Enemies {
 		m.EnemyManager.Add(e)
@@ -53,7 +53,7 @@ func (m *Manager) StageWon() bool {
 }
 
 func (m *Manager) GameWon() bool {
-	return m.EnemyManager.AliveEnemyCount == 0 && m.Difficulty >= len(Stages)-1
+	return m.Difficulty > len(Stages)
 }
 
 func (m *Manager) StageLost() bool {

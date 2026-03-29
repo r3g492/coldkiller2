@@ -19,7 +19,7 @@ var Stages []Data
 
 func InitStages() {
 	Stages = []Data{
-		// --- STAGE 0 ---
+		// --- STAGE 1 ---
 		{
 			Enemies: []*enemy.Enemy{
 				{
@@ -51,7 +51,7 @@ func InitStages() {
 			},
 		},
 
-		// --- STAGE 1 ---
+		// --- STAGE 2 ---
 		{
 			Enemies: []*enemy.Enemy{
 				{
@@ -95,7 +95,7 @@ func InitStages() {
 			},
 		},
 
-		// --- STAGE 2 ---
+		// --- STAGE 3 ---
 		{
 			Enemies: []*enemy.Enemy{
 				{
@@ -115,6 +115,20 @@ func InitStages() {
 				{
 					Model:                 model.UnitV4Model,
 					Position:              rl.Vector3{X: -5, Y: 0, Z: 5},
+					Size:                  killer.CharSize,
+					MoveSpeed:             4,
+					Health:                100,
+					AttackRange:           10,
+					AimTimeLeft:           1,
+					AimTimeUnit:           1,
+					FootstepSoundTimeLeft: 0.4,
+					FootstepSoundTimeUnit: 0.4,
+					FootstepSound:         sound.FootStep,
+					AiType:                enemy.Elite,
+				},
+				{
+					Model:                 model.UnitV4Model,
+					Position:              rl.Vector3{X: -5, Y: 0, Z: 8},
 					Size:                  killer.CharSize,
 					MoveSpeed:             4,
 					Health:                100,

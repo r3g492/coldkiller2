@@ -70,6 +70,13 @@ func main() {
 			}
 		}
 
+		if stageManager.GameWon() {
+			if doGameWon(w, h) {
+				break
+			}
+			continue
+		}
+
 		if showInitMenu {
 			doInitMenu(
 				stageManager,
@@ -99,6 +106,7 @@ func main() {
 		}
 
 		if intermission {
+			rl.PlaySound(sound.ThreeTwoOne)
 			doIntermission(
 				dt,
 				stageManager,
@@ -117,14 +125,9 @@ func main() {
 		var ebc = enemyManager.Mutate(dt, player, structureManager)
 		enemyManager.ProcessAnimation(dt, player)
 
-		if stageManager.GameWon() {
-			// TODO:
-		}
-
 		if stageManager.StageWon() {
 			intermission = true
 			stageManager.Difficulty++
-			rl.PlaySound(sound.ThreeTwoOne)
 		}
 
 		// player

@@ -19,6 +19,8 @@ func CreateManager() *Manager {
 }
 
 func (bm *Manager) Init() {
+	bm.Bullets = []Bullet{}
+	bm.PlayerXp = 0
 }
 
 func (bm *Manager) KillerBulletCreate(

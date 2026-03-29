@@ -70,4 +70,5 @@ func initNewGame(
 		enemyManager,
 		player,
 	)
+	stage.InitStages()
 }

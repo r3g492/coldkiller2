@@ -37,7 +37,7 @@ func doIntermission(
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.DarkGray)
 
-	diffInfoText := fmt.Sprintf("Current Difficulty: %d/%d", stageManager.Difficulty, len(stage.Stages)-1)
+	diffInfoText := fmt.Sprintf("Current Difficulty: %d/%d", stageManager.Difficulty, len(stage.Stages))
 	diffInfoSize := int32(30)
 	diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
 	rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-30, diffInfoSize, rl.LightGray)
@@ -79,8 +79,8 @@ func doInitMenu(
 	w int,
 	h int,
 ) {
-	startingDiffLowerBound := 0
-	startingDiffUpperBound := 10
+	startingDiffLowerBound := 1
+	startingDiffUpperBound := 100
 
 	btnRect := rl.Rectangle{
 		X:      float32(w)/2 - btnWidth/2,
@@ -135,6 +135,38 @@ func doInitMenu(
 	}
 
 	rl.EndDrawing()
+}
+
+func doGameWon(w, h int) bool {
+	if rl.IsCursorHidden() {
+		rl.EnableCursor()
+	}
+
+	rl.BeginDrawing()
+	rl.ClearBackground(rl.Black)
+
+	winText := "MISSION ACCOMPLISHED"
+	fontSizeWin := int32(50)
+	textWidthWin := rl.MeasureText(winText, fontSizeWin)
+	textX := float32(w)/2 - float32(textWidthWin)/2
+	textY := float32(h)/2 - 100
+	rl.DrawText(winText, int32(textX), int32(textY), fontSizeWin, rl.Gold)
+
+	btnRect := rl.Rectangle{
+		X:      float32(w)/2 - btnWidth/2,
+		Y:      float32(h)/2 + 20,
+		Width:  btnWidth,
+		Height: btnHeight,
+	}
+
+	exitClicked := false
+	if drawButton(btnRect, "Exit Game", rl.DarkGray, rl.Gray, rl.White) {
+		exitClicked = true
+	}
+
+	rl.EndDrawing()
+
+	return exitClicked
 }
 
 func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {
