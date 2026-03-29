@@ -172,16 +172,18 @@ func doGameWon(w, h int) bool {
 func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {
 	mousePoint := rl.GetMousePosition()
 	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)
-	isPressed := isHovered && (rl.IsMouseButtonDown(rl.MouseLeftButton) || rl.IsMouseButtonReleased(rl.MouseLeftButton))
 
 	currentColor := baseColor
-	if isPressed {
-		currentColor = rl.Maroon
-		if rl.IsMouseButtonReleased(rl.MouseLeftButton) {
+
+	if isHovered {
+		currentColor = hoverColor
+
+		if rl.IsMouseButtonDown(rl.MouseLeftButton) {
+			currentColor = rl.Maroon
+		}
+		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
 			return true
 		}
-	} else if isHovered {
-		currentColor = hoverColor
 	}
 
 	rl.DrawRectangleRec(rect, rl.Fade(currentColor, 0.3))
