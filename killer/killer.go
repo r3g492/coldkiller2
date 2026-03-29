@@ -3,6 +3,7 @@ package killer
 import (
 	"coldkiller2/animation"
 	"coldkiller2/input"
+	"coldkiller2/model"
 	"coldkiller2/sound"
 	"coldkiller2/structure"
 	"fmt"
@@ -45,8 +46,8 @@ const ModelRatio = 0.2
 const CharSize = 0.72
 
 func Create() *Killer {
-	playerModel := rl.LoadModel("resources/unit_v4.glb")
-	playerAnimation := rl.LoadModelAnimations("resources/unit_v4.glb")
+	playerModel := model.UnitV4Model
+	playerAnimation := model.UnitV4Animation
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	return &Killer{
 		Model:           playerModel,
@@ -80,6 +81,7 @@ func (k *Killer) Init() {
 	k.MoveDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
 	k.TargetDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
 	k.ModelAngleDeg = 0
+	k.ActionTimeLeft = 0
 }
 
 func (k *Killer) Unload() {

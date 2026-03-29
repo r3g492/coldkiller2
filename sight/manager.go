@@ -41,7 +41,7 @@ func UpdateSight(
 	}
 
 	for i := 0; i < len(enemyManager.Enemies); i++ {
-		e := &enemyManager.Enemies[i]
+		e := enemyManager.Enemies[i]
 		if isWithinDistance3D(pPos, e.Position, MaxSightDistance) {
 			if hasLineOfSight3D(pPos, e.Position, structureManager) {
 				e.IsHiddenFromKiller = false

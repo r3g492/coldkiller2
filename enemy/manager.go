@@ -2,7 +2,7 @@ package enemy
 
 import (
 	"coldkiller2/killer"
-	"coldkiller2/sound"
+	"coldkiller2/model"
 	"coldkiller2/structure"
 	"fmt"
 	"math"
@@ -13,7 +13,7 @@ import (
 )
 
 type Manager struct {
-	Enemies                    []Enemy
+	Enemies                    []*Enemy
 	SharedModel                rl.Model
 	SharedAnimations           []rl.ModelAnimation
 	EnemyGenerationLevel       int
@@ -37,9 +37,9 @@ func CreateManager() *Manager {
 }
 
 func (em *Manager) Init(p *killer.Killer) {
-	em.Enemies = make([]Enemy, 0)
-	em.SharedModel = rl.LoadModel("resources/unit_v4.glb")
-	em.SharedAnimations = rl.LoadModelAnimations("resources/unit_v4.glb")
+	em.Enemies = make([]*Enemy, 0)
+	em.SharedModel = model.UnitV4Model
+	em.SharedAnimations = model.UnitV4Animation
 	em.EnemyGenerationLevel = 0
 	em.EnemyGenerationLevelUpUnit = 8 * time.Second
 	em.LastLevelUp = time.Now()
@@ -114,7 +114,7 @@ func (em *Manager) ProcessAnimation(dt float32, p *killer.Killer) {
 func (em *Manager) Unload() {
 	rl.UnloadModel(em.SharedModel)
 	rl.UnloadModelAnimations(em.SharedAnimations)
-	em.Enemies = []Enemy{}
+	em.Enemies = []*Enemy{}
 }
 
 func (em *Manager) GetBoundingBoxes() []rl.BoundingBox {
@@ -127,35 +127,13 @@ func (em *Manager) GetBoundingBoxes() []rl.BoundingBox {
 	return boxes
 }
 
-func (em *Manager) AddEnemy(pPos rl.Vector3) {
+func (em *Manager) Add(e *Enemy) {
 	if em.EnemyLimit < len(em.Enemies) {
 		return
 	}
-
-	candidatePosition := getRandomPosition(pPos)
-	candidate := Enemy{
-		Model:                 em.SharedModel,
-		ModelAngleDeg:         0,
-		Animation:             em.SharedAnimations,
-		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
-		Position:              candidatePosition,
-		Size:                  killer.CharSize,
-		MoveSpeed:             4,
-		ActionTimeLeft:        0,
-		Health:                100,
-		ShouldBeDeleted:       false,
-		AttackRange:           10,
-		AimTimeLeft:           1,
-		AimTimeUnit:           1,
-		FootstepSoundTimeLeft: 0.4,
-		FootstepSoundTimeUnit: 0.4,
-		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
-		AiType:                Elite,
-	}
-	em.Enemies = append(em.Enemies, candidate)
+	em.Enemies = append(em.Enemies, e)
 	newEnemyIndex := len(em.Enemies) - 1
-	gridID := em.getGridID(candidate.Position)
+	gridID := em.getGridID(e.Position)
 	em.Grid[gridID] = append(em.Grid[gridID], newEnemyIndex)
 }
 

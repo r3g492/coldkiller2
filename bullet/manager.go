@@ -62,7 +62,7 @@ func (bm *Manager) EnemyBulletCreate(
 func (bm *Manager) Mutate(
 	dt float32,
 	p *killer.Killer,
-	el []enemy.Enemy,
+	el []*enemy.Enemy,
 	structureManager *structure.Manager,
 ) []blast.Blast {
 

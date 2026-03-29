@@ -6,6 +6,7 @@ import (
 	"coldkiller2/enemy"
 	"coldkiller2/input"
 	"coldkiller2/killer"
+	"coldkiller2/model"
 	"coldkiller2/sight"
 	"coldkiller2/sound"
 	"coldkiller2/stage"
@@ -35,6 +36,8 @@ func main() {
 
 	rl.InitAudioDevice()
 	sound.Init()
+	model.Init()
+	stage.InitStages()
 
 	keyMap := input.DefaultWASD()
 
