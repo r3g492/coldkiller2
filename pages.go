@@ -37,7 +37,7 @@ func doIntermission(
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.DarkGray)
 
-	diffInfoText := fmt.Sprintf("Current Difficulty: %d/%d", stageManager.Difficulty, len(stage.Stages))
+	diffInfoText := fmt.Sprintf("%d/%d", stageManager.Difficulty, len(stage.Stages))
 	diffInfoSize := int32(30)
 	diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
 	rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-30, diffInfoSize, rl.LightGray)
@@ -80,7 +80,7 @@ func doInitMenu(
 	h int,
 ) {
 	startingDiffLowerBound := 1
-	startingDiffUpperBound := 100
+	startingDiffUpperBound := len(stage.Stages)
 
 	btnRect := rl.Rectangle{
 		X:      float32(w)/2 - btnWidth/2,
@@ -105,7 +105,7 @@ func doInitMenu(
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
 
-	diffText := fmt.Sprintf("Starting Difficulty: %d", stageManager.Difficulty)
+	diffText := fmt.Sprintf("%d", stageManager.Difficulty)
 	fontSizeDiff := int32(40)
 	textWidthDiff := rl.MeasureText(diffText, fontSizeDiff)
 	textX := float32(w)/2 - float32(textWidthDiff)/2
