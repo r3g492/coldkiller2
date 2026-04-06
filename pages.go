@@ -123,6 +123,8 @@ func doInitMenu(
 	buttonText := "Start Game"
 	if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) {
 		showInitMenu = false
+		intermission = true
+		rl.PlaySound(sound.ThreeTwoOne)
 		initNewGame(
 			bulletManager,
 			blastManager,
