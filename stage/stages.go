@@ -24,8 +24,6 @@ func InitStages() {
 		Type1(),
 		Type1(),
 		Type1(),
-		Type1(),
-		Type2(),
 		Type2(),
 		Type2(),
 		Type2(),
