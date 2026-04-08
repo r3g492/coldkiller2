@@ -11,14 +11,6 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-var aimPracticePresets = []rl.Vector2{
-	{X: -7, Y: -7}, {X: 0, Y: -7}, {X: 7, Y: -7},
-
-	{X: -7, Y: 0}, {X: 7, Y: 0},
-
-	{X: -7, Y: 7}, {X: 0, Y: 7}, {X: 7, Y: 7},
-}
-
 type Data struct {
 	Enemies    []*enemy.Enemy
 	Structures []*structure.Structure
@@ -28,16 +20,16 @@ var Stages []Data
 
 func InitStages() {
 	Stages = []Data{
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
-		NewAimPracticeStage(),
+		Type1(),
+		Type1(),
+		Type1(),
+		Type1(),
+		Type1(),
+		Type2(),
+		Type2(),
+		Type2(),
+		Type2(),
+		Type2(),
 	}
 }
 
@@ -74,25 +66,59 @@ func NewEnemy(x, z float32) *enemy.Enemy {
 	}
 }
 
-func GetRandomEnemy() *enemy.Enemy {
-	randomIndex := rand.Intn(len(aimPracticePresets))
-	pos := aimPracticePresets[randomIndex]
+func GetRandomEnemy(
+	radius float32,
+	howManyEnemies int,
+) []*enemy.Enemy {
+	presets := []rl.Vector2{
+		{X: -radius, Y: -radius}, {X: 0, Y: -radius}, {X: radius, Y: -radius},
 
-	return NewEnemy(pos.X, pos.Y)
+		{X: -radius, Y: 0}, {X: radius, Y: 0},
+
+		{X: -radius, Y: radius}, {X: 0, Y: radius}, {X: radius, Y: radius},
+	}
+
+	if howManyEnemies > len(presets) {
+		howManyEnemies = len(presets)
+	}
+
+	indices := rand.Perm(len(presets))[:howManyEnemies]
+	enemies := make([]*enemy.Enemy, howManyEnemies)
+	for i, idx := range indices {
+		pos := presets[idx]
+		enemies[i] = NewEnemy(pos.X, pos.Y)
+	}
+	return enemies
 }
 
-func NewAimPracticeStage() Data {
+func Type1() Data {
 	return Data{
-		Enemies:    []*enemy.Enemy{GetRandomEnemy()},
-		Structures: DefaultWalls(),
+		Enemies:    GetRandomEnemy(7, 1),
+		Structures: WallType1(),
 	}
 }
 
-func DefaultWalls() []*structure.Structure {
+func WallType1() []*structure.Structure {
 	return []*structure.Structure{
 		{Position: rl.Vector3{X: -10, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 20}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: 10, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 20}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: 0, Y: 0, Z: 10}, Size: rl.Vector3{X: 20, Y: 1, Z: 1}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: 0, Y: 0, Z: -10}, Size: rl.Vector3{X: 20, Y: 1, Z: 1}, Color: rl.DarkGray},
+	}
+}
+
+func Type2() Data {
+	return Data{
+		Enemies:    GetRandomEnemy(15, 2),
+		Structures: WallType2(),
+	}
+}
+
+func WallType2() []*structure.Structure {
+	return []*structure.Structure{
+		{Position: rl.Vector3{X: -5, Y: 0, Z: -5}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 5, Y: 0, Z: -5}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -5, Y: 0, Z: 5}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 5, Y: 0, Z: 5}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
 	}
 }

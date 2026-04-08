@@ -77,6 +77,7 @@ func (sm *Manager) Unload() {
 }
 
 func (sm *Manager) Init() {
+	clear(sm.Grid)
 }
 
 func (sm *Manager) Draw3D(playerPosition rl.Vector3) {
