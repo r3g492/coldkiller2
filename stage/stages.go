@@ -91,17 +91,17 @@ func GetRandomEnemy(
 
 func Type1() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(7, 1),
+		Enemies:    GetRandomEnemy(8, 1),
 		Structures: WallType1(),
 	}
 }
 
 func WallType1() []*structure.Structure {
 	return []*structure.Structure{
-		{Position: rl.Vector3{X: -10, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 20}, Color: rl.DarkGray},
-		{Position: rl.Vector3{X: 10, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 20}, Color: rl.DarkGray},
-		{Position: rl.Vector3{X: 0, Y: 0, Z: 10}, Size: rl.Vector3{X: 20, Y: 1, Z: 1}, Color: rl.DarkGray},
-		{Position: rl.Vector3{X: 0, Y: 0, Z: -10}, Size: rl.Vector3{X: 20, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -15, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 30}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 15, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 30}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 0, Y: 0, Z: 15}, Size: rl.Vector3{X: 30, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 0, Y: 0, Z: -15}, Size: rl.Vector3{X: 30, Y: 1, Z: 1}, Color: rl.DarkGray},
 	}
 }
 
