@@ -3,9 +3,9 @@ package blast
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 var Radius float32 = 0.25
-var BigRadius float32 = 0.50
+var BigRadius float32 = 0.25
 var COLOR = rl.Yellow
-var LIFETIME float32 = 0.06
+var LIFETIME float32 = 1.00
 
 type Blast struct {
 	Position           rl.Vector3

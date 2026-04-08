@@ -33,7 +33,7 @@ func (bm *Manager) KillerBulletCreate(
 			Speed:     100.0,
 			Radius:    0.1,
 			Active:    true,
-			LifeTime:  2.0,
+			LifeTime:  1.0,
 			Shooter:   Player,
 			Color:     rl.Yellow,
 			Damage:    bc.Damage,
@@ -49,10 +49,10 @@ func (bm *Manager) EnemyBulletCreate(
 		b := Bullet{
 			Position:  bc.Pos,
 			Direction: bc.Dir,
-			Speed:     50.0,
+			Speed:     100.0,
 			Radius:    0.1,
 			Active:    true,
-			LifeTime:  2.0,
+			LifeTime:  1.0,
 			Shooter:   Enemy,
 			Color:     rl.Yellow,
 			Damage:    bc.Damage,
@@ -73,7 +73,7 @@ func (bm *Manager) Mutate(
 		bm.Bullets[i].Mutate(dt)
 		curBullet := bm.Bullets[i]
 
-		if bm.Bullets[i].LifeTime >= 1.99 && bm.Bullets[i].Active {
+		if bm.Bullets[i].LifeTime >= 0.99 && bm.Bullets[i].Active {
 			blasts = append(blasts, blast.Create(bm.Bullets[i].Position, bm.Bullets[i].Shooter == Player))
 		}
 
