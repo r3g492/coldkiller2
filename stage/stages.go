@@ -31,20 +31,7 @@ func InitStages() {
 	}
 }
 
-func NewEnemy(x, z float32) *enemy.Enemy {
-	if x < -9 {
-		x = -9
-	}
-	if x > 9 {
-		x = 9
-	}
-	if z < -9 {
-		z = -9
-	}
-	if z > 9 {
-		z = 9
-	}
-
+func Soldier(x, z float32) *enemy.Enemy {
 	return &enemy.Enemy{
 		Model:                 model.UnitV4Model,
 		Animation:             model.UnitV4Animation,
@@ -64,10 +51,39 @@ func NewEnemy(x, z float32) *enemy.Enemy {
 	}
 }
 
-func GetRandomEnemy(
-	radius float32,
-	howManyEnemies int,
-) []*enemy.Enemy {
+func Dog(x, z float32) *enemy.Enemy {
+	return &enemy.Enemy{
+		Model:                 model.UnitV4Model,
+		Animation:             model.UnitV4Animation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             12,
+		Health:                100,
+		AttackRange:           2,
+		AimTimeLeft:           1,
+		AimTimeUnit:           1,
+		FootstepSoundTimeLeft: 0.4,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                enemy.SimpleZombie,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+	}
+}
+
+type EnemyKind int
+
+const (
+	KindDog EnemyKind = iota
+	KindSoldier
+)
+
+type EnemySpec struct {
+	Kind  EnemyKind
+	Count int
+}
+
+func GetRandomEnemy(radius float32, specs ...EnemySpec) []*enemy.Enemy {
 	presets := []rl.Vector2{
 		{X: -radius, Y: -radius}, {X: 0, Y: -radius}, {X: radius, Y: -radius},
 
@@ -76,22 +92,37 @@ func GetRandomEnemy(
 		{X: -radius, Y: radius}, {X: 0, Y: radius}, {X: radius, Y: radius},
 	}
 
-	if howManyEnemies > len(presets) {
-		howManyEnemies = len(presets)
+	total := 0
+	for _, s := range specs {
+		total += s.Count
+	}
+	if total > len(presets) {
+		total = len(presets)
 	}
 
-	indices := rand.Perm(len(presets))[:howManyEnemies]
-	enemies := make([]*enemy.Enemy, howManyEnemies)
-	for i, idx := range indices {
-		pos := presets[idx]
-		enemies[i] = NewEnemy(pos.X, pos.Y)
+	indices := rand.Perm(len(presets))[:total]
+	enemies := make([]*enemy.Enemy, 0, total)
+	idx := 0
+	for _, s := range specs {
+		factory := Dog
+		if s.Kind == KindSoldier {
+			factory = Soldier
+		}
+		for range s.Count {
+			if idx >= len(indices) {
+				break
+			}
+			pos := presets[indices[idx]]
+			enemies = append(enemies, factory(pos.X, pos.Y))
+			idx++
+		}
 	}
 	return enemies
 }
 
 func Type1() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(8, 1),
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindSoldier, 1}),
 		Structures: WallType1(),
 	}
 }
@@ -107,7 +138,7 @@ func WallType1() []*structure.Structure {
 
 func Type2() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(15, 2),
+		Enemies:    GetRandomEnemy(15, EnemySpec{KindDog, 1}, EnemySpec{KindSoldier, 1}),
 		Structures: WallType2(),
 	}
 }
