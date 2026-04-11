@@ -169,7 +169,7 @@ func (e *Enemy) Mutate(
 		e.AnimationState = animation.StateRunning
 
 		if e.FootstepSoundTimeLeft <= 0 {
-			sound.PlaySound3D(e.FootstepSound, e.Position, p.Position, 0.1)
+			sound.PlaySound3D(e.FootstepSound, e.Position, p.Position, 0.5)
 			e.FootstepSoundTimeLeft = e.FootstepSoundTimeUnit
 		}
 	} else {
