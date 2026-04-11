@@ -36,6 +36,14 @@ func InitStages() {
 		Type4(),
 		Type4(),
 		Type4(),
+		Type5(),
+		Type5(),
+		Type5(),
+		Type5(),
+		Type6(),
+		Type6(),
+		Type6(),
+		Type6(),
 	}
 }
 
@@ -130,19 +138,33 @@ func GetRandomEnemy(radius float32, specs ...EnemySpec) []*enemy.Enemy {
 
 func Type1() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 1}),
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindSoldier, 1}),
 		Structures: WallType1(),
 	}
 }
 
 func Type2() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindSoldier, 1}),
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 1}),
 		Structures: WallType1(),
 	}
 }
 
 func Type3() Data {
+	return Data{
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 2}),
+		Structures: WallType1(),
+	}
+}
+
+func Type4() Data {
+	return Data{
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 3}),
+		Structures: WallType1(),
+	}
+}
+
+func Type5() Data {
 	return Data{
 		Enemies: GetRandomEnemy(
 			15,
@@ -153,7 +175,7 @@ func Type3() Data {
 	}
 }
 
-func Type4() Data {
+func Type6() Data {
 	var enemies []*enemy.Enemy
 	enemies = GetRandomEnemy(
 		15,
