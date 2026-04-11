@@ -21,7 +21,7 @@ func Init() {
 	rl.SetSoundVolume(ShotgunSound, 0.3)
 	ReloadingSound = util.LoadSoundFromEmbedded("1911-reload-6248.mp3")
 	rl.SetSoundVolume(ReloadingSound, 0.4)
-	Track = util.LoadSoundFromEmbedded("song3.mp3")
+	Track = util.LoadSoundFromEmbedded("song2.mp3")
 	rl.SetSoundVolume(Track, 1.2)
 	YouLose = util.LoadSoundFromEmbedded("lost.mp3")
 	ShotNew = util.LoadSoundFromEmbedded("shot_new.mp3")

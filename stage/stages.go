@@ -28,6 +28,10 @@ func InitStages() {
 		Type2(),
 		Type2(),
 		Type2(),
+		Type3(),
+		Type3(),
+		Type3(),
+		Type3(),
 	}
 }
 
@@ -122,8 +126,26 @@ func GetRandomEnemy(radius float32, specs ...EnemySpec) []*enemy.Enemy {
 
 func Type1() Data {
 	return Data{
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 1}),
+		Structures: WallType1(),
+	}
+}
+
+func Type2() Data {
+	return Data{
 		Enemies:    GetRandomEnemy(8, EnemySpec{KindSoldier, 1}),
 		Structures: WallType1(),
+	}
+}
+
+func Type3() Data {
+	return Data{
+		Enemies: GetRandomEnemy(
+			15,
+			EnemySpec{KindDog, 1},
+			EnemySpec{KindSoldier, 1},
+		),
+		Structures: WallType2(),
 	}
 }
 
@@ -133,13 +155,6 @@ func WallType1() []*structure.Structure {
 		{Position: rl.Vector3{X: 15, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 30}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: 0, Y: 0, Z: 15}, Size: rl.Vector3{X: 30, Y: 1, Z: 1}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: 0, Y: 0, Z: -15}, Size: rl.Vector3{X: 30, Y: 1, Z: 1}, Color: rl.DarkGray},
-	}
-}
-
-func Type2() Data {
-	return Data{
-		Enemies:    GetRandomEnemy(15, EnemySpec{KindDog, 1}, EnemySpec{KindSoldier, 1}),
-		Structures: WallType2(),
 	}
 }
 

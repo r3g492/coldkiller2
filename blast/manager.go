@@ -9,6 +9,7 @@ func CreateManager() *Manager {
 }
 
 func (bm *Manager) Init() {
+	clear(bm.Blasts)
 }
 
 func (bm *Manager) AddBlasts(addingBlasts []Blast) {
