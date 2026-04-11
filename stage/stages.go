@@ -154,12 +154,23 @@ func Type3() Data {
 }
 
 func Type4() Data {
+	var enemies []*enemy.Enemy
+	enemies = GetRandomEnemy(
+		15,
+		EnemySpec{KindDog, 1},
+		EnemySpec{KindSoldier, 1},
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			25,
+			EnemySpec{KindDog, 0},
+			EnemySpec{KindSoldier, 2},
+		)...,
+	)
+
 	return Data{
-		Enemies: GetRandomEnemy(
-			20,
-			EnemySpec{KindDog, 1},
-			EnemySpec{KindSoldier, 1},
-		),
+		Enemies:    enemies,
 		Structures: WallType3(),
 	}
 }

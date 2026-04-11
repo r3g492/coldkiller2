@@ -88,6 +88,7 @@ func main() {
 				w,
 				h,
 			)
+			drawInputOverlay(w, h, ip, keyMap)
 			continue
 		}
 
