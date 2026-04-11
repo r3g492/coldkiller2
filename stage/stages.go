@@ -32,6 +32,10 @@ func InitStages() {
 		Type3(),
 		Type3(),
 		Type3(),
+		Type4(),
+		Type4(),
+		Type4(),
+		Type4(),
 	}
 }
 
@@ -149,6 +153,17 @@ func Type3() Data {
 	}
 }
 
+func Type4() Data {
+	return Data{
+		Enemies: GetRandomEnemy(
+			20,
+			EnemySpec{KindDog, 1},
+			EnemySpec{KindSoldier, 1},
+		),
+		Structures: WallType3(),
+	}
+}
+
 func WallType1() []*structure.Structure {
 	return []*structure.Structure{
 		{Position: rl.Vector3{X: -15, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 30}, Color: rl.DarkGray},
@@ -164,5 +179,14 @@ func WallType2() []*structure.Structure {
 		{Position: rl.Vector3{X: 5, Y: 0, Z: -5}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: -5, Y: 0, Z: 5}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: 5, Y: 0, Z: 5}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+	}
+}
+
+func WallType3() []*structure.Structure {
+	return []*structure.Structure{
+		{Position: rl.Vector3{X: -8, Y: 0, Z: -8}, Size: rl.Vector3{X: 3, Y: 3, Z: 3}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 8, Y: 0, Z: -8}, Size: rl.Vector3{X: 3, Y: 3, Z: 3}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -8, Y: 0, Z: 8}, Size: rl.Vector3{X: 3, Y: 3, Z: 3}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 8, Y: 0, Z: 8}, Size: rl.Vector3{X: 3, Y: 3, Z: 3}, Color: rl.DarkGray},
 	}
 }
