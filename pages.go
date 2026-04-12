@@ -125,6 +125,13 @@ func doInitMenu(
 	h int,
 ) bool {
 	startingDiffUpperBound := len(stage.Stages)
+	maxAllowed := stageManager.HighestBeaten + 1
+	if maxAllowed < 1 {
+		maxAllowed = 1
+	}
+	if maxAllowed > startingDiffUpperBound {
+		maxAllowed = startingDiffUpperBound
+	}
 
 	diffY := float32(h)/2 - 80
 
@@ -144,9 +151,9 @@ func doInitMenu(
 		if rl.IsKeyPressed(k) {
 			digit := int(k - int32(rl.KeyZero))
 			next := stageManager.Difficulty*10 + digit
-			if next <= startingDiffUpperBound {
+			if next >= 1 && next <= maxAllowed {
 				stageManager.Difficulty = next
-			} else if digit <= startingDiffUpperBound {
+			} else if digit >= 1 && digit <= maxAllowed {
 				stageManager.Difficulty = digit
 			}
 			showDiffError = false
@@ -175,7 +182,10 @@ func doInitMenu(
 	}
 	rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, diffColor)
 
-	rangeText := fmt.Sprintf("1 - %d", startingDiffUpperBound)
+	rangeText := fmt.Sprintf("1 - %d", maxAllowed)
+	if maxAllowed < startingDiffUpperBound {
+		rangeText += fmt.Sprintf("  (play to unlock)")
+	}
 	rangeSize := int32(20)
 	rangeWidth := rl.MeasureText(rangeText, rangeSize)
 	rl.DrawText(rangeText, int32(w)/2-rangeWidth/2, int32(diffY)-30, rangeSize, rl.DarkGray)

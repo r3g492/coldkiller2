@@ -10,6 +10,7 @@ import (
 
 type Manager struct {
 	Difficulty       int
+	HighestBeaten    int
 	StructureManager *structure.Manager
 	EnemyManager     *enemy.Manager
 	Player           *killer.Killer

@@ -150,6 +150,9 @@ func main() {
 
 		if stageManager.StageWon() {
 			intermission = true
+			if stageManager.Difficulty > stageManager.HighestBeaten {
+				stageManager.HighestBeaten = stageManager.Difficulty
+			}
 			stageManager.Difficulty++
 			if !stageManager.GameWon() {
 				// rl.PlaySound(sound.ThreeTwoOne)
