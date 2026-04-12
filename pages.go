@@ -249,11 +249,14 @@ func doGameWon(w, h int) bool {
 	if rl.IsCursorHidden() {
 		rl.EnableCursor()
 	}
+	if rl.IsSoundPlaying(sound.Track) {
+		rl.StopSound(sound.Track)
+	}
 
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
 
-	winText := "MISSION ACCOMPLISHED"
+	winText := "THANKS FOR PLAYING! YOU'VE FINISHED THE GAME!"
 	fontSizeWin := int32(50)
 	textWidthWin := rl.MeasureText(winText, fontSizeWin)
 	textX := float32(w)/2 - float32(textWidthWin)/2
