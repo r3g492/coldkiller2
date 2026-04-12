@@ -169,8 +169,13 @@ func doInitMenu(
 	tryStart := rl.IsKeyPressed(rl.KeyEnter)
 	fontSizeDiff := int32(40)
 	var diffText string
+	cursorVisible := int(rl.GetTime()*2)%2 == 0
 	if blank {
-		diffText = "_"
+		if cursorVisible {
+			diffText = "_"
+		} else {
+			diffText = " "
+		}
 	} else {
 		diffText = fmt.Sprintf("%d", stageManager.Difficulty)
 	}
@@ -182,18 +187,13 @@ func doInitMenu(
 	}
 	rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, diffColor)
 
-	rangeText := fmt.Sprintf("1 - %d", maxAllowed)
+	rangeText := fmt.Sprintf("type between 1 - %d", maxAllowed)
 	if maxAllowed < startingDiffUpperBound {
 		rangeText += fmt.Sprintf("  (play to unlock)")
 	}
 	rangeSize := int32(20)
 	rangeWidth := rl.MeasureText(rangeText, rangeSize)
 	rl.DrawText(rangeText, int32(w)/2-rangeWidth/2, int32(diffY)-30, rangeSize, rl.DarkGray)
-
-	hintText := "type a number  |  backspace to erase"
-	hintSize := int32(16)
-	hintWidth := rl.MeasureText(hintText, hintSize)
-	rl.DrawText(hintText, int32(w)/2-hintWidth/2, int32(diffY)+60, hintSize, rl.Gray)
 
 	startRect := rl.Rectangle{
 		X:      float32(w)/2 - btnWidth/2,
