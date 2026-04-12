@@ -40,6 +40,7 @@ type Killer struct {
 	FootstepSoundTimeUnit float32
 	float32
 	FootstepSound rl.Sound
+	HitFlashTimer float32
 }
 
 const ModelRatio = 0.2
@@ -213,6 +214,9 @@ func (k *Killer) Mutate(
 	}
 
 	k.ActionTimeLeft -= dt
+	if k.HitFlashTimer > 0 {
+		k.HitFlashTimer -= dt
+	}
 	return bulletCmds
 }
 
@@ -347,6 +351,9 @@ func (k *Killer) GetBoundingBox() rl.BoundingBox {
 
 func (k *Killer) Damage(d int32) {
 	k.Health -= d
+	k.HitFlashTimer = 0.35
+	rl.SetSoundVolume(sound.ShotNew, 0.8)
+	rl.PlaySound(sound.ShotNew)
 	k.AnimationState = animation.StateDying
 	var shotTime float32 = 0.1
 	k.ActionTimeLeft = shotTime
@@ -357,6 +364,16 @@ func (k *Killer) Damage(d int32) {
 		k.ActionTimeLeft = dyingTime
 		k.MaxActionTime = dyingTime
 	}
+}
+
+func (k *Killer) DrawHitFlash() {
+	if k.HitFlashTimer <= 0 {
+		return
+	}
+	alpha := uint8(k.HitFlashTimer / 0.35 * 120)
+	w := rl.GetScreenWidth()
+	h := rl.GetScreenHeight()
+	rl.DrawRectangle(0, 0, int32(w), int32(h), rl.NewColor(220, 30, 30, alpha))
 }
 
 func (k *Killer) IsAlive() bool {

@@ -184,6 +184,7 @@ func main() {
 		rl.EndMode3D()
 
 		player.DrawUi()
+		player.DrawHitFlash()
 		enemyManager.DrawUi(player)
 		drawInputOverlay(w, h, ip, keyMap)
 		drawCursor(mouseLocation, player)
