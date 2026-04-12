@@ -101,13 +101,37 @@ type EnemySpec struct {
 	Count int
 }
 
-func GetRandomEnemy(radius float32, specs ...EnemySpec) []*enemy.Enemy {
-	presets := []rl.Vector2{
-		{X: -radius, Y: -radius}, {X: 0, Y: -radius}, {X: radius, Y: -radius},
+const enemySpawnSpacing = float32(8)
 
-		{X: -radius, Y: 0}, {X: radius, Y: 0},
+func GetRandomEnemy(radius float32, structures []*structure.Structure, specs ...EnemySpec) []*enemy.Enemy {
+	rings := int(radius / enemySpawnSpacing)
+	if rings < 1 {
+		rings = 1
+	}
 
-		{X: -radius, Y: radius}, {X: 0, Y: radius}, {X: radius, Y: radius},
+	enemySize := rl.Vector3{X: killer.CharSize, Y: killer.CharSize, Z: killer.CharSize}
+	presets := make([]rl.Vector2, 0, (2*rings+1)*(2*rings+1)-1)
+	for xi := -rings; xi <= rings; xi++ {
+		for zi := -rings; zi <= rings; zi++ {
+			if xi == 0 && zi == 0 {
+				continue
+			}
+			pos := rl.Vector3{
+				X: float32(xi) * enemySpawnSpacing,
+				Y: 0,
+				Z: float32(zi) * enemySpawnSpacing,
+			}
+			overlaps := false
+			for _, s := range structures {
+				if s.CheckCollision(pos, pos, enemySize) {
+					overlaps = true
+					break
+				}
+			}
+			if !overlaps {
+				presets = append(presets, rl.Vector2{X: pos.X, Y: pos.Z})
+			}
+		}
 	}
 
 	total := 0
@@ -139,55 +163,61 @@ func GetRandomEnemy(radius float32, specs ...EnemySpec) []*enemy.Enemy {
 }
 
 func Type1() Data {
+	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindSoldier, 1}),
-		Structures: WallType1(),
+		Enemies:    GetRandomEnemy(8, structs, EnemySpec{KindSoldier, 1}),
+		Structures: structs,
 	}
 }
 
 func Type2() Data {
+	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindRobot, 1}),
-		Structures: WallType1(),
+		Enemies:    GetRandomEnemy(8, structs, EnemySpec{KindRobot, 1}),
+		Structures: structs,
 	}
 }
 
 func Type3() Data {
+	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindRobot, 2}),
-		Structures: WallType1(),
+		Enemies:    GetRandomEnemy(8, structs, EnemySpec{KindRobot, 2}),
+		Structures: structs,
 	}
 }
 
 func Type4() Data {
+	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindRobot, 3}),
-		Structures: WallType1(),
+		Enemies:    GetRandomEnemy(8, structs, EnemySpec{KindRobot, 3}),
+		Structures: structs,
 	}
 }
 
 func Type5() Data {
+	structs := WallType2()
 	return Data{
 		Enemies: GetRandomEnemy(
-			15,
+			15, structs,
 			EnemySpec{KindRobot, 1},
 			EnemySpec{KindSoldier, 1},
 		),
-		Structures: WallType2(),
+		Structures: structs,
 	}
 }
 
 func Type6() Data {
+	structs := WallType3()
 	var enemies []*enemy.Enemy
 	enemies = GetRandomEnemy(
-		15,
+		20, structs,
 		EnemySpec{KindRobot, 1},
 		EnemySpec{KindSoldier, 1},
 	)
 	enemies = append(
 		enemies,
 		GetRandomEnemy(
-			25,
+			25, structs,
 			EnemySpec{KindRobot, 0},
 			EnemySpec{KindSoldier, 2},
 		)...,
@@ -195,7 +225,7 @@ func Type6() Data {
 
 	return Data{
 		Enemies:    enemies,
-		Structures: WallType3(),
+		Structures: structs,
 	}
 }
 
