@@ -47,6 +47,7 @@ func main() {
 	structureManager := structure.CreateManager()
 	enemyManager := enemy.CreateManager()
 	stageManager := stage.CreateManager()
+	stageManager.HighestBeaten = stage.LoadProgress()
 	player := killer.Create()
 	defer unloadGame(
 		bulletManager,
@@ -152,6 +153,7 @@ func main() {
 			intermission = true
 			if stageManager.Difficulty > stageManager.HighestBeaten {
 				stageManager.HighestBeaten = stageManager.Difficulty
+				stage.SaveProgress(stageManager.HighestBeaten)
 			}
 			stageManager.Difficulty++
 			if !stageManager.GameWon() {
