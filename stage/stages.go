@@ -50,6 +50,7 @@ func InitStages() {
 func Soldier(x, z float32) *enemy.Enemy {
 	return &enemy.Enemy{
 		Model:                 model.UnitV4Model,
+		ModelRatio:            0.2,
 		Animation:             model.UnitV4Animation,
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
@@ -69,8 +70,9 @@ func Soldier(x, z float32) *enemy.Enemy {
 
 func Dog(x, z float32) *enemy.Enemy {
 	return &enemy.Enemy{
-		Model:                 model.UnitV4Model,
-		Animation:             model.UnitV4Animation,
+		Model:                 model.UnitV3Model,
+		ModelRatio:            0.4,
+		Animation:             model.UnitV3Animation,
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
 		MoveSpeed:             8,

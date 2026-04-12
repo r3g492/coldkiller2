@@ -14,6 +14,7 @@ import (
 type Enemy struct {
 	Model         rl.Model
 	ModelAngleDeg float32
+	ModelRatio    float32
 
 	Animation             []rl.ModelAnimation
 	AnimationState        animation.ActionState
@@ -60,10 +61,10 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 	rl.Rotatef(-30, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
 	if e.IsAlive() {
-		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), killer.ModelRatio, rl.Red)
-		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, rl.Red)
+		rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
 	} else {
-		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), killer.ModelRatio, rl.DarkGray)
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, rl.DarkGray)
 	}
 	rl.PopMatrix()
 	if e.AnimationState == animation.StateAiming {
