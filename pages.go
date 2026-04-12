@@ -175,6 +175,11 @@ func doInitMenu(
 	}
 	rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, diffColor)
 
+	rangeText := fmt.Sprintf("1 - %d", startingDiffUpperBound)
+	rangeSize := int32(20)
+	rangeWidth := rl.MeasureText(rangeText, rangeSize)
+	rl.DrawText(rangeText, int32(w)/2-rangeWidth/2, int32(diffY)-30, rangeSize, rl.DarkGray)
+
 	hintText := "type a number  |  backspace to erase"
 	hintSize := int32(16)
 	hintWidth := rl.MeasureText(hintText, hintSize)
