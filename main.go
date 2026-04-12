@@ -79,7 +79,7 @@ func main() {
 		}
 
 		if showInitMenu {
-			doInitMenu(
+			if doInitMenu(
 				stageManager,
 				bulletManager,
 				blastManager,
@@ -88,7 +88,9 @@ func main() {
 				enemyManager,
 				w,
 				h,
-			)
+			) {
+				break
+			}
 			drawInputOverlay(w, h, ip, keyMap)
 			continue
 		}

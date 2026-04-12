@@ -121,16 +121,10 @@ func doInitMenu(
 	enemyManager *enemy.Manager,
 	w int,
 	h int,
-) {
+) bool {
 	startingDiffLowerBound := 1
 	startingDiffUpperBound := len(stage.Stages)
 
-	btnRect := rl.Rectangle{
-		X:      float32(w)/2 - btnWidth/2,
-		Y:      float32(h)/2 + 60,
-		Width:  btnWidth,
-		Height: btnHeight,
-	}
 	diffY := float32(h)/2 - 80
 
 	rl.StopSound(sound.Track)
@@ -163,8 +157,20 @@ func doInitMenu(
 		stageManager.Difficulty = stageManager.Difficulty + 1
 	}
 
-	buttonText := "Start Game"
-	if drawButton(btnRect, buttonText, rl.Red, rl.Red, rl.Red) {
+	startRect := rl.Rectangle{
+		X:      float32(w)/2 - btnWidth/2,
+		Y:      float32(h)/2 + 60,
+		Width:  btnWidth,
+		Height: btnHeight,
+	}
+	exitRect := rl.Rectangle{
+		X:      float32(w)/2 - btnWidth/2,
+		Y:      float32(h)/2 + 60 + btnHeight + spacing,
+		Width:  btnWidth,
+		Height: btnHeight,
+	}
+
+	if drawButton(startRect, "Start Game", rl.Maroon, rl.Red, rl.White) {
 		showInitMenu = false
 		intermission = true
 		// rl.PlaySound(sound.ThreeTwoOne)
@@ -179,7 +185,10 @@ func doInitMenu(
 		stageManager.CreateNewStage(player.Position)
 	}
 
+	exitClicked := drawButton(exitRect, "Exit Game", rl.DarkGray, rl.Gray, rl.White)
+
 	rl.EndDrawing()
+	return exitClicked
 }
 
 func doGameWon(w, h int) bool {
