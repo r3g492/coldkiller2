@@ -11,6 +11,8 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+var enemyRed = rl.NewColor(150, 20, 25, 255)
+
 type Enemy struct {
 	Model         rl.Model
 	ModelAngleDeg float32
@@ -61,14 +63,14 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 	rl.Rotatef(-30, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
 	if e.IsAlive() {
-		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, rl.Red)
-		rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, rl.Red)
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, enemyRed)
+		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, enemyRed)
 	} else {
 		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, rl.DarkGray)
 	}
 	rl.PopMatrix()
 	if e.AnimationState == animation.StateAiming {
-		rl.DrawLine3D(e.Position, p.Position, rl.Red)
+		rl.DrawLine3D(e.Position, p.Position, enemyRed)
 	}
 }
 
