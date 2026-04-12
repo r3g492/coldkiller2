@@ -82,10 +82,15 @@ func doIntermission(
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.DarkGray)
 
-	diffInfoText := fmt.Sprintf("%d/%d", stageManager.Difficulty, len(stage.Stages))
-	diffInfoSize := int32(30)
+	labelText := "NEXT STAGE"
+	labelSize := int32(18)
+	labelWidth := rl.MeasureText(labelText, labelSize)
+	rl.DrawText(labelText, int32(w)/2-labelWidth/2, int32(h)/2-70, labelSize, rl.Gray)
+
+	diffInfoText := fmt.Sprintf("%d / %d", stageManager.Difficulty, len(stage.Stages))
+	diffInfoSize := int32(40)
 	diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
-	rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-30, diffInfoSize, rl.LightGray)
+	rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-40, diffInfoSize, rl.RayWhite)
 
 	timeLeft := 1.0 - intermissionTimer
 	if timeLeft < 0 {
