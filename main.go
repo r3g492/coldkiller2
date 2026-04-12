@@ -185,6 +185,7 @@ func main() {
 
 		player.DrawUi()
 		player.DrawHitFlash()
+		drawEnemyCount(w, enemyManager.AliveCount())
 		enemyManager.DrawUi(player)
 		drawInputOverlay(w, h, ip, keyMap)
 		drawCursor(mouseLocation, player)

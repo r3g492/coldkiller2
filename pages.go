@@ -214,6 +214,14 @@ func doGameWon(w, h int) bool {
 	return exitClicked
 }
 
+func drawEnemyCount(w int, alive int) {
+	text := fmt.Sprintf("ENEMIES: %d", alive)
+	fontSize := int32(22)
+	textWidth := rl.MeasureText(text, fontSize)
+	margin := int32(20)
+	rl.DrawText(text, int32(w)/2-textWidth/2, margin, fontSize, rl.NewColor(220, 60, 60, 220))
+}
+
 func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {
 	mousePoint := rl.GetMousePosition()
 	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)

@@ -117,6 +117,16 @@ func (em *Manager) Unload() {
 	em.Enemies = []*Enemy{}
 }
 
+func (em *Manager) AliveCount() int {
+	count := 0
+	for _, e := range em.Enemies {
+		if e.IsAlive() {
+			count++
+		}
+	}
+	return count
+}
+
 func (em *Manager) GetBoundingBoxes() []rl.BoundingBox {
 	boxes := make([]rl.BoundingBox, 0, len(em.Enemies))
 	for _, e := range em.Enemies {
