@@ -206,7 +206,7 @@ func Type5() Data {
 	return Data{
 		Enemies: GetRandomEnemy(
 			15, structs, nil,
-			EnemySpec{KindRobot, 1},
+			EnemySpec{KindRobot, 3},
 			EnemySpec{KindSoldier, 1},
 		),
 		Structures: structs,
@@ -224,8 +224,8 @@ func Type6() Data {
 		enemies,
 		GetRandomEnemy(
 			25, structs, enemies,
-			EnemySpec{KindRobot, 0},
-			EnemySpec{KindSoldier, 2},
+			EnemySpec{KindRobot, 3},
+			EnemySpec{KindSoldier, 1},
 		)...,
 	)
 
