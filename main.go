@@ -20,6 +20,7 @@ var lastLog = time.Now()
 var showInitMenu = true
 var intermission = false
 var intermissionTimer float32 = 0.0
+var paused = false
 
 func main() {
 	// setting
@@ -65,8 +66,8 @@ func main() {
 		if ip.EndGamePressed {
 			if showInitMenu {
 				break
-			} else {
-				showInitMenu = true
+			} else if !intermission {
+				paused = !paused
 			}
 		}
 
@@ -100,6 +101,21 @@ func main() {
 
 		if !rl.IsSoundPlaying(sound.Track) {
 			rl.PlaySound(sound.Track)
+		}
+
+		if paused {
+			if rl.IsCursorHidden() {
+				rl.EnableCursor()
+			}
+			action := doPauseMenu(w, h)
+			if action == pauseResume {
+				paused = false
+			} else if action == pauseQuitToMenu {
+				paused = false
+				showInitMenu = true
+				rl.StopSound(sound.Track)
+			}
+			continue
 		}
 
 		if !rl.IsCursorHidden() {

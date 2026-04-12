@@ -21,6 +21,49 @@ var (
 	spacing   = float32(20)
 )
 
+type pauseAction int
+
+const (
+	pauseNone       pauseAction = iota
+	pauseResume     pauseAction = iota
+	pauseQuitToMenu pauseAction = iota
+)
+
+func doPauseMenu(w, h int) pauseAction {
+	rl.BeginDrawing()
+	rl.ClearBackground(rl.NewColor(0, 0, 0, 0))
+	rl.DrawRectangle(0, 0, int32(w), int32(h), rl.NewColor(0, 0, 0, 160))
+
+	titleText := "PAUSED"
+	titleSize := int32(60)
+	titleWidth := rl.MeasureText(titleText, titleSize)
+	rl.DrawText(titleText, int32(w)/2-titleWidth/2, int32(h)/2-160, titleSize, rl.RayWhite)
+
+	resumeRect := rl.Rectangle{
+		X:      float32(w)/2 - btnWidth/2,
+		Y:      float32(h)/2 - 40,
+		Width:  btnWidth,
+		Height: btnHeight,
+	}
+	quitRect := rl.Rectangle{
+		X:      float32(w)/2 - btnWidth/2,
+		Y:      float32(h)/2 + 60,
+		Width:  btnWidth,
+		Height: btnHeight,
+	}
+
+	result := pauseNone
+	if drawButton(resumeRect, "Resume", rl.DarkGray, rl.Gray, rl.White) {
+		result = pauseResume
+	}
+	if drawButton(quitRect, "Quit to Menu", rl.DarkGray, rl.Gray, rl.White) {
+		result = pauseQuitToMenu
+	}
+
+	rl.EndDrawing()
+	return result
+}
+
 func doIntermission(
 	dt float32,
 	stageManager *stage.Manager,
