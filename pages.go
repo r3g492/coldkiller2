@@ -21,6 +21,8 @@ var (
 	spacing   = float32(20)
 )
 
+var showDiffError = false
+
 type pauseAction int
 
 const (
@@ -122,15 +124,11 @@ func doInitMenu(
 	w int,
 	h int,
 ) bool {
-	startingDiffLowerBound := 1
 	startingDiffUpperBound := len(stage.Stages)
 
 	diffY := float32(h)/2 - 80
 
 	rl.StopSound(sound.Track)
-	if stageManager.Difficulty < startingDiffLowerBound {
-		stageManager.Difficulty = startingDiffLowerBound
-	}
 	if stageManager.Difficulty > startingDiffUpperBound {
 		stageManager.Difficulty = startingDiffUpperBound
 	}
@@ -142,20 +140,45 @@ func doInitMenu(
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.Black)
 
-	diffText := fmt.Sprintf("%d", stageManager.Difficulty)
+	for k := int32(rl.KeyZero); k <= int32(rl.KeyNine); k++ {
+		if rl.IsKeyPressed(k) {
+			digit := int(k - int32(rl.KeyZero))
+			next := stageManager.Difficulty*10 + digit
+			if next <= startingDiffUpperBound {
+				stageManager.Difficulty = next
+			} else if digit <= startingDiffUpperBound {
+				stageManager.Difficulty = digit
+			}
+			showDiffError = false
+		}
+	}
+	if rl.IsKeyPressed(rl.KeyBackspace) {
+		stageManager.Difficulty /= 10 // single digit → 0 (blank)
+		showDiffError = false
+	}
+
+	blank := stageManager.Difficulty == 0
+
+	tryStart := rl.IsKeyPressed(rl.KeyEnter)
 	fontSizeDiff := int32(40)
+	var diffText string
+	if blank {
+		diffText = "_"
+	} else {
+		diffText = fmt.Sprintf("%d", stageManager.Difficulty)
+	}
 	textWidthDiff := rl.MeasureText(diffText, fontSizeDiff)
 	textX := float32(w)/2 - float32(textWidthDiff)/2
-	rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, rl.RayWhite)
+	diffColor := rl.RayWhite
+	if blank {
+		diffColor = rl.Gray
+	}
+	rl.DrawText(diffText, int32(textX), int32(diffY+10), fontSizeDiff, diffColor)
 
-	minusRect := rl.Rectangle{X: textX - sqSize - spacing, Y: diffY, Width: sqSize, Height: sqSize}
-	plusRect := rl.Rectangle{X: textX + float32(textWidthDiff) + spacing, Y: diffY, Width: sqSize, Height: sqSize}
-	if drawButton(minusRect, "-", rl.DarkGray, rl.Gray, rl.White) && stageManager.Difficulty > startingDiffLowerBound {
-		stageManager.Difficulty = stageManager.Difficulty - 1
-	}
-	if drawButton(plusRect, "+", rl.DarkGray, rl.Gray, rl.White) && stageManager.Difficulty < startingDiffUpperBound {
-		stageManager.Difficulty = stageManager.Difficulty + 1
-	}
+	hintText := "type a number  |  backspace to erase"
+	hintSize := int32(16)
+	hintWidth := rl.MeasureText(hintText, hintSize)
+	rl.DrawText(hintText, int32(w)/2-hintWidth/2, int32(diffY)+60, hintSize, rl.Gray)
 
 	startRect := rl.Rectangle{
 		X:      float32(w)/2 - btnWidth/2,
@@ -170,19 +193,35 @@ func doInitMenu(
 		Height: btnHeight,
 	}
 
-	if drawButton(startRect, "Start Game", rl.Maroon, rl.Red, rl.White) {
-		showInitMenu = false
-		intermission = true
-		// rl.PlaySound(sound.ThreeTwoOne)
-		initNewGame(
-			bulletManager,
-			blastManager,
-			structureManager,
-			player,
-			enemyManager,
-			stageManager,
-		)
-		stageManager.CreateNewStage(player.Position)
+	startColor := rl.Maroon
+	if blank {
+		startColor = rl.DarkGray
+	}
+	if drawButton(startRect, "Start Game", startColor, rl.Red, rl.White) || tryStart {
+		if blank {
+			showDiffError = true
+		} else {
+			showDiffError = false
+			showInitMenu = false
+			intermission = true
+			// rl.PlaySound(sound.ThreeTwoOne)
+			initNewGame(
+				bulletManager,
+				blastManager,
+				structureManager,
+				player,
+				enemyManager,
+				stageManager,
+			)
+			stageManager.CreateNewStage(player.Position)
+		}
+	}
+
+	if showDiffError {
+		errText := "enter a stage number first"
+		errSize := int32(18)
+		errWidth := rl.MeasureText(errText, errSize)
+		rl.DrawText(errText, int32(w)/2-errWidth/2, int32(startRect.Y)-30, errSize, rl.Red)
 	}
 
 	exitClicked := drawButton(exitRect, "Exit Game", rl.DarkGray, rl.Gray, rl.White)

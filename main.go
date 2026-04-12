@@ -66,7 +66,12 @@ func main() {
 		if ip.EndGamePressed {
 			if showInitMenu {
 				break
-			} else if !intermission {
+			} else if intermission {
+				intermission = false
+				intermissionTimer = 0
+				showInitMenu = true
+				rl.StopSound(sound.Track)
+			} else {
 				paused = !paused
 			}
 		}
