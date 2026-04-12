@@ -68,7 +68,7 @@ func Soldier(x, z float32) *enemy.Enemy {
 	}
 }
 
-func Dog(x, z float32) *enemy.Enemy {
+func Robot(x, z float32) *enemy.Enemy {
 	return &enemy.Enemy{
 		Model:                 model.UnitV3Model,
 		ModelRatio:            0.4,
@@ -122,7 +122,7 @@ func GetRandomEnemy(radius float32, specs ...EnemySpec) []*enemy.Enemy {
 	enemies := make([]*enemy.Enemy, 0, total)
 	idx := 0
 	for _, s := range specs {
-		factory := Dog
+		factory := Robot
 		if s.Kind == KindSoldier {
 			factory = Soldier
 		}
