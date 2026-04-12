@@ -92,7 +92,7 @@ func Robot(x, z float32) *enemy.Enemy {
 type EnemyKind int
 
 const (
-	KindDog EnemyKind = iota
+	KindRobot EnemyKind = iota
 	KindSoldier
 )
 
@@ -147,21 +147,21 @@ func Type1() Data {
 
 func Type2() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 1}),
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindRobot, 1}),
 		Structures: WallType1(),
 	}
 }
 
 func Type3() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 2}),
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindRobot, 2}),
 		Structures: WallType1(),
 	}
 }
 
 func Type4() Data {
 	return Data{
-		Enemies:    GetRandomEnemy(8, EnemySpec{KindDog, 3}),
+		Enemies:    GetRandomEnemy(8, EnemySpec{KindRobot, 3}),
 		Structures: WallType1(),
 	}
 }
@@ -170,7 +170,7 @@ func Type5() Data {
 	return Data{
 		Enemies: GetRandomEnemy(
 			15,
-			EnemySpec{KindDog, 1},
+			EnemySpec{KindRobot, 1},
 			EnemySpec{KindSoldier, 1},
 		),
 		Structures: WallType2(),
@@ -181,14 +181,14 @@ func Type6() Data {
 	var enemies []*enemy.Enemy
 	enemies = GetRandomEnemy(
 		15,
-		EnemySpec{KindDog, 1},
+		EnemySpec{KindRobot, 1},
 		EnemySpec{KindSoldier, 1},
 	)
 	enemies = append(
 		enemies,
 		GetRandomEnemy(
 			25,
-			EnemySpec{KindDog, 0},
+			EnemySpec{KindRobot, 0},
 			EnemySpec{KindSoldier, 2},
 		)...,
 	)
