@@ -40,6 +40,7 @@ type Enemy struct {
 	AttackRange           float32
 	AimTimeLeft           float32
 	AimTimeUnit           float32
+	AimDirection          rl.Vector3
 	FootstepSoundTimeLeft float32
 	FootstepSoundTimeUnit float32
 	FootstepSound         rl.Sound
@@ -69,8 +70,9 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, rl.DarkGray)
 	}
 	rl.PopMatrix()
-	if e.AnimationState == animation.StateAiming {
-		rl.DrawLine3D(e.Position, p.Position, enemyRed)
+	if e.AnimationState == animation.StateAiming && e.AimDirection != (rl.Vector3{}) {
+		aimEnd := rl.Vector3Add(e.Position, rl.Vector3Scale(rl.Vector3Normalize(e.AimDirection), e.AttackRange))
+		rl.DrawLine3D(e.Position, aimEnd, enemyRed)
 	}
 }
 
@@ -104,7 +106,6 @@ func (e *Enemy) Mutate(
 	myIdx int,
 	structureManager *structure.Manager,
 ) []BulletCmd {
-	distToPlayer := rl.Vector3Distance(e.Position, p.Position)
 	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
@@ -119,26 +120,28 @@ func (e *Enemy) Mutate(
 	}
 
 	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, &p, structureManager)
+	if e.AimDirection != (rl.Vector3{}) {
+		derivedAimStart = true
+	}
 
-	if e.AimTimeLeft <= 0 && distToPlayer <= e.AttackRange {
-		// shot
-		e.TargetDirection = vecToPlayer
-		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
-		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+	if e.AimTimeLeft <= 0 {
+		dir := rl.Vector3Normalize(e.AimDirection)
 		e.ActionTimeLeft = 1
 		e.AnimationState = animation.StateAttacking
 		e.AnimationCurrentFrame = 0
 		e.AimTimeLeft = e.AimTimeUnit
+		e.AimDirection = rl.Vector3{}
 		rl.PlaySound(sound.ShotgunSound)
-		dir := rl.Vector3Normalize(e.TargetDirection)
-		spawnPos := rl.Vector3Add(e.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
+		spawnPos := e.Position
 		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200})
 		return bulletCmds
 	}
 
 	if derivedAimStart {
-		// aim
-		e.TargetDirection = vecToPlayer
+		if e.AimDirection == (rl.Vector3{}) {
+			e.AimDirection = vecToPlayer
+		}
+		e.TargetDirection = e.AimDirection
 		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 		e.AimTimeLeft -= dt
@@ -148,6 +151,7 @@ func (e *Enemy) Mutate(
 	}
 
 	e.AimTimeLeft = e.AimTimeUnit
+	e.AimDirection = rl.Vector3{}
 	e.MoveDirection = derivedMovement
 
 	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
