@@ -72,6 +72,25 @@ func (sm *Manager) CheckCollision(otherPos rl.Vector3, prevPos rl.Vector3, other
 	return false
 }
 
+func (sm *Manager) RayObstructed(from, to rl.Vector3) bool {
+	dir := rl.Vector3Subtract(to, from)
+	dist := rl.Vector3Length(dir)
+	if dist < 1e-6 {
+		return false
+	}
+	ray := rl.Ray{
+		Position:  from,
+		Direction: rl.Vector3Normalize(dir),
+	}
+	for _, s := range sm.GetStructuresNearPosition(from, dist+RADIUS) {
+		col := s.RayCollisionOBB(ray)
+		if col.Hit && col.Distance < dist {
+			return true
+		}
+	}
+	return false
+}
+
 func (sm *Manager) Unload() {
 	clear(sm.Grid)
 }

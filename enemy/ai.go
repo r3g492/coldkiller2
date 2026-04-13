@@ -35,12 +35,13 @@ func deriveAi(
 		return shouldAim, moveDir
 	}
 	if e.AiType == Elite {
-		shouldAim := e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange
+		aimObstructed := structureManager.RayObstructed(e.Position, p.Position)
+		shouldAim := e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && !aimObstructed
 		var moveDir rl.Vector3
 		optimalRange := e.AttackRange * 0.8
 		tooCloseRange := e.AttackRange * 0.4
 
-		if distToPlayer > optimalRange {
+		if distToPlayer > optimalRange || aimObstructed {
 			moveDir = dirToPlayer
 		} else if distToPlayer < tooCloseRange {
 			moveDir = rl.Vector3Scale(dirToPlayer, -1)
