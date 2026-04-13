@@ -133,7 +133,7 @@ func (e *Enemy) Mutate(
 		e.AimDirection = rl.Vector3{}
 		rl.PlaySound(sound.ShotgunSound)
 		spawnPos := e.Position
-		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200})
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200, e.AttackRange})
 		return bulletCmds
 	}
 

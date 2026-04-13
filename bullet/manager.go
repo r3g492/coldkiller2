@@ -46,13 +46,15 @@ func (bm *Manager) EnemyBulletCreate(
 	bulletCmds []enemy.BulletCmd,
 ) {
 	for _, bc := range bulletCmds {
+		const speed = 100.0
+		lifeTime := bc.Range / speed
 		b := Bullet{
 			Position:  bc.Pos,
 			Direction: bc.Dir,
-			Speed:     100.0,
+			Speed:     speed,
 			Radius:    0.1,
 			Active:    true,
-			LifeTime:  1.0,
+			LifeTime:  lifeTime,
 			Shooter:   Enemy,
 			Color:     rl.Yellow,
 			Damage:    bc.Damage,
