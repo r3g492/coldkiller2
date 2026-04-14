@@ -296,6 +296,27 @@ func Soldier(x, z float32) *Enemy {
 	}
 }
 
+func Sniper(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.UnitV4Model,
+		ModelRatio:            0.2,
+		Animation:             model.UnitV4Animation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             1,
+		Health:                100,
+		AttackRange:           30,
+		AimTimeLeft:           5,
+		AimTimeUnit:           5,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Elite,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+	}
+}
+
 func Robot(x, z float32) *Enemy {
 	return &Enemy{
 		Model:                 model.UnitV3Model,

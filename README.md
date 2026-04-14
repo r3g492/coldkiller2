@@ -1,2 +1,5 @@
 TODO:
-- win condition  && win screen by difficulty
+- boss with dash 
+- new ai 
+- new enemy model 
+- 
