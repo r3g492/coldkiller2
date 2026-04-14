@@ -190,7 +190,7 @@ func (k *Killer) Mutate(
 	if input.ReloadPressed && k.ActionTimeLeft <= 0 {
 		rl.PlaySound(sound.ReloadingSound)
 		k.Ammo = k.AmmoCapacity
-		var reloadTime float32 = 0.7
+		var reloadTime float32 = 0.4
 		k.ActionTimeLeft = reloadTime
 		k.MaxActionTime = reloadTime
 		k.AnimationState = animation.StateReloading
