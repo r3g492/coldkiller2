@@ -31,7 +31,58 @@ const (
 	pauseQuitToMenu pauseAction = iota
 )
 
-func doPauseMenu(w, h int) pauseAction {
+const splashDuration = 2.0
+
+// doSplash draws the splash screen and returns true when it should end.
+func doSplash(timer *float32, tex rl.Texture2D, dt float32, w, h int) bool {
+	*timer += dt
+
+	// fade in over first 0.5s, fully visible until 1.5s, fade out over last 0.5s
+	var overlay uint8
+	t := *timer
+	switch {
+	case t < 0.5:
+		overlay = uint8(255 - t/0.5*255)
+	case t < 1.5:
+		overlay = 0
+	default:
+		fade := (t - 1.5) / 0.5
+		if fade > 1 {
+			fade = 1
+		}
+		overlay = uint8(fade * 255)
+	}
+
+	rl.BeginDrawing()
+	rl.ClearBackground(rl.Black)
+
+	imgW := float32(tex.Width)
+	imgH := float32(tex.Height)
+	destX := float32(w)/2 - imgW/2
+	destY := float32(h)/2 - imgH/2
+	rl.DrawTextureV(tex, rl.Vector2{X: destX, Y: destY}, rl.White)
+
+	// gradient: top dark → transparent → bottom dark
+	gradH := float32(h)
+	for i := 0; i < h; i++ {
+		edge := float32(i) / gradH
+		var alpha uint8
+		if edge < 0.5 {
+			alpha = uint8((1 - edge*2) * 180)
+		} else {
+			alpha = uint8((edge*2 - 1) * 180)
+		}
+		rl.DrawLine(0, int32(i), int32(w), int32(i), rl.NewColor(0, 0, 0, alpha))
+	}
+
+	rl.DrawRectangle(0, 0, int32(w), int32(h), rl.NewColor(0, 0, 0, overlay))
+
+	rl.EndDrawing()
+
+	return *timer >= splashDuration
+}
+
+func doPauseMenu(w, h int, ip input.Input, keyMap input.KeyMap) pauseAction {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.NewColor(0, 0, 0, 0))
 	rl.DrawRectangle(0, 0, int32(w), int32(h), rl.NewColor(0, 0, 0, 160))
@@ -61,6 +112,8 @@ func doPauseMenu(w, h int) pauseAction {
 	if drawButton(quitRect, "Quit to Menu", rl.DarkGray, rl.Gray, rl.White) {
 		result = pauseQuitToMenu
 	}
+
+	drawInputOverlay(w, h, ip, keyMap, true)
 
 	rl.EndDrawing()
 	return result

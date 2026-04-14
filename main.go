@@ -11,12 +11,15 @@ import (
 	"coldkiller2/sound"
 	"coldkiller2/stage"
 	"coldkiller2/structure"
+	"coldkiller2/util"
 	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 var lastLog = time.Now()
+var showSplash = true
+var splashTimer float32 = 0.0
 var showInitMenu = true
 var intermission = false
 var intermissionTimer float32 = 0.0
@@ -41,6 +44,9 @@ func main() {
 	model.Init()
 	stage.InitStages()
 
+	splashTex := util.LoadTextureFromEmbedded("raylib_144x144.png")
+	defer rl.UnloadTexture(splashTex)
+
 	keyMap := input.DefaultWASD()
 
 	bulletManager := bullet.CreateManager()
@@ -64,6 +70,11 @@ func main() {
 		mouseLocation := rl.GetMousePosition()
 		ip := input.ReadInput(keyMap)
 		log(mouseLocation, dt, player)
+
+		if showSplash {
+			showSplash = !doSplash(&splashTimer, splashTex, dt, w, h)
+			continue
+		}
 
 		if ip.EndGamePressed {
 			if showInitMenu {
@@ -116,7 +127,7 @@ func main() {
 			if rl.IsCursorHidden() {
 				rl.EnableCursor()
 			}
-			action := doPauseMenu(w, h)
+			action := doPauseMenu(w, h, ip, keyMap)
 			if action == pauseResume {
 				paused = false
 			} else if action == pauseQuitToMenu {
@@ -143,7 +154,6 @@ func main() {
 				w,
 				h,
 			)
-			drawInputOverlay(w, h, ip, keyMap, false)
 			continue
 		}
 
@@ -210,7 +220,6 @@ func main() {
 		player.DrawHitFlash()
 		drawEnemyCount(w, enemyManager.AliveCount())
 		enemyManager.DrawUi(player)
-		drawInputOverlay(w, h, ip, keyMap, false)
 		drawCursor(mouseLocation, player)
 
 		rl.EndDrawing()

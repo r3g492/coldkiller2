@@ -9,7 +9,20 @@ import (
 )
 
 //go:embed sounds/*
+//go:embed images/*
 var resFS embed.FS
+
+func LoadTextureFromEmbedded(filename string) rl.Texture2D {
+	data, err := resFS.ReadFile("images/" + filename)
+	if err != nil {
+		log.Fatalf("failed to read embedded image %s: %v", filename, err)
+	}
+	ext := ".png"
+	img := rl.LoadImageFromMemory(ext, data, int32(len(data)))
+	tex := rl.LoadTextureFromImage(img)
+	rl.UnloadImage(img)
+	return tex
+}
 
 func LoadSoundFromEmbedded(filename string) rl.Sound {
 	data, err := resFS.ReadFile("sounds/" + filename)
