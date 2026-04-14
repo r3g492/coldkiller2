@@ -398,7 +398,7 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap, midTop bool
 	drawKey(currX, baseY+keySize+spacing, keySize, labelReload, "RELOAD", ip.ReloadPressed)
 	currX += keySize + spacing
 
-	drawKey(currX, baseY+keySize+spacing, keySize+30, "LMB", "SHOOT", rl.IsMouseButtonDown(keyMap.PunchHold))
+	drawKey(currX, baseY+keySize+spacing, keySize+30, "LMB", "SHOOT", rl.IsMouseButtonDown(keyMap.Fire))
 	currX += keySize + 30 + spacing
 
 	drawKey(currX, baseY+keySize+spacing, keySize+30, "SPC", "DASH", ip.DashPressed)

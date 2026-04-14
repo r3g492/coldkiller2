@@ -8,9 +8,9 @@ type Input struct {
 	MoveLeft       bool
 	MoveRight      bool
 	MouseLocation  rl.Vector2
-	PunchHold      bool
-	PunchPressed   bool
-	PunchReleased  bool
+	FireHold       bool
+	FirePressed    bool
+	FireReleased   bool
 	ReloadPressed  bool
 	EndGamePressed bool
 	DashPressed    bool
@@ -21,7 +21,7 @@ type KeyMap struct {
 	Down      int32
 	Left      int32
 	Right     int32
-	PunchHold rl.MouseButton
+	Fire      rl.MouseButton
 	Reload    int32
 	ResetGame int32
 	EndGame   int32
@@ -30,14 +30,14 @@ type KeyMap struct {
 
 func DefaultWASD() KeyMap {
 	return KeyMap{
-		Up:        rl.KeyW,
-		Down:      rl.KeyS,
-		Left:      rl.KeyA,
-		Right:     rl.KeyD,
-		PunchHold: rl.MouseLeftButton,
-		Reload:    rl.KeyR,
-		EndGame:   rl.KeyEscape,
-		Dash:      rl.KeySpace,
+		Up:      rl.KeyW,
+		Down:    rl.KeyS,
+		Left:    rl.KeyA,
+		Right:   rl.KeyD,
+		Fire:    rl.MouseLeftButton,
+		Reload:  rl.KeyR,
+		EndGame: rl.KeyEscape,
+		Dash:    rl.KeySpace,
 	}
 }
 
@@ -48,9 +48,9 @@ func ReadInput(keyMap KeyMap) Input {
 		MoveLeft:       rl.IsKeyDown(keyMap.Left),
 		MoveRight:      rl.IsKeyDown(keyMap.Right),
 		MouseLocation:  rl.GetMousePosition(),
-		PunchHold:      rl.IsMouseButtonDown(keyMap.PunchHold),
-		PunchPressed:   rl.IsMouseButtonPressed(keyMap.PunchHold),
-		PunchReleased:  rl.IsMouseButtonReleased(keyMap.PunchHold),
+		FireHold:       rl.IsMouseButtonDown(keyMap.Fire),
+		FirePressed:    rl.IsMouseButtonPressed(keyMap.Fire),
+		FireReleased:   rl.IsMouseButtonReleased(keyMap.Fire),
 		ReloadPressed:  rl.IsKeyDown(keyMap.Reload),
 		EndGamePressed: rl.IsKeyPressed(keyMap.EndGame),
 		DashPressed:    rl.IsKeyPressed(keyMap.Dash),
