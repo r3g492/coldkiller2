@@ -1,6 +1,8 @@
 package bullet
 
 import (
+	"coldkiller2/enemy"
+
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -13,6 +15,7 @@ type Bullet struct {
 	Active       bool
 	LifeTime     float32
 	Shooter      Shooter
+	EnemyShooter *enemy.Enemy
 	Color        rl.Color
 	Damage       int32
 

@@ -49,15 +49,16 @@ func (bm *Manager) EnemyBulletCreate(
 		const speed = 25
 		lifeTime := bc.Range / speed
 		b := Bullet{
-			Position:  bc.Pos,
-			Direction: bc.Dir,
-			Speed:     speed,
-			Radius:    0.1,
-			Active:    true,
-			LifeTime:  lifeTime,
-			Shooter:   Enemy,
-			Color:     rl.Yellow,
-			Damage:    bc.Damage,
+			Position:     bc.Pos,
+			Direction:    bc.Dir,
+			Speed:        speed,
+			Radius:       0.1,
+			Active:       true,
+			LifeTime:     lifeTime,
+			Shooter:      Enemy,
+			EnemyShooter: bc.Shooter,
+			Color:        rl.Yellow,
+			Damage:       bc.Damage,
 		}
 		bm.Bullets = append(bm.Bullets, b)
 	}
@@ -89,7 +90,7 @@ func (bm *Manager) Mutate(
 		for j := 0; j < len(el); j++ {
 			enemyPos := el[j].Position
 
-			if curBullet.Shooter == Player && el[j].IsAlive() {
+			if (curBullet.Shooter == Player || (curBullet.Shooter == Enemy && el[j] != curBullet.EnemyShooter)) && el[j].IsAlive() {
 				hitRadius := el[j].Size + curBullet.Radius
 				if checkSegmentSphereCollision(curBullet.PrevPosition, curBullet.Position, enemyPos, hitRadius) {
 					if bm.Bullets[i].Active {
