@@ -30,7 +30,7 @@ func (bm *Manager) KillerBulletCreate(
 		b := Bullet{
 			Position:  bc.Pos,
 			Direction: bc.Dir,
-			Speed:     25,
+			Speed:     75,
 			Radius:    0.1,
 			Active:    true,
 			LifeTime:  1.0,
@@ -46,7 +46,7 @@ func (bm *Manager) EnemyBulletCreate(
 	bulletCmds []enemy.BulletCmd,
 ) {
 	for _, bc := range bulletCmds {
-		const speed = 25
+		const speed = 75
 		lifeTime := bc.Range / speed
 		b := Bullet{
 			Position:     bc.Pos,

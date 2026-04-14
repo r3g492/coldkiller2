@@ -14,6 +14,7 @@ type Bullet struct {
 	Radius       float32
 	Active       bool
 	LifeTime     float32
+	Age          float32
 	Shooter      Shooter
 	EnemyShooter *enemy.Enemy
 	Color        rl.Color
@@ -29,14 +30,18 @@ const (
 	Enemy
 )
 
+const initialDelay = 0.065
+
 func (b *Bullet) Draw3D() {
 	if b.IsHiddenFromKiller {
 		return
 	}
-	tailStart := rl.Vector3Subtract(b.Position, rl.Vector3Scale(b.Direction, 0.8))
-	tailColor := rl.NewColor(b.Color.R, b.Color.G, b.Color.B, 100)
-	rl.DrawCapsule(tailStart, b.Position, b.Radius*0.3, 4, 1, tailColor)
-	rl.DrawSphere(b.Position, b.Radius, b.Color)
+	if b.Age >= initialDelay {
+		tailStart := rl.Vector3Subtract(b.Position, rl.Vector3Scale(b.Direction, 5))
+		tailColor := rl.NewColor(b.Color.R, b.Color.G, b.Color.B, 100)
+		rl.DrawCapsule(tailStart, b.Position, b.Radius*0.3, 4, 1, tailColor)
+		rl.DrawSphere(b.Position, b.Radius, b.Color)
+	}
 }
 
 func (b *Bullet) Mutate(dt float32) {
@@ -44,4 +49,5 @@ func (b *Bullet) Mutate(dt float32) {
 	b.PrevPosition = b.Position
 	b.Position = rl.Vector3Add(b.Position, movement)
 	b.LifeTime -= dt
+	b.Age += dt
 }
