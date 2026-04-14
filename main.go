@@ -21,6 +21,7 @@ var showInitMenu = true
 var intermission = false
 var intermissionTimer float32 = 0.0
 var paused = false
+var stageWonDelay float32 = -1
 
 func main() {
 	// setting
@@ -151,15 +152,24 @@ func main() {
 		enemyManager.ProcessAnimation(dt, player)
 
 		if stageManager.StageWon() && player.IsAlive() {
-			intermission = true
-			if stageManager.Difficulty > stageManager.HighestBeaten {
-				stageManager.HighestBeaten = stageManager.Difficulty
-				stage.SaveProgress(stageManager.HighestBeaten)
+			if stageWonDelay < 0 {
+				stageWonDelay = 1.0
 			}
-			stageManager.Difficulty++
-			if !stageManager.GameWon() {
-				// rl.PlaySound(sound.ThreeTwoOne)
+			stageWonDelay -= dt
+			if stageWonDelay <= 0 {
+				stageWonDelay = -1
+				intermission = true
+				if stageManager.Difficulty > stageManager.HighestBeaten {
+					stageManager.HighestBeaten = stageManager.Difficulty
+					stage.SaveProgress(stageManager.HighestBeaten)
+				}
+				stageManager.Difficulty++
+				if !stageManager.GameWon() {
+					// rl.PlaySound(sound.ThreeTwoOne)
+				}
 			}
+		} else {
+			stageWonDelay = -1
 		}
 
 		// player
