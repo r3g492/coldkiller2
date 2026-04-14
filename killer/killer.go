@@ -43,6 +43,7 @@ type Killer struct {
 	HitFlashTimer float32
 	DashTimeLeft  float32
 	DashCooldown  float32
+	CameraOffset  rl.Vector3
 }
 
 const ModelRatio = 0.2
@@ -168,6 +169,12 @@ func (k *Killer) Mutate(
 	if k.IsAlive() {
 		mouseMovement(input, k)
 	}
+	if rl.Vector3LengthSqr(k.TargetDirection) > 0 {
+		aimDir := rl.Vector3Normalize(k.TargetDirection)
+		targetOffset := rl.Vector3Scale(aimDir, 2.5)
+		k.CameraOffset.X += (targetOffset.X - k.CameraOffset.X) * 4.0 * dt
+		k.CameraOffset.Z += (targetOffset.Z - k.CameraOffset.Z) * 4.0 * dt
+	}
 	attack := false
 	if k.ActionTimeLeft <= 0 {
 		bulletCmds, attack = k.attack(input)
@@ -192,13 +199,6 @@ func (k *Killer) Mutate(
 
 	if !attack && k.ActionTimeLeft <= 0 {
 		moving := k.movement(input, dt, obstacles, structureManager)
-		k.Camera = rl.Camera3D{
-			Position:   rl.Vector3Add(k.Position, rl.NewVector3(0.0, 10.0, 0.0)),
-			Target:     k.Position,
-			Up:         rl.NewVector3(0.0, 0.0, -1),
-			Fovy:       30.0,
-			Projection: rl.CameraOrthographic,
-		}
 
 		if k.FootstepSoundTimeLeft > 0 {
 			k.FootstepSoundTimeLeft -= dt
@@ -215,6 +215,15 @@ func (k *Killer) Mutate(
 			k.AnimationState = animation.StateIdle
 			k.FootstepSoundTimeLeft = 0
 		}
+	}
+
+	camTarget := rl.Vector3Add(k.Position, k.CameraOffset)
+	k.Camera = rl.Camera3D{
+		Position:   rl.Vector3Add(camTarget, rl.NewVector3(0.0, 10.0, 0.0)),
+		Target:     camTarget,
+		Up:         rl.NewVector3(0.0, 0.0, -1),
+		Fovy:       30.0,
+		Projection: rl.CameraOrthographic,
 	}
 
 	k.ActionTimeLeft -= dt
@@ -268,6 +277,7 @@ func (k *Killer) movement(
 		k.MoveDirection = rl.Vector3Normalize(k.MoveDirection)
 	}
 	if input.DashPressed && isMoving && k.DashCooldown <= 0 {
+		rl.PlaySound(sound.Dash)
 		k.DashTimeLeft = 0.18
 		k.DashCooldown = 1.0
 	}

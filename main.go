@@ -97,7 +97,7 @@ func main() {
 			) {
 				break
 			}
-			drawInputOverlay(w, h, ip, keyMap)
+			drawInputOverlay(w, h, ip, keyMap, true)
 			continue
 		}
 
@@ -142,7 +142,7 @@ func main() {
 				w,
 				h,
 			)
-			drawInputOverlay(w, h, ip, keyMap)
+			drawInputOverlay(w, h, ip, keyMap, false)
 			continue
 		}
 
@@ -200,7 +200,7 @@ func main() {
 		player.DrawHitFlash()
 		drawEnemyCount(w, enemyManager.AliveCount())
 		enemyManager.DrawUi(player)
-		drawInputOverlay(w, h, ip, keyMap)
+		drawInputOverlay(w, h, ip, keyMap, false)
 		drawCursor(mouseLocation, player)
 
 		rl.EndDrawing()

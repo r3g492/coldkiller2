@@ -323,7 +323,7 @@ func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor
 	return false
 }
 
-func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
+func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap, midTop bool) {
 	const (
 		keySize      = 45
 		spacing      = 6
@@ -331,6 +331,7 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
 		descSize     = 9
 		rightMargin  = 40
 		bottomMargin = 90
+		topMargin    = 240
 	)
 
 	labelUp := input.GetKeyName(keyMap.Up)
@@ -341,8 +342,14 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
 	labelEnd := input.GetKeyName(keyMap.EndGame)
 
 	totalWidth := (keySize * 8) + (spacing * 7) + 50
-	baseX := float32(w) - float32(totalWidth) - rightMargin
-	baseY := float32(h) - (keySize * 2) - spacing - bottomMargin
+	var baseX, baseY float32
+	if midTop {
+		baseX = float32(w)/2 - float32(totalWidth)/2
+		baseY = float32(topMargin)
+	} else {
+		baseX = float32(w) - float32(totalWidth) - rightMargin
+		baseY = float32(h) - (keySize * 2) - spacing - bottomMargin
+	}
 
 	drawKey := func(x, y float32, width float32, label string, desc string, active bool) {
 		rect := rl.Rectangle{X: x, Y: y, Width: width, Height: keySize}

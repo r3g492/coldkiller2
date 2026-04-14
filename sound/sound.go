@@ -14,6 +14,7 @@ var (
 	ShotNew        rl.Sound
 	FootStep       rl.Sound
 	ThreeTwoOne    rl.Sound
+	Dash           rl.Sound
 )
 
 func Init() {
@@ -24,10 +25,11 @@ func Init() {
 	Track = util.LoadSoundFromEmbedded("song2.mp3")
 	rl.SetSoundVolume(Track, 1.2)
 	YouLose = util.LoadSoundFromEmbedded("lost.mp3")
-	ShotNew = util.LoadSoundFromEmbedded("shot_new.mp3")
+	ShotNew = util.LoadSoundFromEmbedded("shot_new_trimmed.mp3")
 	rl.SetSoundVolume(ShotNew, 0.5)
 	FootStep = util.LoadSoundFromEmbedded("data_pion-st1-footstep-sfx-323053.mp3")
 	ThreeTwoOne = util.LoadSoundFromEmbedded("female-vocal-321-countdown-240912.mp3")
+	Dash = util.LoadSoundFromEmbedded("dash_trimmed.mp3")
 }
 
 func PlaySound3D(s rl.Sound, sourcePos rl.Vector3, playerPos rl.Vector3, volumeMult float32) {
