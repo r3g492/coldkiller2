@@ -10,6 +10,7 @@ import (
 
 //go:embed sounds/*
 //go:embed images/*
+//go:embed models/*
 var resFS embed.FS
 
 func LoadTextureFromEmbedded(filename string) rl.Texture2D {
@@ -22,6 +23,24 @@ func LoadTextureFromEmbedded(filename string) rl.Texture2D {
 	tex := rl.LoadTextureFromImage(img)
 	rl.UnloadImage(img)
 	return tex
+}
+
+func LoadModelFromEmbedded(filename string) (rl.Model, []rl.ModelAnimation) {
+	data, err := resFS.ReadFile("models/" + filename)
+	if err != nil {
+		log.Fatalf("failed to read embedded model %s: %v", filename, err)
+	}
+	tmpFile, err := os.CreateTemp("", "*.glb")
+	if err != nil {
+		log.Fatalf("failed to create temporary file for %s: %v", filename, err)
+	}
+	_, err = tmpFile.Write(data)
+	if err != nil {
+		log.Fatalf("failed to write to temporary file for %s: %v", filename, err)
+	}
+	tmpPath := tmpFile.Name()
+	_ = tmpFile.Close()
+	return rl.LoadModel(tmpPath), rl.LoadModelAnimations(tmpPath)
 }
 
 func LoadSoundFromEmbedded(filename string) rl.Sound {

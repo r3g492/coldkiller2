@@ -2,6 +2,8 @@ package model
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
+
+	"coldkiller2/util"
 )
 
 var (
@@ -12,8 +14,6 @@ var (
 )
 
 func Init() {
-	RobotModel = rl.LoadModel("resources/robot.glb")
-	RobotAnimation = rl.LoadModelAnimations("resources/robot.glb")
-	SoldierModel = rl.LoadModel("resources/soldier.glb")
-	SoldierAnimation = rl.LoadModelAnimations("resources/soldier.glb")
+	RobotModel, RobotAnimation = util.LoadModelFromEmbedded("robot.glb")
+	SoldierModel, SoldierAnimation = util.LoadModelFromEmbedded("soldier.glb")
 }
