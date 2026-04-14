@@ -47,6 +47,8 @@ type Enemy struct {
 	FootstepSound         rl.Sound
 	IsHiddenFromKiller    bool
 	AiType                AiType
+	KnockbackVelocity     rl.Vector3
+	KnockbackTimeLeft     float32
 }
 
 func (e *Enemy) IsAlive() bool {
@@ -107,6 +109,22 @@ func (e *Enemy) Mutate(
 	myIdx int,
 	structureManager *structure.Manager,
 ) []BulletCmd {
+	if e.KnockbackTimeLeft > 0 {
+		kbMove := rl.Vector3Scale(e.KnockbackVelocity, dt)
+		e.PrevPosition = e.Position
+		oldPos := e.Position
+		e.Position.X += kbMove.X
+		if structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+			e.Position.X = oldPos.X
+		}
+		e.Position.Z += kbMove.Z
+		if structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+			e.Position.Z = oldPos.Z
+		}
+		e.KnockbackVelocity = rl.Vector3Scale(e.KnockbackVelocity, 1-8*dt)
+		e.KnockbackTimeLeft -= dt
+	}
+
 	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
 	var bulletCmds []BulletCmd
 	if e.ActionTimeLeft > 0 {
@@ -116,7 +134,7 @@ func (e *Enemy) Mutate(
 	if e.ActionTimeLeft <= 0 {
 		e.AnimationState = animation.StateIdle
 	}
-	if e.ActionTimeLeft <= 0 && !e.IsAlive() {
+	if e.ActionTimeLeft <= 0 && !e.IsAlive() && e.KnockbackTimeLeft <= 0 {
 		e.ShouldBeDeleted = true
 	}
 
@@ -190,10 +208,14 @@ func (e *Enemy) Mutate(
 	return bulletCmds
 }
 
-func (e *Enemy) Damage(d int32) {
+func (e *Enemy) Damage(d int32, bulletDir rl.Vector3) {
 	e.Health -= d
 	e.AnimationState = animation.StateDying
 	e.ActionTimeLeft = 0.1
+	if rl.Vector3LengthSqr(bulletDir) > 0 {
+		e.KnockbackVelocity = rl.Vector3Scale(rl.Vector3Normalize(bulletDir), 60.0)
+		e.KnockbackTimeLeft = 0.2
+	}
 	if !e.IsAlive() {
 		e.AnimationState = animation.StateDying
 		e.ActionTimeLeft = 10

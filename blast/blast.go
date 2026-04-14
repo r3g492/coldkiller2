@@ -57,3 +57,25 @@ func CreateBig(position rl.Vector3, isByPlayer bool) Blast {
 		AlwaysShow:  isByPlayer,
 	}
 }
+
+func CreateSplash(position rl.Vector3) Blast {
+	return Blast{
+		Position:    position,
+		Radius:      0.55,
+		MaxLifeTime: 0.25,
+		LifeTime:    0.25,
+		Color:       rl.NewColor(220, 80, 20, 230),
+		AlwaysShow:  true,
+	}
+}
+
+func CreateDebris(position rl.Vector3) Blast {
+	return Blast{
+		Position:    position,
+		Radius:      0.2,
+		MaxLifeTime: 0.35,
+		LifeTime:    0.35,
+		Color:       rl.NewColor(180, 40, 10, 200),
+		AlwaysShow:  true,
+	}
+}

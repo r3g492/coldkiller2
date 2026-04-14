@@ -93,8 +93,14 @@ func (bm *Manager) Mutate(
 				hitRadius := el[j].Size + curBullet.Radius
 				if checkSegmentSphereCollision(curBullet.PrevPosition, curBullet.Position, enemyPos, hitRadius) {
 					if bm.Bullets[i].Active {
-						el[j].Damage(bm.Bullets[i].Damage)
-						blasts = append(blasts, blast.Create(bm.Bullets[i].Position, bm.Bullets[i].Shooter == Player))
+						dir := bm.Bullets[i].Direction
+						hitPos := bm.Bullets[i].Position
+						el[j].Damage(bm.Bullets[i].Damage, dir)
+						blasts = append(blasts, blast.CreateSplash(hitPos))
+						for k := 0; k < 3; k++ {
+							offset := rl.Vector3Scale(dir, float32(k+1)*0.3)
+							blasts = append(blasts, blast.CreateDebris(rl.Vector3Add(hitPos, offset)))
+						}
 						bm.Bullets[i].Active = false
 						bm.PlayerXp++
 					}
