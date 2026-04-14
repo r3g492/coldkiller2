@@ -277,9 +277,9 @@ func (e *Enemy) GetBoundingBox() rl.BoundingBox {
 
 func Soldier(x, z float32) *Enemy {
 	return &Enemy{
-		Model:                 model.UnitV4Model,
+		Model:                 model.SoldierModel,
 		ModelRatio:            0.2,
-		Animation:             model.UnitV4Animation,
+		Animation:             model.SoldierAnimation,
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
 		MoveSpeed:             4,
@@ -298,9 +298,9 @@ func Soldier(x, z float32) *Enemy {
 
 func Sniper(x, z float32) *Enemy {
 	return &Enemy{
-		Model:                 model.UnitV4Model,
+		Model:                 model.SoldierModel,
 		ModelRatio:            0.2,
-		Animation:             model.UnitV4Animation,
+		Animation:             model.SoldierAnimation,
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
 		MoveSpeed:             1,
@@ -319,9 +319,9 @@ func Sniper(x, z float32) *Enemy {
 
 func Robot(x, z float32) *Enemy {
 	return &Enemy{
-		Model:                 model.UnitV3Model,
+		Model:                 model.RobotModel,
 		ModelRatio:            0.4,
-		Animation:             model.UnitV3Animation,
+		Animation:             model.RobotAnimation,
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
 		MoveSpeed:             8,

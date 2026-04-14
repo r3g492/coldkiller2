@@ -38,8 +38,8 @@ func CreateManager() *Manager {
 
 func (em *Manager) Init(p *killer.Killer) {
 	em.Enemies = make([]*Enemy, 0)
-	em.SharedModel = model.UnitV4Model
-	em.SharedAnimations = model.UnitV4Animation
+	em.SharedModel = model.SoldierModel
+	em.SharedAnimations = model.SoldierAnimation
 	em.EnemyGenerationLevel = 0
 	em.EnemyGenerationLevelUpUnit = 8 * time.Second
 	em.LastLevelUp = time.Now()

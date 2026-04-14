@@ -50,8 +50,8 @@ const ModelRatio = 0.2
 const CharSize = 0.72
 
 func Create() *Killer {
-	playerModel := model.UnitV4Model
-	playerAnimation := model.UnitV4Animation
+	playerModel := model.SoldierModel
+	playerAnimation := model.SoldierAnimation
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	return &Killer{
 		Model:           playerModel,
