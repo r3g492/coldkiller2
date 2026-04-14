@@ -150,7 +150,7 @@ func main() {
 		var ebc = enemyManager.Mutate(dt, player, structureManager)
 		enemyManager.ProcessAnimation(dt, player)
 
-		if stageManager.StageWon() {
+		if stageManager.StageWon() && player.IsAlive() {
 			intermission = true
 			if stageManager.Difficulty > stageManager.HighestBeaten {
 				stageManager.HighestBeaten = stageManager.Difficulty

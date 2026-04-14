@@ -13,6 +13,7 @@ type Input struct {
 	PunchReleased  bool
 	ReloadPressed  bool
 	EndGamePressed bool
+	DashPressed    bool
 }
 
 type KeyMap struct {
@@ -24,6 +25,7 @@ type KeyMap struct {
 	Reload    int32
 	ResetGame int32
 	EndGame   int32
+	Dash      int32
 }
 
 func DefaultWASD() KeyMap {
@@ -35,6 +37,7 @@ func DefaultWASD() KeyMap {
 		PunchHold: rl.MouseLeftButton,
 		Reload:    rl.KeyR,
 		EndGame:   rl.KeyEscape,
+		Dash:      rl.KeySpace,
 	}
 }
 
@@ -50,6 +53,7 @@ func ReadInput(keyMap KeyMap) Input {
 		PunchReleased:  rl.IsMouseButtonReleased(keyMap.PunchHold),
 		ReloadPressed:  rl.IsKeyDown(keyMap.Reload),
 		EndGamePressed: rl.IsKeyPressed(keyMap.EndGame),
+		DashPressed:    rl.IsKeyPressed(keyMap.Dash),
 	}
 }
 

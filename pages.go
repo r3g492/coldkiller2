@@ -340,7 +340,7 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
 	labelReload := input.GetKeyName(keyMap.Reload)
 	labelEnd := input.GetKeyName(keyMap.EndGame)
 
-	totalWidth := (keySize * 7) + (spacing * 6) + 20
+	totalWidth := (keySize * 8) + (spacing * 7) + 50
 	baseX := float32(w) - float32(totalWidth) - rightMargin
 	baseY := float32(h) - (keySize * 2) - spacing - bottomMargin
 
@@ -392,6 +392,9 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap) {
 	currX += keySize + spacing
 
 	drawKey(currX, baseY+keySize+spacing, keySize+30, "LMB", "SHOOT", rl.IsMouseButtonDown(keyMap.PunchHold))
+	currX += keySize + 30 + spacing
+
+	drawKey(currX, baseY+keySize+spacing, keySize+30, "SPC", "DASH", ip.DashPressed)
 }
 
 func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {

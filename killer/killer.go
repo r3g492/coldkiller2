@@ -41,6 +41,8 @@ type Killer struct {
 	float32
 	FootstepSound rl.Sound
 	HitFlashTimer float32
+	DashTimeLeft  float32
+	DashCooldown  float32
 }
 
 const ModelRatio = 0.2
@@ -83,6 +85,8 @@ func (k *Killer) Init() {
 	k.TargetDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
 	k.ModelAngleDeg = 0
 	k.ActionTimeLeft = 0
+	k.DashTimeLeft = 0
+	k.DashCooldown = 0
 }
 
 func (k *Killer) Unload() {
@@ -217,6 +221,12 @@ func (k *Killer) Mutate(
 	if k.HitFlashTimer > 0 {
 		k.HitFlashTimer -= dt
 	}
+	if k.DashTimeLeft > 0 {
+		k.DashTimeLeft -= dt
+	}
+	if k.DashCooldown > 0 {
+		k.DashCooldown -= dt
+	}
 	return bulletCmds
 }
 
@@ -253,10 +263,19 @@ func (k *Killer) movement(
 	if input.MoveRight {
 		k.MoveDirection.X += 1
 	}
-	if rl.Vector3LengthSqr(k.MoveDirection) > 0 {
+	isMoving := rl.Vector3LengthSqr(k.MoveDirection) > 0
+	if isMoving {
 		k.MoveDirection = rl.Vector3Normalize(k.MoveDirection)
 	}
-	moveAmount := rl.Vector3Scale(k.MoveDirection, k.MoveSpeed*dt)
+	if input.DashPressed && isMoving && k.DashCooldown <= 0 {
+		k.DashTimeLeft = 0.18
+		k.DashCooldown = 1.0
+	}
+	speed := k.MoveSpeed
+	if k.DashTimeLeft > 0 {
+		speed = k.MoveSpeed * 3.5
+	}
+	moveAmount := rl.Vector3Scale(k.MoveDirection, speed*dt)
 	if rl.Vector3Length(moveAmount) > 0 {
 		oldPos := k.Position
 		k.Position.X += moveAmount.X

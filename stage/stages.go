@@ -3,8 +3,6 @@ package stage
 import (
 	"coldkiller2/enemy"
 	"coldkiller2/killer"
-	"coldkiller2/model"
-	"coldkiller2/sound"
 	"coldkiller2/structure"
 	"math"
 	"math/rand"
@@ -45,48 +43,6 @@ func InitStages() {
 		Type6(),
 		Type6(),
 		Type6(),
-	}
-}
-
-func Soldier(x, z float32) *enemy.Enemy {
-	return &enemy.Enemy{
-		Model:                 model.UnitV4Model,
-		ModelRatio:            0.2,
-		Animation:             model.UnitV4Animation,
-		Position:              rl.Vector3{X: x, Y: 0, Z: z},
-		Size:                  killer.CharSize,
-		MoveSpeed:             4,
-		Health:                100,
-		AttackRange:           10,
-		AimTimeLeft:           0.5,
-		AimTimeUnit:           0.5,
-		FootstepSoundTimeLeft: 0,
-		FootstepSoundTimeUnit: 0.4,
-		FootstepSound:         sound.FootStep,
-		AiType:                enemy.Elite,
-		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
-	}
-}
-
-func Robot(x, z float32) *enemy.Enemy {
-	return &enemy.Enemy{
-		Model:                 model.UnitV3Model,
-		ModelRatio:            0.4,
-		Animation:             model.UnitV3Animation,
-		Position:              rl.Vector3{X: x, Y: 0, Z: z},
-		Size:                  killer.CharSize,
-		MoveSpeed:             8,
-		Health:                100,
-		AttackRange:           2,
-		AimTimeLeft:           0.5,
-		AimTimeUnit:           0.5,
-		FootstepSoundTimeLeft: 0,
-		FootstepSoundTimeUnit: 0.4,
-		FootstepSound:         sound.FootStep,
-		AiType:                enemy.SimpleZombie,
-		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
-		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 	}
 }
 
@@ -153,9 +109,9 @@ func GetRandomEnemy(radius float32, structures []*structure.Structure, existing 
 	enemies := make([]*enemy.Enemy, 0, total)
 	idx := 0
 	for _, s := range specs {
-		factory := Robot
+		factory := enemy.Robot
 		if s.Kind == KindSoldier {
-			factory = Soldier
+			factory = enemy.Soldier
 		}
 		for range s.Count {
 			if idx >= len(indices) {
@@ -172,7 +128,7 @@ func GetRandomEnemy(radius float32, structures []*structure.Structure, existing 
 func Type1() Data {
 	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, structs, nil, EnemySpec{KindSoldier, 1}),
+		Enemies:    GetRandomEnemy(17, structs, nil, EnemySpec{KindSoldier, 1}),
 		Structures: structs,
 	}
 }
@@ -180,7 +136,7 @@ func Type1() Data {
 func Type2() Data {
 	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, structs, nil, EnemySpec{KindRobot, 1}),
+		Enemies:    GetRandomEnemy(17, structs, nil, EnemySpec{KindRobot, 1}),
 		Structures: structs,
 	}
 }
@@ -188,7 +144,7 @@ func Type2() Data {
 func Type3() Data {
 	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, structs, nil, EnemySpec{KindRobot, 2}),
+		Enemies:    GetRandomEnemy(17, structs, nil, EnemySpec{KindRobot, 2}),
 		Structures: structs,
 	}
 }
@@ -196,7 +152,7 @@ func Type3() Data {
 func Type4() Data {
 	structs := WallType1()
 	return Data{
-		Enemies:    GetRandomEnemy(8, structs, nil, EnemySpec{KindRobot, 3}),
+		Enemies:    GetRandomEnemy(17, structs, nil, EnemySpec{KindRobot, 3}),
 		Structures: structs,
 	}
 }
@@ -205,7 +161,7 @@ func Type5() Data {
 	structs := WallType2()
 	return Data{
 		Enemies: GetRandomEnemy(
-			15, structs, nil,
+			17, structs, nil,
 			EnemySpec{KindRobot, 3},
 			EnemySpec{KindSoldier, 1},
 		),
@@ -237,10 +193,10 @@ func Type6() Data {
 
 func WallType1() []*structure.Structure {
 	return []*structure.Structure{
-		{Position: rl.Vector3{X: -15, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 30}, Color: rl.DarkGray},
-		{Position: rl.Vector3{X: 15, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 30}, Color: rl.DarkGray},
-		{Position: rl.Vector3{X: 0, Y: 0, Z: 15}, Size: rl.Vector3{X: 30, Y: 1, Z: 1}, Color: rl.DarkGray},
-		{Position: rl.Vector3{X: 0, Y: 0, Z: -15}, Size: rl.Vector3{X: 30, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -20, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 40}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 20, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 40}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 0, Y: 0, Z: 20}, Size: rl.Vector3{X: 40, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 0, Y: 0, Z: -20}, Size: rl.Vector3{X: 40, Y: 1, Z: 1}, Color: rl.DarkGray},
 	}
 }
 

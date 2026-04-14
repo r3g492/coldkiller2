@@ -3,6 +3,7 @@ package enemy
 import (
 	"coldkiller2/animation"
 	"coldkiller2/killer"
+	"coldkiller2/model"
 	"coldkiller2/sound"
 	"coldkiller2/structure"
 	"math"
@@ -249,5 +250,47 @@ func (e *Enemy) GetBoundingBox() rl.BoundingBox {
 	return rl.BoundingBox{
 		Min: rl.Vector3{X: e.Position.X - e.Size, Y: e.Position.Y - e.Size, Z: e.Position.Z - e.Size},
 		Max: rl.Vector3{X: e.Position.X + e.Size, Y: e.Position.Y + e.Size, Z: e.Position.Z + e.Size},
+	}
+}
+
+func Soldier(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.UnitV4Model,
+		ModelRatio:            0.2,
+		Animation:             model.UnitV4Animation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             4,
+		Health:                100,
+		AttackRange:           10,
+		AimTimeLeft:           0.5,
+		AimTimeUnit:           0.5,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Elite,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+	}
+}
+
+func Robot(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.UnitV3Model,
+		ModelRatio:            0.4,
+		Animation:             model.UnitV3Animation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             8,
+		Health:                100,
+		AttackRange:           2,
+		AimTimeLeft:           0.25,
+		AimTimeUnit:           0.25,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                SimpleZombie,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 	}
 }
