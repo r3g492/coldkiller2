@@ -30,6 +30,9 @@ func (b *Bullet) Draw3D() {
 	if b.IsHiddenFromKiller {
 		return
 	}
+	tailStart := rl.Vector3Subtract(b.Position, rl.Vector3Scale(b.Direction, 0.8))
+	tailColor := rl.NewColor(b.Color.R, b.Color.G, b.Color.B, 100)
+	rl.DrawCapsule(tailStart, b.Position, b.Radius*0.3, 4, 1, tailColor)
 	rl.DrawSphere(b.Position, b.Radius, b.Color)
 }
 
