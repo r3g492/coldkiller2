@@ -19,6 +19,7 @@ func setMonitor() (int, int) {
 	if targetMonitor >= monitorCount {
 		targetMonitor = 0
 	}
+	rl.SetWindowMonitor(targetMonitor)
 	w := rl.GetMonitorWidth(targetMonitor)
 	h := rl.GetMonitorHeight(targetMonitor)
 	monitorPos := rl.GetMonitorPosition(targetMonitor)
