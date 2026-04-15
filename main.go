@@ -37,8 +37,6 @@ func main() {
 	rl.SetTargetFPS(144)
 	rl.SetExitKey(0)
 
-	// TODO: monitor change feature?
-	setMonitor()
 	w, h := VirtualWidth, VirtualHeight
 	rl.DisableCursor()
 

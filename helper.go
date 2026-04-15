@@ -13,21 +13,6 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-func setMonitor() (int, int) {
-	targetMonitor := 0
-	monitorCount := rl.GetMonitorCount()
-	if targetMonitor >= monitorCount {
-		targetMonitor = 0
-	}
-	rl.SetWindowMonitor(targetMonitor)
-	w := rl.GetMonitorWidth(targetMonitor)
-	h := rl.GetMonitorHeight(targetMonitor)
-	monitorPos := rl.GetMonitorPosition(targetMonitor)
-	rl.SetWindowPosition(int(monitorPos.X), int(monitorPos.Y))
-	rl.SetWindowSize(w, h)
-	return w, h
-}
-
 func log(mouseLocation rl.Vector2, dt float32, player *killer.Killer) {
 	if time.Since(lastLog) >= 1000*time.Millisecond {
 		msg := fmt.Sprintf("mouseLocation=%v, dt=%v", mouseLocation, dt)
