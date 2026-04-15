@@ -53,7 +53,7 @@ func doSplash(timer *float32, tex rl.Texture2D, dt float32, w, h int) bool {
 		overlay = uint8(fade * 255)
 	}
 
-	rl.BeginDrawing()
+	beginFrame()
 	rl.ClearBackground(rl.Black)
 
 	imgW := float32(tex.Width)
@@ -77,13 +77,13 @@ func doSplash(timer *float32, tex rl.Texture2D, dt float32, w, h int) bool {
 
 	rl.DrawRectangle(0, 0, int32(w), int32(h), rl.NewColor(0, 0, 0, overlay))
 
-	rl.EndDrawing()
+	endFrame()
 
 	return *timer >= splashDuration
 }
 
 func doPauseMenu(w, h int, ip input.Input, keyMap input.KeyMap) pauseAction {
-	rl.BeginDrawing()
+	beginFrame()
 	rl.ClearBackground(rl.NewColor(0, 0, 0, 0))
 	rl.DrawRectangle(0, 0, int32(w), int32(h), rl.NewColor(0, 0, 0, 160))
 
@@ -115,7 +115,7 @@ func doPauseMenu(w, h int, ip input.Input, keyMap input.KeyMap) pauseAction {
 
 	drawInputOverlay(w, h, ip, keyMap, true)
 
-	rl.EndDrawing()
+	endFrame()
 	return result
 }
 
@@ -133,7 +133,7 @@ func doIntermission(
 ) {
 	const totalLoadSteps = 9
 
-	rl.BeginDrawing()
+	beginFrame()
 	rl.ClearBackground(rl.DarkGray)
 
 	diffInfoText := fmt.Sprintf("%d / %d", stageManager.Difficulty, len(stage.Stages))
@@ -189,7 +189,7 @@ func doIntermission(
 		}
 	}
 
-	rl.EndDrawing()
+	endFrame()
 }
 
 func doInitMenu(
@@ -217,7 +217,7 @@ func doInitMenu(
 		rl.EnableCursor()
 	}
 
-	rl.BeginDrawing()
+	beginFrame()
 	rl.ClearBackground(rl.Black)
 
 	for k := int32(rl.KeyZero); k <= int32(rl.KeyNine); k++ {
@@ -305,7 +305,7 @@ func doInitMenu(
 
 	exitClicked := drawButton(exitRect, "Exit Game", rl.DarkGray, rl.Gray, rl.White)
 
-	rl.EndDrawing()
+	endFrame()
 	return exitClicked
 }
 
@@ -317,7 +317,7 @@ func doGameWon(w, h int) bool {
 		rl.StopSound(sound.Track)
 	}
 
-	rl.BeginDrawing()
+	beginFrame()
 	rl.ClearBackground(rl.Black)
 
 	winText := "THANKS FOR PLAYING! YOU'VE FINISHED THE GAME!"
@@ -339,7 +339,7 @@ func doGameWon(w, h int) bool {
 		exitClicked = true
 	}
 
-	rl.EndDrawing()
+	endFrame()
 
 	return exitClicked
 }
@@ -353,7 +353,7 @@ func drawEnemyCount(w int, alive int) {
 }
 
 func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {
-	mousePoint := rl.GetMousePosition()
+	mousePoint := virtualMousePosition()
 	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)
 
 	currentColor := baseColor
@@ -464,7 +464,7 @@ func drawInputOverlay(w, h int, ip input.Input, keyMap input.KeyMap, midTop bool
 }
 
 func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
-	mouseRay := rl.GetScreenToWorldRay(mouseLocation, player.Camera)
+	mouseRay := rl.GetScreenToWorldRayEx(mouseLocation, player.Camera, VirtualWidth, VirtualHeight)
 
 	t := float32(0.0)
 	if mouseRay.Direction.Y != 0 {

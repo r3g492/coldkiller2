@@ -38,13 +38,17 @@ func main() {
 	rl.SetExitKey(0)
 
 	// TODO: monitor change feature?
-	w, h := setMonitor()
+	setMonitor()
+	w, h := VirtualWidth, VirtualHeight
 	rl.DisableCursor()
 
 	rl.InitAudioDevice()
 	sound.Init()
 	model.Init()
 	stage.InitStages()
+
+	initRender()
+	defer unloadRender()
 
 	splashTex := util.LoadTextureFromEmbedded("raylib_144x144.png")
 	defer rl.UnloadTexture(splashTex)
@@ -83,8 +87,9 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
-		mouseLocation := rl.GetMousePosition()
+		mouseLocation := virtualMousePosition()
 		ip := input.ReadInput(keyMap)
+		ip.MouseLocation = mouseLocation
 		log(mouseLocation, dt, player)
 
 		if showSplash {
@@ -213,7 +218,7 @@ func main() {
 			player,
 		)
 
-		rl.BeginDrawing()
+		beginFrame()
 		rl.ClearBackground(rl.Gray)
 
 		rl.BeginMode3D(player.Camera)
@@ -232,6 +237,6 @@ func main() {
 		enemyManager.DrawUi(player)
 		drawCursor(mouseLocation, player)
 
-		rl.EndDrawing()
+		endFrame()
 	}
 }

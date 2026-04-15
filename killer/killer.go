@@ -6,6 +6,7 @@ import (
 	"coldkiller2/model"
 	"coldkiller2/sound"
 	"coldkiller2/structure"
+	"coldkiller2/util"
 	"fmt"
 	"math"
 
@@ -252,7 +253,7 @@ func (k *Killer) Mutate(
 
 func mouseMovement(input input.Input, k *Killer) {
 	mouseLocation := input.MouseLocation
-	ray := rl.GetScreenToWorldRay(mouseLocation, k.Camera)
+	ray := rl.GetScreenToWorldRayEx(mouseLocation, k.Camera, util.VirtualWidth, util.VirtualHeight)
 	targetOnXzPlane := rl.Vector3{
 		X: ray.Position.X,
 		Y: 0,

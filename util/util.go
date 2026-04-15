@@ -13,6 +13,11 @@ import (
 //go:embed models/*
 var resFS embed.FS
 
+const (
+	VirtualWidth  = 1920
+	VirtualHeight = 1080
+)
+
 func LoadTextureFromEmbedded(filename string) rl.Texture2D {
 	data, err := resFS.ReadFile("images/" + filename)
 	if err != nil {
