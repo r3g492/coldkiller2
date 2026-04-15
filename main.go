@@ -151,9 +151,6 @@ func main() {
 		}
 
 		if paused {
-			if rl.IsCursorHidden() {
-				rl.EnableCursor()
-			}
 			action := doPauseMenu(w, h, ip, keyMap)
 			if action == pauseResume {
 				paused = false

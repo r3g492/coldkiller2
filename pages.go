@@ -105,6 +105,14 @@ func doPauseMenu(w, h int, ip input.Input, keyMap input.KeyMap) pauseAction {
 		Height: btnHeight,
 	}
 
+	if rl.IsCursorHidden() {
+		rl.EnableCursor()
+		scale, offsetX, offsetY := letterbox()
+		cx := int32((resumeRect.X+resumeRect.Width/2)*scale + offsetX)
+		cy := int32((resumeRect.Y+resumeRect.Height/2)*scale + offsetY)
+		rl.SetMousePosition(int(cx), int(cy))
+	}
+
 	result := pauseNone
 	if drawButton(resumeRect, "Resume", rl.DarkGray, rl.Gray, rl.White) {
 		result = pauseResume
@@ -173,14 +181,18 @@ func doIntermission(
 		}
 	} else {
 		// loading done: show start button
-		if rl.IsCursorHidden() {
-			rl.EnableCursor()
-		}
 		startRect := rl.Rectangle{
 			X:      float32(w)/2 - btnWidth/2,
 			Y:      float32(h)/2 + 35,
 			Width:  btnWidth,
 			Height: btnHeight,
+		}
+		if rl.IsCursorHidden() {
+			rl.EnableCursor()
+			scale, offsetX, offsetY := letterbox()
+			cx := int32((startRect.X+startRect.Width/2)*scale + offsetX)
+			cy := int32((startRect.Y+startRect.Height/2)*scale + offsetY)
+			rl.SetMousePosition(int(cx), int(cy))
 		}
 		if drawButton(startRect, "Go", rl.Maroon, rl.Red, rl.White) || rl.IsKeyPressed(rl.KeyEnter) {
 			intermission = false
