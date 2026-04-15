@@ -317,7 +317,7 @@ func (k *Killer) movement(
 
 func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	var bulletCmds []BulletCmd
-	if input.FireHold && k.Ammo > 0 {
+	if input.FireHold && k.Ammo > 0 && k.DashTimeLeft <= 0 {
 		rl.PlaySound(sound.ShotgunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
