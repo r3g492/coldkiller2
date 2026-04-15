@@ -156,46 +156,58 @@ func doIntermission(
 		rl.DrawText(timerText, int32(w)/2-timerWidth/2, int32(h)/2+10, timerSize, rl.Gray)
 	}
 
-	// bar is always shown; loading starts on the first frame
-	progress := float32(intermissionLoadStep) / float32(totalLoadSteps)
-	barW := float32(400)
-	barH := float32(18)
-	barX := float32(w)/2 - barW/2
-	barY := float32(h)/2 + 55
-	rl.DrawRectangle(int32(barX), int32(barY), int32(barW), int32(barH), rl.DarkGray)
-	rl.DrawRectangleLinesEx(rl.Rectangle{X: barX, Y: barY, Width: barW, Height: barH}, 1, rl.Gray)
-	rl.DrawRectangle(int32(barX), int32(barY), int32(barW*progress), int32(barH), rl.RayWhite)
+	ready := intermissionTimer >= 1.0 && intermissionLoadStep >= totalLoadSteps
 
-	// one init step per frame
-	if intermissionLoadStep < totalLoadSteps {
-		switch intermissionLoadStep {
-		case 0:
-			stageManager.GenerateNewStage()
-		case 1:
-			bulletManager.Init()
-		case 2:
-			blastManager.Init()
-		case 3:
-			structureManager.Init()
-		case 4:
-			player.Init()
-		case 5:
-			enemyManager.Init(player)
-		case 6:
-			stageManager.Init(structureManager, enemyManager, player)
-		case 7:
-			stage.InitStages()
-		case 8:
-			stageManager.CreateNewStage(player.Position)
+	if !ready {
+		// loading in progress: show bar and execute one init step per frame
+		progress := float32(intermissionLoadStep) / float32(totalLoadSteps)
+		barW := float32(400)
+		barH := float32(18)
+		barX := float32(w)/2 - barW/2
+		barY := float32(h)/2 + 55
+		rl.DrawRectangle(int32(barX), int32(barY), int32(barW), int32(barH), rl.DarkGray)
+		rl.DrawRectangleLinesEx(rl.Rectangle{X: barX, Y: barY, Width: barW, Height: barH}, 1, rl.Gray)
+		rl.DrawRectangle(int32(barX), int32(barY), int32(barW*progress), int32(barH), rl.RayWhite)
+
+		if intermissionLoadStep < totalLoadSteps {
+			switch intermissionLoadStep {
+			case 0:
+				stageManager.GenerateNewStage()
+			case 1:
+				bulletManager.Init()
+			case 2:
+				blastManager.Init()
+			case 3:
+				structureManager.Init()
+			case 4:
+				player.Init()
+			case 5:
+				enemyManager.Init(player)
+			case 6:
+				stageManager.Init(structureManager, enemyManager, player)
+			case 7:
+				stage.InitStages()
+			case 8:
+				stageManager.CreateNewStage(player.Position)
+			}
+			intermissionLoadStep++
 		}
-		intermissionLoadStep++
-	}
-
-	// transition only when both countdown and loading are done
-	if intermissionTimer >= 1.0 && intermissionLoadStep >= totalLoadSteps {
-		intermission = false
-		intermissionTimer = 0
-		intermissionLoadStep = 0
+	} else {
+		// loading done: show start button
+		if rl.IsCursorHidden() {
+			rl.EnableCursor()
+		}
+		startRect := rl.Rectangle{
+			X:      float32(w)/2 - btnWidth/2,
+			Y:      float32(h)/2 + 35,
+			Width:  btnWidth,
+			Height: btnHeight,
+		}
+		if drawButton(startRect, "Go", rl.Maroon, rl.Red, rl.White) {
+			intermission = false
+			intermissionTimer = 0
+			intermissionLoadStep = 0
+		}
 	}
 
 	rl.EndDrawing()
@@ -373,7 +385,7 @@ func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor
 		if rl.IsMouseButtonDown(rl.MouseLeftButton) {
 			currentColor = rl.Maroon
 		}
-		if rl.IsMouseButtonPressed(rl.MouseLeftButton) {
+		if rl.IsMouseButtonReleased(rl.MouseLeftButton) {
 			return true
 		}
 	}
