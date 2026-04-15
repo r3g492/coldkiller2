@@ -130,7 +130,7 @@ func (k *Killer) Draw3D() {
 
 func (k *Killer) DrawUi() {
 	uiWorldPos := rl.Vector3{X: k.Position.X, Y: k.Position.Y + 3.0, Z: k.Position.Z}
-	screenPos := rl.GetWorldToScreen(uiWorldPos, k.Camera)
+	screenPos := rl.GetWorldToScreenEx(uiWorldPos, k.Camera, util.VirtualWidth, util.VirtualHeight)
 
 	var _ = int32(20)
 	barWidth := float32(60)

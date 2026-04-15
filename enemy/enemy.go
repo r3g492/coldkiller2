@@ -6,6 +6,7 @@ import (
 	"coldkiller2/model"
 	"coldkiller2/sound"
 	"coldkiller2/structure"
+	"coldkiller2/util"
 	"math"
 	"time"
 
@@ -98,7 +99,7 @@ func (e *Enemy) DrawUI(p *killer.Killer) {
 	}
 
 	uiWorldPos := rl.Vector3{X: e.Position.X, Y: e.Position.Y + 3.0, Z: e.Position.Z}
-	screenPos := rl.GetWorldToScreen(uiWorldPos, p.Camera)
+	screenPos := rl.GetWorldToScreenEx(uiWorldPos, p.Camera, util.VirtualWidth, util.VirtualHeight)
 
 	if e.AimTimeLeft > 0 && e.AimTimeLeft != e.AimTimeUnit && e.IsAlive() {
 		barWidth := float32(40)

@@ -4,6 +4,7 @@ import (
 	"coldkiller2/killer"
 	"coldkiller2/model"
 	"coldkiller2/structure"
+	"coldkiller2/util"
 	"fmt"
 	"math"
 	"math/rand"
@@ -112,7 +113,7 @@ func (em *Manager) DrawUi(p *killer.Killer) {
 		}
 	}
 	uiWorldPos := rl.Vector3{X: p.Position.X, Y: p.Position.Y + 3.0, Z: p.Position.Z}
-	screenPos := rl.GetWorldToScreen(uiWorldPos, p.Camera)
+	screenPos := rl.GetWorldToScreenEx(uiWorldPos, p.Camera, util.VirtualWidth, util.VirtualHeight)
 	fpsText := fmt.Sprintf("%d", em.AliveEnemyCount)
 	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+120, 1, rl.Yellow)
 }
