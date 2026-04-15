@@ -23,6 +23,7 @@ var splashTimer float32 = 0.0
 var showInitMenu = true
 var intermission = false
 var intermissionTimer float32 = 0.0
+var intermissionLoadStep = 0
 var paused = false
 var stageWonDelay float32 = -1
 
@@ -82,6 +83,7 @@ func main() {
 			} else if intermission {
 				intermission = false
 				intermissionTimer = 0
+				intermissionLoadStep = 0
 				showInitMenu = true
 				rl.StopSound(sound.Track)
 			} else {
@@ -97,7 +99,16 @@ func main() {
 		}
 
 		if showInitMenu {
-			if doInitMenu(
+			if doInitMenu(stageManager, w, h) {
+				break
+			}
+			drawInputOverlay(w, h, ip, keyMap, true)
+			continue
+		}
+
+		if intermission {
+			doIntermission(
+				dt,
 				stageManager,
 				bulletManager,
 				blastManager,
@@ -106,10 +117,7 @@ func main() {
 				enemyManager,
 				w,
 				h,
-			) {
-				break
-			}
-			drawInputOverlay(w, h, ip, keyMap, true)
+			)
 			continue
 		}
 
@@ -140,21 +148,6 @@ func main() {
 
 		if !rl.IsCursorHidden() {
 			rl.DisableCursor()
-		}
-
-		if intermission {
-			doIntermission(
-				dt,
-				stageManager,
-				bulletManager,
-				blastManager,
-				structureManager,
-				player,
-				enemyManager,
-				w,
-				h,
-			)
-			continue
 		}
 
 		// enemy

@@ -130,7 +130,7 @@ func doIntermission(
 	w int,
 	h int,
 ) {
-	intermissionTimer += dt
+	const totalLoadSteps = 9
 
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.DarkGray)
@@ -145,28 +145,57 @@ func doIntermission(
 	diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
 	rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-40, diffInfoSize, rl.RayWhite)
 
-	timeLeft := 1.0 - intermissionTimer
-	if timeLeft < 0 {
-		timeLeft = 0
-	}
-	timerText := fmt.Sprintf("%.1f...", timeLeft)
-	timerSize := int32(30)
-	timerWidth := rl.MeasureText(timerText, timerSize)
-	rl.DrawText(timerText, int32(w)/2-timerWidth/2, int32(h)/2+40, timerSize, rl.Gray)
+	intermissionTimer += dt
 
-	if intermissionTimer >= 1.0 {
+	// countdown timer shown until 1 second
+	if intermissionTimer < 1.0 {
+		timeLeft := 1.0 - intermissionTimer
+		timerText := fmt.Sprintf("%.1f...", timeLeft)
+		timerSize := int32(30)
+		timerWidth := rl.MeasureText(timerText, timerSize)
+		rl.DrawText(timerText, int32(w)/2-timerWidth/2, int32(h)/2+10, timerSize, rl.Gray)
+	}
+
+	// bar is always shown; loading starts on the first frame
+	progress := float32(intermissionLoadStep) / float32(totalLoadSteps)
+	barW := float32(400)
+	barH := float32(18)
+	barX := float32(w)/2 - barW/2
+	barY := float32(h)/2 + 55
+	rl.DrawRectangle(int32(barX), int32(barY), int32(barW), int32(barH), rl.DarkGray)
+	rl.DrawRectangleLinesEx(rl.Rectangle{X: barX, Y: barY, Width: barW, Height: barH}, 1, rl.Gray)
+	rl.DrawRectangle(int32(barX), int32(barY), int32(barW*progress), int32(barH), rl.RayWhite)
+
+	// one init step per frame
+	if intermissionLoadStep < totalLoadSteps {
+		switch intermissionLoadStep {
+		case 0:
+			stageManager.GenerateNewStage()
+		case 1:
+			bulletManager.Init()
+		case 2:
+			blastManager.Init()
+		case 3:
+			structureManager.Init()
+		case 4:
+			player.Init()
+		case 5:
+			enemyManager.Init(player)
+		case 6:
+			stageManager.Init(structureManager, enemyManager, player)
+		case 7:
+			stage.InitStages()
+		case 8:
+			stageManager.CreateNewStage(player.Position)
+		}
+		intermissionLoadStep++
+	}
+
+	// transition only when both countdown and loading are done
+	if intermissionTimer >= 1.0 && intermissionLoadStep >= totalLoadSteps {
 		intermission = false
 		intermissionTimer = 0
-		stageManager.GenerateNewStage()
-		initNewGame(
-			bulletManager,
-			blastManager,
-			structureManager,
-			player,
-			enemyManager,
-			stageManager,
-		)
-		stageManager.CreateNewStage(player.Position)
+		intermissionLoadStep = 0
 	}
 
 	rl.EndDrawing()
@@ -174,11 +203,6 @@ func doIntermission(
 
 func doInitMenu(
 	stageManager *stage.Manager,
-	bulletManager *bullet.Manager,
-	blastManager *blast.Manager,
-	structureManager *structure.Manager,
-	player *killer.Killer,
-	enemyManager *enemy.Manager,
 	w int,
 	h int,
 ) bool {
@@ -278,15 +302,6 @@ func doInitMenu(
 			showInitMenu = false
 			intermission = true
 			// rl.PlaySound(sound.ThreeTwoOne)
-			initNewGame(
-				bulletManager,
-				blastManager,
-				structureManager,
-				player,
-				enemyManager,
-				stageManager,
-			)
-			stageManager.CreateNewStage(player.Position)
 		}
 	}
 
