@@ -13,6 +13,7 @@ import (
 	"coldkiller2/structure"
 	"coldkiller2/util"
 	"time"
+	"unsafe"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -47,6 +48,21 @@ func main() {
 
 	splashTex := util.LoadTextureFromEmbedded("raylib_144x144.png")
 	defer rl.UnloadTexture(splashTex)
+
+	floorTex := util.LoadTextureFromEmbedded("raylib_144x144.png")
+	rl.SetTextureWrap(floorTex, rl.WrapRepeat)
+	const floorTiles = 20
+	floorMesh := rl.GenMeshPlane(400, 400, floorTiles, floorTiles)
+	tcCount := int(floorMesh.VertexCount) * 2
+	tc := unsafe.Slice(floorMesh.Texcoords, tcCount)
+	for i := range tc {
+		tc[i] *= floorTiles
+	}
+	rl.UpdateMeshBuffer(floorMesh, 1, unsafe.Slice((*byte)(unsafe.Pointer(floorMesh.Texcoords)), tcCount*4), 0)
+	floorModel := rl.LoadModelFromMesh(floorMesh)
+	rl.SetMaterialTexture(floorModel.Materials, rl.MapDiffuse, floorTex)
+	defer rl.UnloadTexture(floorTex)
+	defer rl.UnloadModel(floorModel)
 
 	keyMap := input.DefaultWASD()
 
@@ -201,6 +217,7 @@ func main() {
 		rl.ClearBackground(rl.Gray)
 
 		rl.BeginMode3D(player.Camera)
+		rl.DrawModel(floorModel, rl.Vector3{Y: -2}, 1.0, rl.White)
 		sight.DrawSolidShadows(player.Position, structureManager)
 		player.Draw3D()
 		enemyManager.Draw3D(player)
