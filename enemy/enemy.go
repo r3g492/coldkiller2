@@ -60,6 +60,14 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 		return
 	}
 
+	if e.IsAlive() {
+		rl.DrawCylinder(
+			rl.Vector3{X: e.Position.X, Y: -1, Z: e.Position.Z + 0.3},
+			e.Size*0.4, e.Size*0.4, 0.01, 16,
+			rl.NewColor(0, 0, 0, 40),
+		)
+	}
+
 	anim := e.Animation[e.AnimationIdx]
 	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
 	rl.PushMatrix()

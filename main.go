@@ -49,9 +49,8 @@ func main() {
 	splashTex := util.LoadTextureFromEmbedded("raylib_144x144.png")
 	defer rl.UnloadTexture(splashTex)
 
-	floorTex := util.LoadTextureFromEmbedded("raylib_144x144.png")
-	rl.SetTextureWrap(floorTex, rl.WrapRepeat)
-	const floorTiles = 20
+	floorTex := generateFloorTile()
+	const floorTiles = 128
 	floorMesh := rl.GenMeshPlane(400, 400, floorTiles, floorTiles)
 	tcCount := int(floorMesh.VertexCount) * 2
 	tc := unsafe.Slice(floorMesh.Texcoords, tcCount)
