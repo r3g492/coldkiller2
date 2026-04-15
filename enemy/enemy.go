@@ -67,7 +67,7 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 
 	if e.IsAlive() {
 		rl.DrawCylinder(
-			rl.Vector3{X: e.Position.X, Y: -1, Z: e.Position.Z + 0.3},
+			rl.Vector3{X: e.Position.X, Y: -1, Z: e.Position.Z + e.Size*0.4},
 			e.Size*0.4, e.Size*0.4, 0.01, 16,
 			rl.NewColor(0, 0, 0, 40),
 		)

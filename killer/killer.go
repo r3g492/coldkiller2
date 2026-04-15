@@ -99,7 +99,7 @@ func (k *Killer) Unload() {
 
 func (k *Killer) Draw3D() {
 	rl.DrawCylinder(
-		rl.Vector3{X: k.Position.X, Y: -1, Z: k.Position.Z + 0.3},
+		rl.Vector3{X: k.Position.X, Y: -1, Z: k.Position.Z + CharSize*0.4},
 		CharSize*0.4, CharSize*0.4, 0.01, 16,
 		rl.NewColor(0, 0, 0, 40),
 	)
