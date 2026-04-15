@@ -136,11 +136,6 @@ func doIntermission(
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.DarkGray)
 
-	labelText := "NEXT STAGE"
-	labelSize := int32(18)
-	labelWidth := rl.MeasureText(labelText, labelSize)
-	rl.DrawText(labelText, int32(w)/2-labelWidth/2, int32(h)/2-70, labelSize, rl.Gray)
-
 	diffInfoText := fmt.Sprintf("%d / %d", stageManager.Difficulty, len(stage.Stages))
 	diffInfoSize := int32(40)
 	diffInfoWidth := rl.MeasureText(diffInfoText, diffInfoSize)
@@ -148,27 +143,10 @@ func doIntermission(
 
 	intermissionTimer += dt
 
-	// countdown timer shown until 1 second
-	if intermissionTimer < 1.0 {
-		timeLeft := 1.0 - intermissionTimer
-		timerText := fmt.Sprintf("%.1f...", timeLeft)
-		timerSize := int32(30)
-		timerWidth := rl.MeasureText(timerText, timerSize)
-		rl.DrawText(timerText, int32(w)/2-timerWidth/2, int32(h)/2+10, timerSize, rl.Gray)
-	}
-
-	ready := intermissionTimer >= 1.0 && intermissionLoadStep >= totalLoadSteps
+	ready := intermissionLoadStep >= totalLoadSteps
 
 	if !ready {
 		// loading in progress: show bar and execute one init step per frame
-		progress := float32(intermissionLoadStep) / float32(totalLoadSteps)
-		barW := float32(400)
-		barH := float32(18)
-		barX := float32(w)/2 - barW/2
-		barY := float32(h)/2 + 55
-		rl.DrawRectangle(int32(barX), int32(barY), int32(barW), int32(barH), rl.DarkGray)
-		rl.DrawRectangleLinesEx(rl.Rectangle{X: barX, Y: barY, Width: barW, Height: barH}, 1, rl.Gray)
-		rl.DrawRectangle(int32(barX), int32(barY), int32(barW*progress), int32(barH), rl.RayWhite)
 
 		if intermissionLoadStep < totalLoadSteps {
 			switch intermissionLoadStep {
