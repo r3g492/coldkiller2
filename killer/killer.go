@@ -39,11 +39,13 @@ type Killer struct {
 	FootstepSoundTimeLeft float32
 	FootstepSoundTimeUnit float32
 	float32
-	FootstepSound rl.Sound
-	HitFlashTimer float32
-	DashTimeLeft  float32
-	DashCooldown  float32
-	CameraOffset  rl.Vector3
+	FootstepSound    rl.Sound
+	HitFlashTimer    float32
+	DashTimeLeft     float32
+	DashCooldown     float32
+	DashPushTimeLeft float32
+	DashDirection    rl.Vector3
+	CameraOffset     rl.Vector3
 }
 
 const ModelRatio = 0.2
@@ -239,6 +241,9 @@ func (k *Killer) Mutate(
 	if k.DashTimeLeft > 0 {
 		k.DashTimeLeft -= dt
 	}
+	if k.DashPushTimeLeft > 0 {
+		k.DashPushTimeLeft -= dt
+	}
 	if k.DashCooldown > 0 {
 		k.DashCooldown -= dt
 	}
@@ -284,12 +289,15 @@ func (k *Killer) movement(
 	}
 	if input.DashPressed && isMoving && k.DashCooldown <= 0 {
 		rl.PlaySound(sound.Dash)
-		k.DashTimeLeft = 0.18
+		k.DashTimeLeft = 0.3
+		k.DashPushTimeLeft = 0.4
 		k.DashCooldown = 1.0
+		k.DashDirection = k.MoveDirection
 	}
 	speed := k.MoveSpeed
 	if k.DashTimeLeft > 0 {
 		speed = k.MoveSpeed * 3.5
+		k.MoveDirection = k.DashDirection
 	}
 	moveAmount := rl.Vector3Scale(k.MoveDirection, speed*dt)
 	if rl.Vector3Length(moveAmount) > 0 {

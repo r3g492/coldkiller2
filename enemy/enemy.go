@@ -55,6 +55,11 @@ func (e *Enemy) IsAlive() bool {
 	return e.Health > 0
 }
 
+func (e *Enemy) ApplyKnockback(velocity rl.Vector3, duration float32) {
+	e.KnockbackVelocity = velocity
+	e.KnockbackTimeLeft = duration
+}
+
 func (e *Enemy) Draw3D(p *killer.Killer) {
 	if e.IsHiddenFromKiller {
 		return
@@ -128,6 +133,17 @@ func (e *Enemy) Mutate(
 		e.Position.Z += kbMove.Z
 		if structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
 			e.Position.Z = oldPos.Z
+		}
+		// cascade: transfer knockback to any enemy we moved into
+		if hit := em.findCollidingEnemy(myIdx, e); hit != nil {
+			speed := rl.Vector3Length(e.KnockbackVelocity)
+			if speed > 2 {
+				dir := rl.Vector3Subtract(hit.Position, e.Position)
+				if rl.Vector3LengthSqr(dir) < 0.0001 {
+					dir = e.KnockbackVelocity
+				}
+				hit.ApplyKnockback(rl.Vector3Scale(rl.Vector3Normalize(dir), speed*0.8), e.KnockbackTimeLeft*0.8)
+			}
 		}
 		e.KnockbackVelocity = rl.Vector3Scale(e.KnockbackVelocity, 1-8*dt)
 		e.KnockbackTimeLeft -= dt
