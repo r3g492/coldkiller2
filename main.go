@@ -132,6 +132,7 @@ func main() {
 				enemyManager,
 				w,
 				h,
+				keyMap,
 			)
 			continue
 		}

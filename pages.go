@@ -129,6 +129,7 @@ func doIntermission(
 	enemyManager *enemy.Manager,
 	w int,
 	h int,
+	keyMap input.KeyMap,
 ) {
 	const totalLoadSteps = 9
 
@@ -203,7 +204,7 @@ func doIntermission(
 			Width:  btnWidth,
 			Height: btnHeight,
 		}
-		if drawButton(startRect, "Go", rl.Maroon, rl.Red, rl.White) {
+		if drawButton(startRect, "Go", rl.Maroon, rl.Red, rl.White) || rl.IsKeyPressed(rl.KeyEnter) {
 			intermission = false
 			intermissionTimer = 0
 			intermissionLoadStep = 0
