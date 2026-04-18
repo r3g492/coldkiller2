@@ -7,7 +7,6 @@ import (
 	"coldkiller2/sound"
 	"coldkiller2/structure"
 	"coldkiller2/util"
-	"fmt"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -163,9 +162,8 @@ func (k *Killer) DrawUi() {
 		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
 	}
 
-	// Optional: Keep the FPS counter at the bottom
-	fpsText := fmt.Sprintf("%d", rl.GetFPS())
-	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, 1, rl.Yellow)
+	/*fpsText := fmt.Sprintf("%d", rl.GetFPS())
+	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, 1, rl.Yellow)*/
 }
 func (k *Killer) Mutate(
 	input input.Input,
