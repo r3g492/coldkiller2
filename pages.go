@@ -489,9 +489,16 @@ func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 		Z: mouseRay.Position.Z + mouseRay.Direction.Z*t,
 	}
 
+	lineEnd := target3D
+	aimVec := rl.Vector3Subtract(target3D, player.Position)
+	if rl.Vector3Length(aimVec) > player.Range {
+		aimDir := rl.Vector3Normalize(aimVec)
+		lineEnd = rl.Vector3Add(player.Position, rl.Vector3Scale(aimDir, player.Range))
+	}
+
 	rl.BeginMode3D(player.Camera)
 
-	rl.DrawLine3D(player.Position, target3D, rl.Green)
+	rl.DrawLine3D(player.Position, lineEnd, rl.Green)
 
 	rl.DrawSphere(target3D, 0.1, rl.Green)
 

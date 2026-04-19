@@ -46,6 +46,7 @@ type Killer struct {
 	DashPushTimeLeft float32
 	DashDirection    rl.Vector3
 	CameraOffset     rl.Vector3
+	Range            float32
 }
 
 const ModelRatio = 0.2
@@ -77,6 +78,7 @@ func Create() *Killer {
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSoundTimeLeft: 0.4,
 		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
+		Range:                 10,
 	}
 }
 
@@ -328,7 +330,7 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 		dir := rl.Vector3Normalize(k.TargetDirection)
 		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
-		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200})
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200, k.Range})
 		k.Ammo--
 		return bulletCmds, true
 	}

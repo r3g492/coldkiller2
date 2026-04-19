@@ -27,13 +27,15 @@ func (bm *Manager) KillerBulletCreate(
 	bulletCmds []killer.BulletCmd,
 ) {
 	for _, bc := range bulletCmds {
+		const speed = 75
+		lifeTime := bc.Range / speed
 		b := Bullet{
 			Position:  bc.Pos,
 			Direction: bc.Dir,
-			Speed:     75,
+			Speed:     speed,
 			Radius:    0.1,
 			Active:    true,
-			LifeTime:  1.0,
+			LifeTime:  lifeTime,
 			Shooter:   Player,
 			Color:     rl.Yellow,
 			Damage:    bc.Damage,

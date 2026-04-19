@@ -6,4 +6,5 @@ type BulletCmd struct {
 	Pos    rl.Vector3
 	Dir    rl.Vector3
 	Damage int32
+	Range  float32
 }
