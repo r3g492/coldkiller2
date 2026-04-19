@@ -345,7 +345,9 @@ func (k *Killer) ResolveAnimation() {
 	case animation.StateDying:
 		k.setAnim(3, 300, false)
 	case animation.StateReloading:
-		k.setAnim(2, 150, false)
+		k.setAnim(2, 45, false)
+	case animation.StateDashing:
+		k.setAnim(4, 150, false)
 	default:
 		panic("unhandled default case")
 	}

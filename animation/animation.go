@@ -9,4 +9,5 @@ const (
 	StateDying
 	StateAiming
 	StateReloading
+	StateDashing
 )

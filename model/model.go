@@ -18,5 +18,5 @@ var (
 func Init() {
 	RobotModel, RobotAnimation = util.LoadModelFromEmbedded("robot.glb")
 	SoldierModel, SoldierAnimation = util.LoadModelFromEmbedded("soldier.glb")
-	KillerModel, KillerAnimation = util.LoadModelFromEmbedded("new_stuff.glb")
+	KillerModel, KillerAnimation = util.LoadModelFromEmbedded("killer.glb")
 }
