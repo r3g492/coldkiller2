@@ -64,15 +64,12 @@ func (em *Manager) Mutate(
 	// dash push: player collides with enemies while dashing
 	if p.DashPushTimeLeft > 0 {
 		for _, e := range em.Enemies {
-			if !e.IsAlive() {
-				continue
-			}
 			if rl.CheckCollisionSpheres(p.Position, p.Size*1.5, e.Position, e.Size) {
 				dir := rl.Vector3Subtract(e.Position, p.Position)
 				if rl.Vector3LengthSqr(dir) < 0.0001 {
 					dir = rl.Vector3{X: 1}
 				}
-				e.ApplyKnockback(rl.Vector3Scale(rl.Vector3Normalize(dir), 25.0), 0.25)
+				e.ApplyKnockback(rl.Vector3Scale(rl.Vector3Normalize(dir), 45.0), 0.4)
 			}
 		}
 	}

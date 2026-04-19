@@ -36,13 +36,12 @@ type Killer struct {
 	Ammo                  int32
 	FootstepSoundTimeLeft float32
 	FootstepSoundTimeUnit float32
-	float32
-	FootstepSound    rl.Sound
-	HitFlashTimer    float32
-	DashCooldown     float32
-	DashPushTimeLeft float32
-	DashDirection    rl.Vector3
-	CameraOffset     rl.Vector3
+	FootstepSound         rl.Sound
+	HitFlashTimer         float32
+	DashCooldown          float32
+	DashPushTimeLeft      float32
+	DashDirection         rl.Vector3
+	CameraOffset          rl.Vector3
 
 	// possible level up stats
 	MoveSpeed    float32
@@ -66,7 +65,7 @@ func Create() *Killer {
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        playerPosition,
 		Size:            CharSize,
-		MoveSpeed:       5,
+		MoveSpeed:       6,
 		Camera: rl.Camera3D{
 			Position:   rl.Vector3Add(playerPosition, rl.NewVector3(0.0, 10.0, 0.0)),
 			Target:     playerPosition,
@@ -203,7 +202,7 @@ func (k *Killer) Mutate(
 	if input.ReloadPressed && k.ActionTimeLeft <= 0 {
 		rl.PlaySound(sound.ReloadingSound)
 		k.Ammo = k.AmmoCapacity
-		var reloadTime float32 = 0.4
+		var reloadTime float32 = 0.25
 		k.ActionTimeLeft = reloadTime
 		k.MaxActionTime = reloadTime
 		k.AnimationState = animation.StateReloading
