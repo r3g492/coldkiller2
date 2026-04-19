@@ -124,7 +124,9 @@ func (em *Manager) ProcessAnimation(dt float32, p *killer.Killer) {
 
 func (em *Manager) Unload() {
 	rl.UnloadModel(em.SharedModel)
-	rl.UnloadModelAnimations(em.SharedAnimations)
+	if len(em.SharedAnimations) > 0 {
+		rl.UnloadModelAnimations(em.SharedAnimations)
+	}
 	em.Enemies = []*Enemy{}
 }
 

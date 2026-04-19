@@ -11,9 +11,12 @@ var (
 	RobotAnimation   []rl.ModelAnimation
 	SoldierModel     rl.Model
 	SoldierAnimation []rl.ModelAnimation
+	KillerModel      rl.Model
+	KillerAnimation  []rl.ModelAnimation
 )
 
 func Init() {
 	RobotModel, RobotAnimation = util.LoadModelFromEmbedded("robot.glb")
 	SoldierModel, SoldierAnimation = util.LoadModelFromEmbedded("soldier.glb")
+	KillerModel, KillerAnimation = util.LoadModelFromEmbedded("new_stuff.glb")
 }

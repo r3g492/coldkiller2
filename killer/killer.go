@@ -52,8 +52,8 @@ const ModelRatio = 0.2
 const CharSize = 0.72
 
 func Create() *Killer {
-	playerModel := model.SoldierModel
-	playerAnimation := model.SoldierAnimation
+	playerModel := model.KillerModel
+	playerAnimation := model.KillerAnimation
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
 	return &Killer{
 		Model:           playerModel,
@@ -94,7 +94,9 @@ func (k *Killer) Init() {
 
 func (k *Killer) Unload() {
 	rl.UnloadModel(k.Model)
-	rl.UnloadModelAnimations(k.Animation)
+	if len(k.Animation) > 0 {
+		rl.UnloadModelAnimations(k.Animation)
+	}
 }
 
 func (k *Killer) Draw3D() {
@@ -330,6 +332,9 @@ func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 }
 
 func (k *Killer) ResolveAnimation() {
+	if len(k.Animation) == 0 {
+		return
+	}
 	switch k.AnimationState {
 	case animation.StateIdle:
 		k.setAnim(0, 24, true)
@@ -357,6 +362,9 @@ func (k *Killer) setAnim(idx int, speed float32, loop bool) {
 }
 
 func (k *Killer) PlanAnimate(dt float32) {
+	if len(k.Animation) == 0 {
+		return
+	}
 	k.AnimationFrameCounter += k.AnimationFrameSpeed * dt
 	anim := k.Animation[k.AnimationIdx]
 	for k.AnimationFrameCounter >= 1.0 {
@@ -370,6 +378,9 @@ func (k *Killer) PlanAnimate(dt float32) {
 }
 
 func (k *Killer) Animate() {
+	if len(k.Animation) == 0 {
+		return
+	}
 	anim := k.Animation[k.AnimationIdx]
 	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
 }

@@ -45,7 +45,17 @@ func LoadModelFromEmbedded(filename string) (rl.Model, []rl.ModelAnimation) {
 	}
 	tmpPath := tmpFile.Name()
 	_ = tmpFile.Close()
-	return rl.LoadModel(tmpPath), rl.LoadModelAnimations(tmpPath)
+	return rl.LoadModel(tmpPath), safeLoadModelAnimations(tmpPath)
+}
+
+func safeLoadModelAnimations(path string) (anims []rl.ModelAnimation) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("no animations found in %s, skipping", path)
+			anims = nil
+		}
+	}()
+	return rl.LoadModelAnimations(path)
 }
 
 func LoadSoundFromEmbedded(filename string) rl.Sound {

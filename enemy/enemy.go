@@ -74,8 +74,10 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 		)
 	}
 
-	anim := e.Animation[e.AnimationIdx]
-	rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
+	if len(e.Animation) > 0 {
+		anim := e.Animation[e.AnimationIdx]
+		rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
+	}
 	rl.PushMatrix()
 	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
 	rl.Rotatef(-30, 1, 0, 0)
@@ -249,11 +251,16 @@ func (e *Enemy) Damage(d int32, bulletDir rl.Vector3) {
 
 func (e *Enemy) Unload() {
 	rl.UnloadModel(e.Model)
-	rl.UnloadModelAnimations(e.Animation)
+	if len(e.Animation) > 0 {
+		rl.UnloadModelAnimations(e.Animation)
+	}
 	rl.UnloadSoundAlias(e.FootstepSound)
 }
 
 func (e *Enemy) ResolveAnimation() {
+	if len(e.Animation) == 0 {
+		return
+	}
 	switch e.AnimationState {
 	case animation.StateIdle:
 		e.setAnim(0, 24, true)
@@ -281,6 +288,9 @@ func (e *Enemy) setAnim(idx int, speed float32, loop bool) {
 }
 
 func (e *Enemy) PlanAnimate(dt float32) {
+	if len(e.Animation) == 0 {
+		return
+	}
 	e.AnimationFrameCounter += e.AnimationFrameSpeed * dt
 	anim := e.Animation[e.AnimationIdx]
 	for e.AnimationFrameCounter >= 1.0 {
