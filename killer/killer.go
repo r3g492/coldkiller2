@@ -38,16 +38,18 @@ type Killer struct {
 	FootstepSoundTimeUnit float32
 	FootstepSound         rl.Sound
 	HitFlashTimer         float32
-	DashCooldown          float32
-	DashPushTimeLeft      float32
-	DashDirection         rl.Vector3
-	CameraOffset          rl.Vector3
+
+	DashTimeLeft     float32
+	DashCooldown     float32
+	DashPushTimeLeft float32
+	DashDirection    rl.Vector3
+	CameraOffset     rl.Vector3
 
 	// possible level up stats
 	MoveSpeed    float32
 	AmmoCapacity int32
 	Range        float32
-	DashTimeLeft float32
+	DashTimeUnit float32
 }
 
 const ModelRatio = 0.2
@@ -74,6 +76,7 @@ func Create() *Killer {
 			Projection: rl.CameraOrthographic,
 		},
 		ActionTimeLeft:        0,
+		DashTimeUnit:          0.3,
 		AmmoCapacity:          6,
 		Ammo:                  6,
 		FootstepSoundTimeUnit: 0.4,
@@ -295,7 +298,7 @@ func (k *Killer) movement(
 	}
 	if input.DashPressed && isMoving && k.DashCooldown <= 0 {
 		rl.PlaySound(sound.Dash)
-		k.DashTimeLeft = 0.3
+		k.DashTimeLeft = k.DashTimeUnit
 		k.DashPushTimeLeft = 0.4
 		k.DashCooldown = 1.0
 		k.DashDirection = k.MoveDirection
