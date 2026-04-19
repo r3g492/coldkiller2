@@ -213,7 +213,9 @@ func (k *Killer) Mutate(
 			k.FootstepSoundTimeLeft -= dt
 		}
 
-		if moving {
+		if k.DashTimeLeft > 0 {
+			k.AnimationState = animation.StateDashing
+		} else if moving {
 			k.AnimationState = animation.StateRunning
 
 			if k.FootstepSoundTimeLeft <= 0 {
@@ -299,6 +301,8 @@ func (k *Killer) movement(
 	if k.DashTimeLeft > 0 {
 		speed = k.MoveSpeed * 3.5
 		k.MoveDirection = k.DashDirection
+		angleRad := math.Atan2(float64(k.DashDirection.X), float64(k.DashDirection.Z))
+		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 	}
 	moveAmount := rl.Vector3Scale(k.MoveDirection, speed*dt)
 	if rl.Vector3Length(moveAmount) > 0 {
@@ -347,7 +351,7 @@ func (k *Killer) ResolveAnimation() {
 	case animation.StateReloading:
 		k.setAnim(2, 45, false)
 	case animation.StateDashing:
-		k.setAnim(4, 150, false)
+		k.setAnim(4, 300, false)
 	default:
 		panic("unhandled default case")
 	}
