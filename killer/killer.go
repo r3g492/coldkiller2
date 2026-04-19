@@ -215,7 +215,7 @@ func (k *Killer) Mutate(
 			k.AnimationState = animation.StateRunning
 
 			if k.FootstepSoundTimeLeft <= 0 {
-				sound.PlaySound3D(k.FootstepSound, k.Position, k.Position, 1)
+				sound.PlaySound3D(k.FootstepSound, k.Position, k.Position, 0.3)
 				k.FootstepSoundTimeLeft = k.FootstepSoundTimeUnit
 			}
 		} else {

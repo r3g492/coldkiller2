@@ -30,6 +30,7 @@ func Init() {
 	FootStep = util.LoadSoundFromEmbedded("data_pion-st1-footstep-sfx-323053.mp3")
 	ThreeTwoOne = util.LoadSoundFromEmbedded("female-vocal-321-countdown-240912.mp3")
 	Dash = util.LoadSoundFromEmbedded("dash_trimmed.mp3")
+	rl.SetSoundVolume(Dash, 2)
 }
 
 func PlaySound3D(s rl.Sound, sourcePos rl.Vector3, playerPos rl.Vector3, volumeMult float32) {
