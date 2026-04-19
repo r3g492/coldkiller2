@@ -203,6 +203,7 @@ func main() {
 		bulletBlasts := bulletManager.Mutate(dt, player, enemyManager.Enemies, structureManager)
 
 		blastManager.AddBlasts(bulletBlasts)
+		blastManager.AddBlasts(enemyManager.BlastBuffer)
 		blastManager.Mutate(dt)
 
 		sight.UpdateSight(

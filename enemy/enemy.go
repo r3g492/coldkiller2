@@ -2,6 +2,7 @@ package enemy
 
 import (
 	"coldkiller2/animation"
+	"coldkiller2/blast"
 	"coldkiller2/killer"
 	"coldkiller2/model"
 	"coldkiller2/sound"
@@ -50,6 +51,9 @@ type Enemy struct {
 	AiType                AiType
 	KnockbackVelocity     rl.Vector3
 	KnockbackTimeLeft     float32
+
+	IsSelfDestructor  bool
+	SelfDestructRange float32
 }
 
 func (e *Enemy) IsAlive() bool {
@@ -120,7 +124,7 @@ func (e *Enemy) DrawUI(p *killer.Killer) {
 
 func (e *Enemy) Mutate(
 	dt float32,
-	p killer.Killer,
+	p *killer.Killer,
 	em *Manager,
 	myIdx int,
 	structureManager *structure.Manager,
@@ -165,7 +169,7 @@ func (e *Enemy) Mutate(
 		e.ShouldBeDeleted = true
 	}
 
-	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, &p, structureManager)
+	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, p, structureManager)
 	if e.AimDirection != (rl.Vector3{}) {
 		derivedAimStart = true
 	}
@@ -178,6 +182,12 @@ func (e *Enemy) Mutate(
 		e.AimTimeLeft = e.AimTimeUnit
 		e.AimDirection = rl.Vector3{}
 		rl.PlaySound(sound.ShotgunSound)
+
+		if e.IsSelfDestructor {
+			e.selfDestruct(p, em)
+			return []BulletCmd{}
+		}
+
 		spawnPos := e.Position
 		bulletCmds = append(bulletCmds, BulletCmd{Pos: spawnPos, Dir: dir, Damage: 200, Range: e.AttackRange, Shooter: e})
 		return bulletCmds
@@ -233,6 +243,38 @@ func (e *Enemy) Mutate(
 	angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
 	e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
 	return bulletCmds
+}
+
+func (e *Enemy) selfDestruct(p *killer.Killer, em *Manager) {
+	radius := e.SelfDestructRange
+	if radius <= 0 {
+		radius = e.AttackRange
+	}
+
+	if p.IsAlive() && rl.Vector3Distance(e.Position, p.Position) <= radius {
+		p.Damage(200)
+	}
+
+	em.BlastBuffer = append(em.BlastBuffer, blast.Blast{
+		Position:    e.Position,
+		Radius:      radius,
+		MaxLifeTime: 0.4,
+		LifeTime:    0.4,
+		Color:       rl.NewColor(255, 140, 20, 220),
+		AlwaysShow:  true,
+	})
+	for k := 0; k < 8; k++ {
+		angle := float64(k) * math.Pi / 4
+		offset := rl.Vector3{
+			X: float32(math.Cos(angle)) * radius * 0.7,
+			Z: float32(math.Sin(angle)) * radius * 0.7,
+		}
+		em.BlastBuffer = append(em.BlastBuffer, blast.CreateDebris(rl.Vector3Add(e.Position, offset)))
+	}
+
+	e.Health = 0
+	e.AnimationState = animation.StateDying
+	e.ActionTimeLeft = 10
 }
 
 func (e *Enemy) Damage(d int32, bulletDir rl.Vector3) {
@@ -361,14 +403,16 @@ func Robot(x, z float32) *Enemy {
 		Size:                  killer.CharSize,
 		MoveSpeed:             8,
 		Health:                100,
-		AttackRange:           8,
-		AimTimeLeft:           0.5,
-		AimTimeUnit:           0.5,
+		AttackRange:           2.0,
+		AimTimeLeft:           0.25,
+		AimTimeUnit:           0.25,
 		FootstepSoundTimeLeft: 0,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         sound.FootStep,
 		AiType:                SimpleZombie,
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		IsSelfDestructor:      true,
+		SelfDestructRange:     4.0,
 	}
 }

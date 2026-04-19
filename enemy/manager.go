@@ -1,6 +1,7 @@
 package enemy
 
 import (
+	"coldkiller2/blast"
 	"coldkiller2/killer"
 	"coldkiller2/model"
 	"coldkiller2/structure"
@@ -22,6 +23,7 @@ type Manager struct {
 	LastGenerated              time.Time
 	EnemyLimit                 int
 	BulletBuffer               []BulletCmd
+	BlastBuffer                []blast.Blast
 	Grid                       map[int][]int
 	CellSize                   float32
 	AliveEnemyCount            int
@@ -57,6 +59,7 @@ func (em *Manager) Mutate(
 	em.AliveEnemyCount = 0
 	em.updateGrid()
 	em.BulletBuffer = em.BulletBuffer[:0]
+	em.BlastBuffer = em.BlastBuffer[:0]
 
 	// dash push: player collides with enemies while dashing
 	if p.DashPushTimeLeft > 0 {
@@ -75,7 +78,7 @@ func (em *Manager) Mutate(
 	}
 
 	for i := 0; i < len(em.Enemies); i++ {
-		addBullets := em.Enemies[i].Mutate(dt, *p, em, i, structureManager)
+		addBullets := em.Enemies[i].Mutate(dt, p, em, i, structureManager)
 		em.BulletBuffer = append(em.BulletBuffer, addBullets...)
 	}
 
