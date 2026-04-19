@@ -423,6 +423,6 @@ func Robot(x, z float32) *Enemy {
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 		IsSelfDestructor:      true,
-		SelfDestructRange:     4.0,
+		SelfDestructRange:     3.3,
 	}
 }

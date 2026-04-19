@@ -43,6 +43,10 @@ func InitStages() {
 		Type6(),
 		Type6(),
 		Type6(),
+		Type7(),
+		Type7(),
+		Type7(),
+		Type7(),
 	}
 }
 
@@ -191,6 +195,28 @@ func Type6() Data {
 	}
 }
 
+func Type7() Data {
+	structs := WallType4()
+	enemies := GetRandomEnemy(
+		20, structs, nil,
+		EnemySpec{KindRobot, 2},
+		EnemySpec{KindSoldier, 1},
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			25, structs, enemies,
+			EnemySpec{KindRobot, 4},
+			EnemySpec{KindSoldier, 3},
+		)...,
+	)
+
+	return Data{
+		Enemies:    enemies,
+		Structures: structs,
+	}
+}
+
 func WallType1() []*structure.Structure {
 	return []*structure.Structure{
 		{Position: rl.Vector3{X: -20, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 40}, Color: rl.DarkGray},
@@ -215,5 +241,20 @@ func WallType3() []*structure.Structure {
 		{Position: rl.Vector3{X: 8, Y: 0, Z: -8}, Size: rl.Vector3{X: 3, Y: 3, Z: 3}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: -8, Y: 0, Z: 8}, Size: rl.Vector3{X: 3, Y: 3, Z: 3}, Color: rl.DarkGray},
 		{Position: rl.Vector3{X: 8, Y: 0, Z: 8}, Size: rl.Vector3{X: 3, Y: 3, Z: 3}, Color: rl.DarkGray},
+	}
+}
+
+func WallType4() []*structure.Structure {
+	return []*structure.Structure{
+		{Position: rl.Vector3{X: -10, Y: 0, Z: -10}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 10, Y: 0, Z: -10}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -10, Y: 0, Z: 10}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 10, Y: 0, Z: 10}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -15, Y: 0, Z: 15}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 15, Y: 0, Z: 15}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 20, Y: 0, Z: 0}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 21, Y: 0, Z: 2}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 22, Y: 0, Z: 4}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 23, Y: 0, Z: 6}, Size: rl.Vector3{X: 1, Y: 1, Z: 1}, Color: rl.DarkGray},
 	}
 }
