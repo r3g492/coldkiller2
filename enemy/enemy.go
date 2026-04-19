@@ -255,6 +255,16 @@ func (e *Enemy) selfDestruct(p *killer.Killer, em *Manager) {
 		p.Damage(200)
 	}
 
+	for _, other := range em.Enemies {
+		if other == e || !other.IsAlive() {
+			continue
+		}
+		if rl.Vector3Distance(e.Position, other.Position) <= radius {
+			dir := rl.Vector3Subtract(other.Position, e.Position)
+			other.Damage(200, dir)
+		}
+	}
+
 	em.BlastBuffer = append(em.BlastBuffer, blast.Blast{
 		Position:    e.Position,
 		Radius:      radius,
