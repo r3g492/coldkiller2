@@ -29,24 +29,26 @@ type Killer struct {
 	Position              rl.Vector3
 	PrevPosition          rl.Vector3
 	Size                  float32
-	MoveSpeed             float32
 	Camera                rl.Camera3D
 	ActionTimeLeft        float32
 	MaxActionTime         float32
 	Health                int32
-	AmmoCapacity          int32
 	Ammo                  int32
 	FootstepSoundTimeLeft float32
 	FootstepSoundTimeUnit float32
 	float32
 	FootstepSound    rl.Sound
 	HitFlashTimer    float32
-	DashTimeLeft     float32
 	DashCooldown     float32
 	DashPushTimeLeft float32
 	DashDirection    rl.Vector3
 	CameraOffset     rl.Vector3
-	Range            float32
+
+	// possible level up stats
+	MoveSpeed    float32
+	AmmoCapacity int32
+	Range        float32
+	DashTimeLeft float32
 }
 
 const ModelRatio = 0.2
