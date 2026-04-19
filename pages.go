@@ -10,9 +10,84 @@ import (
 	"coldkiller2/stage"
 	"coldkiller2/structure"
 	"fmt"
+	"math/rand"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
+
+type intermissionUpgrade int
+
+const (
+	upgradeNone intermissionUpgrade = iota
+	upgradeDashMult
+	upgradeAmmoCapacity
+	upgradeRange
+	upgradeDashTime
+	upgradeReloadTime
+)
+
+var intermissionUpgrades [2]intermissionUpgrade
+
+func upgradeLabel(u intermissionUpgrade) string {
+	switch u {
+	case upgradeDashMult:
+		return "Dash Mult +0.5"
+	case upgradeAmmoCapacity:
+		return "Ammo Capacity +2"
+	case upgradeRange:
+		return "Range +2"
+	case upgradeDashTime:
+		return "Dash Time +0.1s"
+	case upgradeReloadTime:
+		return "Reload Time -0.05s"
+	}
+	return ""
+}
+
+func applyUpgrade(p *killer.Killer, u intermissionUpgrade) {
+	switch u {
+	case upgradeDashMult:
+		p.DashMult += 0.5
+	case upgradeAmmoCapacity:
+		p.AmmoCapacity += 1
+		p.Ammo = p.AmmoCapacity
+	case upgradeRange:
+		p.Range += 1
+	case upgradeDashTime:
+		p.DashTimeUnit += 0.1
+	case upgradeReloadTime:
+		p.ReloadTimeUnit -= 0.05
+		if p.ReloadTimeUnit < 0.05 {
+			p.ReloadTimeUnit = 0.05
+		}
+	default:
+		panic("unhandled default case")
+	}
+}
+
+func rollIntermissionUpgrades() {
+	all := []intermissionUpgrade{upgradeDashMult, upgradeAmmoCapacity, upgradeRange, upgradeDashTime, upgradeReloadTime}
+	rand.Shuffle(len(all), func(i, j int) { all[i], all[j] = all[j], all[i] })
+	intermissionUpgrades[0] = all[0]
+	intermissionUpgrades[1] = all[1]
+}
+
+func drawPlayerStats(p *killer.Killer) {
+	const fontSize = int32(16)
+	const lineH = 20
+	const marginX = 20
+	const marginY = 80
+	lines := []string{
+		fmt.Sprintf("Dash Mult:    %.1f", p.DashMult),
+		fmt.Sprintf("Ammo:         %d", p.AmmoCapacity),
+		fmt.Sprintf("Range:        %.1f", p.Range),
+		fmt.Sprintf("Dash Time:    %.2fs", p.DashTimeUnit),
+		fmt.Sprintf("Reload Time:  %.2fs", p.ReloadTimeUnit),
+	}
+	for i, line := range lines {
+		rl.DrawText(line, marginX, marginY+int32(i)*lineH, fontSize, rl.NewColor(220, 220, 220, 220))
+	}
+}
 
 var (
 	btnWidth  = float32(400)
@@ -180,24 +255,48 @@ func doIntermission(
 			intermissionLoadStep++
 		}
 	} else {
-		// loading done: show start button
-		startRect := rl.Rectangle{
+		// loading done: pick upgrades and show 2 upgrade buttons
+		if intermissionUpgrades[0] == upgradeNone {
+			rollIntermissionUpgrades()
+		}
+
+		halfWidth := btnWidth/2 - spacing/2
+		leftRect := rl.Rectangle{
 			X:      float32(w)/2 - btnWidth/2,
 			Y:      float32(h)/2 + 35,
-			Width:  btnWidth,
+			Width:  halfWidth,
 			Height: btnHeight,
 		}
+		rightRect := rl.Rectangle{
+			X:      float32(w)/2 + spacing/2,
+			Y:      float32(h)/2 + 35,
+			Width:  halfWidth,
+			Height: btnHeight,
+		}
+
 		if rl.IsCursorHidden() {
 			rl.EnableCursor()
 			scale, offsetX, offsetY := letterbox()
-			cx := int32((startRect.X+startRect.Width/2)*scale + offsetX)
-			cy := int32((startRect.Y+startRect.Height/2)*scale + offsetY)
+			cx := int32((leftRect.X+leftRect.Width/2)*scale + offsetX)
+			cy := int32((leftRect.Y+leftRect.Height/2)*scale + offsetY)
 			rl.SetMousePosition(int(cx), int(cy))
 		}
-		if drawButton(startRect, "Go", rl.Maroon, rl.Red, rl.White) || rl.IsKeyPressed(rl.KeyEnter) {
+
+		chosen := upgradeNone
+		if drawButtonSized(leftRect, upgradeLabel(intermissionUpgrades[0]), 18, rl.Maroon, rl.Red, rl.White) {
+			chosen = intermissionUpgrades[0]
+		}
+		if drawButtonSized(rightRect, upgradeLabel(intermissionUpgrades[1]), 18, rl.Maroon, rl.Red, rl.White) {
+			chosen = intermissionUpgrades[1]
+		}
+
+		if chosen != upgradeNone {
+			applyUpgrade(player, chosen)
 			intermission = false
 			intermissionTimer = 0
 			intermissionLoadStep = 0
+			intermissionUpgrades[0] = upgradeNone
+			intermissionUpgrades[1] = upgradeNone
 		}
 	}
 
@@ -365,6 +464,10 @@ func drawEnemyCount(w int, alive int) {
 }
 
 func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor rl.Color) bool {
+	return drawButtonSized(rect, text, 30, baseColor, hoverColor, textColor)
+}
+
+func drawButtonSized(rect rl.Rectangle, text string, fontSize int32, baseColor, hoverColor, textColor rl.Color) bool {
 	mousePoint := virtualMousePosition()
 	isHovered := rl.CheckCollisionPointRec(mousePoint, rect)
 
@@ -384,7 +487,6 @@ func drawButton(rect rl.Rectangle, text string, baseColor, hoverColor, textColor
 	rl.DrawRectangleRec(rect, rl.Fade(currentColor, 0.3))
 	rl.DrawRectangleLinesEx(rect, 3, currentColor)
 
-	fontSize := int32(30)
 	textWidth := rl.MeasureText(text, fontSize)
 	textX := int32(rect.X + (rect.Width / 2) - float32(textWidth/2))
 	textY := int32(rect.Y + (rect.Height / 2) - float32(fontSize/2))

@@ -102,6 +102,8 @@ func main() {
 				intermission = false
 				intermissionTimer = 0
 				intermissionLoadStep = 0
+				intermissionUpgrades[0] = upgradeNone
+				intermissionUpgrades[1] = upgradeNone
 				showInitMenu = true
 				rl.StopSound(sound.Track)
 			} else {
@@ -143,6 +145,7 @@ func main() {
 		if stageManager.StageLost() {
 			rl.StopSound(sound.Track)
 			rl.PlaySound(sound.YouLose)
+			player.ResetStats()
 			showInitMenu = true
 		}
 
@@ -230,6 +233,7 @@ func main() {
 		player.DrawUi()
 		player.DrawHitFlash()
 		drawEnemyCount(w, enemyManager.AliveCount())
+		drawPlayerStats(player)
 		enemyManager.DrawUi(player)
 		drawCursor(mouseLocation, player)
 

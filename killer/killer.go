@@ -45,11 +45,13 @@ type Killer struct {
 	DashDirection    rl.Vector3
 	CameraOffset     rl.Vector3
 
+	MoveSpeed float32
 	// possible level up stats
-	MoveSpeed    float32
-	AmmoCapacity int32
-	Range        float32
-	DashTimeUnit float32
+	AmmoCapacity   int32
+	Range          float32
+	DashTimeUnit   float32
+	DashMult       float32
+	ReloadTimeUnit float32
 }
 
 const ModelRatio = 0.2
@@ -59,7 +61,7 @@ func Create() *Killer {
 	playerModel := model.KillerModel
 	playerAnimation := model.KillerAnimation
 	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
-	return &Killer{
+	k := &Killer{
 		Model:           playerModel,
 		ModelAngleDeg:   0,
 		Animation:       playerAnimation,
@@ -67,7 +69,6 @@ func Create() *Killer {
 		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
 		Position:        playerPosition,
 		Size:            CharSize,
-		MoveSpeed:       6,
 		Camera: rl.Camera3D{
 			Position:   rl.Vector3Add(playerPosition, rl.NewVector3(0.0, 10.0, 0.0)),
 			Target:     playerPosition,
@@ -76,14 +77,12 @@ func Create() *Killer {
 			Projection: rl.CameraOrthographic,
 		},
 		ActionTimeLeft:        0,
-		DashTimeUnit:          0.3,
-		AmmoCapacity:          6,
-		Ammo:                  6,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSoundTimeLeft: 0.4,
 		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
-		Range:                 10,
 	}
+	k.ResetStats()
+	return k
 }
 
 func (k *Killer) Init() {
@@ -96,6 +95,16 @@ func (k *Killer) Init() {
 	k.ActionTimeLeft = 0
 	k.DashTimeLeft = 0
 	k.DashCooldown = 0
+}
+
+func (k *Killer) ResetStats() {
+	k.MoveSpeed = 6
+	k.DashMult = 3.5
+	k.AmmoCapacity = 6
+	k.Ammo = 6
+	k.Range = 10
+	k.DashTimeUnit = 0.3
+	k.ReloadTimeUnit = 0.3
 }
 
 func (k *Killer) Unload() {
@@ -205,7 +214,7 @@ func (k *Killer) Mutate(
 	if input.ReloadPressed && k.ActionTimeLeft <= 0 {
 		rl.PlaySound(sound.ReloadingSound)
 		k.Ammo = k.AmmoCapacity
-		var reloadTime float32 = 0.25
+		var reloadTime = k.ReloadTimeUnit
 		k.ActionTimeLeft = reloadTime
 		k.MaxActionTime = reloadTime
 		k.AnimationState = animation.StateReloading
@@ -305,7 +314,7 @@ func (k *Killer) movement(
 	}
 	speed := k.MoveSpeed
 	if k.DashTimeLeft > 0 {
-		speed = k.MoveSpeed * 3.5
+		speed = k.MoveSpeed * k.DashMult
 		k.MoveDirection = k.DashDirection
 		angleRad := math.Atan2(float64(k.DashDirection.X), float64(k.DashDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
