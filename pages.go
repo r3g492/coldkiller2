@@ -33,9 +33,9 @@ func upgradeLabel(u intermissionUpgrade) string {
 	case upgradeDashMult:
 		return "Dash Mult +0.5"
 	case upgradeAmmoCapacity:
-		return "Ammo Capacity +2"
+		return "Ammo Capacity +1"
 	case upgradeRange:
-		return "Range +2"
+		return "Range +1"
 	case upgradeDashTime:
 		return "Dash Time +0.1s"
 	case upgradeReloadTime:
