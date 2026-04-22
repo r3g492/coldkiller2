@@ -170,6 +170,7 @@ func main() {
 		}
 
 		// enemy
+		stageManager.Mutate(dt)
 		var ebc = enemyManager.Mutate(dt, player, structureManager)
 		enemyManager.ProcessAnimation(dt, player)
 

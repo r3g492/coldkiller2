@@ -182,45 +182,6 @@ func (e *Enemy) Mutate(
 	}
 
 	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, p, structureManager)
-	if e.AimDirection != (rl.Vector3{}) {
-		derivedAimStart = true
-	}
-
-	if e.AimTimeLeft <= 0 {
-		dir := rl.Vector3Normalize(e.AimDirection)
-		e.ActionTimeLeft = 1
-		e.AnimationState = animation.StateAttacking
-		e.AnimationCurrentFrame = 0
-		e.AimTimeLeft = e.AimTimeUnit
-		e.AimDirection = rl.Vector3{}
-		rl.PlaySound(sound.ShotgunSound)
-
-		if e.IsSelfDestructor {
-			e.selfDestruct(p, em)
-			return []BulletCmd{}
-		}
-
-		spawnPos := e.Position
-		bulletCmds = append(bulletCmds, BulletCmd{Pos: spawnPos, Dir: dir, Damage: 200, Range: e.AttackRange, Shooter: e})
-		return bulletCmds
-	}
-
-	if derivedAimStart {
-		if e.AimDirection == (rl.Vector3{}) {
-			e.AimDirection = vecToPlayer
-		}
-		e.TargetDirection = e.AimDirection
-		angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
-		e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
-		e.AimTimeLeft -= dt
-		e.AnimationState = animation.StateAiming
-		e.AnimationCurrentFrame = 0
-		return []BulletCmd{}
-	}
-
-	e.AimTimeLeft = e.AimTimeUnit
-	e.AimDirection = rl.Vector3{}
-	e.MoveDirection = derivedMovement
 
 	if e.DashTimeLeft > 0 {
 		e.DashTimeLeft -= dt
@@ -228,13 +189,59 @@ func (e *Enemy) Mutate(
 	if e.DashCooldown > 0 {
 		e.DashCooldown -= dt
 	}
-	if e.DashTimeUnit > 0 && e.DashCooldown <= 0 && e.DashTimeLeft <= 0 && rl.Vector3LengthSqr(e.MoveDirection) > 0 {
+	if e.DashTimeUnit > 0 && e.DashCooldown <= 0 && e.DashTimeLeft <= 0 && rl.Vector3LengthSqr(derivedMovement) > 0 {
 		e.DashTimeLeft = e.DashTimeUnit
 		e.DashCooldown = e.DashCooldownUnit
-		e.DashDirection = rl.Vector3Normalize(e.MoveDirection)
+		e.DashDirection = rl.Vector3Normalize(derivedMovement)
+		e.AimTimeLeft = e.AimTimeUnit
+		e.AimDirection = rl.Vector3{}
 	}
+	isDashing := e.DashTimeLeft > 0
+
+	if !isDashing {
+		if e.AimDirection != (rl.Vector3{}) {
+			derivedAimStart = true
+		}
+
+		if e.AimTimeLeft <= 0 {
+			dir := rl.Vector3Normalize(e.AimDirection)
+			e.ActionTimeLeft = 1
+			e.AnimationState = animation.StateAttacking
+			e.AnimationCurrentFrame = 0
+			e.AimTimeLeft = e.AimTimeUnit
+			e.AimDirection = rl.Vector3{}
+			rl.PlaySound(sound.ShotgunSound)
+
+			if e.IsSelfDestructor {
+				e.selfDestruct(p, em)
+				return []BulletCmd{}
+			}
+
+			spawnPos := e.Position
+			bulletCmds = append(bulletCmds, BulletCmd{Pos: spawnPos, Dir: dir, Damage: 200, Range: e.AttackRange, Shooter: e})
+			return bulletCmds
+		}
+
+		if derivedAimStart {
+			if e.AimDirection == (rl.Vector3{}) {
+				e.AimDirection = vecToPlayer
+			}
+			e.TargetDirection = e.AimDirection
+			angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
+			e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+			e.AimTimeLeft -= dt
+			e.AnimationState = animation.StateAiming
+			e.AnimationCurrentFrame = 0
+			return []BulletCmd{}
+		}
+
+		e.AimTimeLeft = e.AimTimeUnit
+		e.AimDirection = rl.Vector3{}
+	}
+
+	e.MoveDirection = derivedMovement
 	speed := e.MoveSpeed
-	if e.DashTimeLeft > 0 {
+	if isDashing {
 		speed = e.MoveSpeed * e.DashMult
 		e.MoveDirection = e.DashDirection
 	}
@@ -242,12 +249,21 @@ func (e *Enemy) Mutate(
 
 	e.PrevPosition = e.Position
 	oldPos := e.Position
+	collisionSize := rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}
 	e.Position.X += moveAmount.X
-	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+	blockedX := structureManager.CheckCollision(e.Position, e.PrevPosition, collisionSize)
+	if !isDashing {
+		blockedX = blockedX || e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox())
+	}
+	if blockedX {
 		e.Position.X = oldPos.X
 	}
 	e.Position.Z += moveAmount.Z
-	if e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox()) || structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+	blockedZ := structureManager.CheckCollision(e.Position, e.PrevPosition, collisionSize)
+	if !isDashing {
+		blockedZ = blockedZ || e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox())
+	}
+	if blockedZ {
 		e.Position.Z = oldPos.Z
 	}
 
@@ -458,6 +474,30 @@ func Robot(x, z float32) *Enemy {
 	}
 }
 
+func SuperRobot(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.RobotModel,
+		ModelRatio:            0.4,
+		Animation:             model.RobotAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             16,
+		Health:                100,
+		AttackRange:           2.0,
+		AimTimeLeft:           0.4,
+		AimTimeUnit:           0.4,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                SimpleZombie,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		IsSelfDestructor:      true,
+		SelfDestructRange:     3.3,
+		Color:                 enemyRed,
+	}
+}
+
 func Boss(x, z float32) *Enemy {
 	return &Enemy{
 		Model:                 model.KillerModel,
@@ -477,8 +517,8 @@ func Boss(x, z float32) *Enemy {
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 		Color:                 enemyPurple,
-		DashTimeUnit:          0.4,
-		DashCooldownUnit:      3.0,
-		DashMult:              6.0,
+		DashTimeUnit:          2.0,
+		DashCooldownUnit:      5.0,
+		DashMult:              2.5,
 	}
 }
