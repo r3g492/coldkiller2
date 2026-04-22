@@ -235,7 +235,6 @@ func main() {
 		player.DrawUi()
 		player.DrawHitFlash()
 		drawEnemyCount(w, enemyManager.AliveCount())
-		drawPlayerStats(player)
 		enemyManager.DrawUi(player)
 		drawCursor(mouseLocation, player)
 

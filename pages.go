@@ -24,6 +24,8 @@ const (
 	upgradeRange
 	upgradeDashTime
 	upgradeReloadTime
+	upgradeDashCooldown
+	upgradeMoveSpeed
 )
 
 var intermissionUpgrades [2]intermissionUpgrade
@@ -31,15 +33,19 @@ var intermissionUpgrades [2]intermissionUpgrade
 func upgradeLabel(u intermissionUpgrade) string {
 	switch u {
 	case upgradeDashMult:
-		return "Dash Mult +0.02"
+		return "Dash Mult +0.03"
 	case upgradeAmmoCapacity:
 		return "Ammo Capacity +1"
 	case upgradeRange:
 		return "Range +1"
 	case upgradeDashTime:
-		return "Dash Time +0.02s"
+		return "Dash Time +0.1s"
 	case upgradeReloadTime:
-		return "Reload Time -0.05s"
+		return "Reload Time -0.10s"
+	case upgradeDashCooldown:
+		return "Dash Cooldown -0.1s"
+	case upgradeMoveSpeed:
+		return "MoveSpeed +0.25"
 	}
 	return ""
 }
@@ -47,26 +53,41 @@ func upgradeLabel(u intermissionUpgrade) string {
 func applyUpgrade(p *killer.Killer, u intermissionUpgrade) {
 	switch u {
 	case upgradeDashMult:
-		p.DashMult += 0.02
+		p.DashMult += 0.03
 	case upgradeAmmoCapacity:
 		p.AmmoCapacity += 1
 		p.Ammo = p.AmmoCapacity
 	case upgradeRange:
 		p.Range += 1
 	case upgradeDashTime:
-		p.DashTimeUnit += 0.02
+		p.DashTimeUnit += 0.1
 	case upgradeReloadTime:
-		p.ReloadTimeUnit -= 0.05
-		if p.ReloadTimeUnit < 0.05 {
-			p.ReloadTimeUnit = 0.05
+		p.ReloadTimeUnit -= 0.10
+		if p.ReloadTimeUnit < 0.01 {
+			p.ReloadTimeUnit = 0.01
 		}
+	case upgradeDashCooldown:
+		p.DashCooldown -= 0.1
+		if p.DashCooldown < 0.5 {
+			p.DashCooldown = 0.5
+		}
+	case upgradeMoveSpeed:
+		p.MoveSpeed += 0.25
 	default:
 		panic("unhandled default case")
 	}
 }
 
 func rollIntermissionUpgrades() {
-	all := []intermissionUpgrade{upgradeDashMult, upgradeAmmoCapacity, upgradeRange, upgradeDashTime, upgradeReloadTime}
+	all := []intermissionUpgrade{
+		upgradeDashMult,
+		upgradeAmmoCapacity,
+		upgradeRange,
+		upgradeDashTime,
+		upgradeReloadTime,
+		upgradeDashCooldown,
+		upgradeMoveSpeed,
+	}
 	rand.Shuffle(len(all), func(i, j int) { all[i], all[j] = all[j], all[i] })
 	intermissionUpgrades[0] = all[0]
 	intermissionUpgrades[1] = all[1]
@@ -75,14 +96,16 @@ func rollIntermissionUpgrades() {
 func drawPlayerStats(p *killer.Killer) {
 	const fontSize = int32(16)
 	const lineH = 20
-	const marginX = 20
-	const marginY = 80
+	const marginX = 400
+	const marginY = 400
 	lines := []string{
 		fmt.Sprintf("Dash Mult:    %.1f", p.DashMult),
 		fmt.Sprintf("Ammo:         %d", p.AmmoCapacity),
 		fmt.Sprintf("Range:        %.1f", p.Range),
 		fmt.Sprintf("Dash Time:    %.2fs", p.DashTimeUnit),
 		fmt.Sprintf("Reload Time:  %.2fs", p.ReloadTimeUnit),
+		fmt.Sprintf("DashCooldown:  %.2fs", p.DashCooldown),
+		fmt.Sprintf("MoveSpeed:    %.2f", p.MoveSpeed),
 	}
 	for i, line := range lines {
 		rl.DrawText(line, marginX, marginY+int32(i)*lineH, fontSize, rl.NewColor(220, 220, 220, 220))
@@ -299,7 +322,7 @@ func doIntermission(
 			intermissionUpgrades[1] = upgradeNone
 		}
 	}
-
+	drawPlayerStats(player)
 	endFrame()
 }
 

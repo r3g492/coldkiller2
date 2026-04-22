@@ -101,13 +101,13 @@ func (k *Killer) Init() {
 }
 
 func (k *Killer) ResetStats() {
-	k.MoveSpeed = 6
-	k.DashMult = 3.5
-	k.AmmoCapacity = 6
-	k.Ammo = 6
-	k.Range = 10
-	k.DashTimeUnit = 0.3
-	k.ReloadTimeUnit = 0.3
+	k.MoveSpeed = 4
+	k.DashMult = 4.0
+	k.AmmoCapacity = 1
+	k.Ammo = 1
+	k.Range = 8
+	k.DashTimeUnit = 0.25
+	k.ReloadTimeUnit = 0.5
 }
 
 func (k *Killer) ApplyKnockback(velocity rl.Vector3, duration float32) {
