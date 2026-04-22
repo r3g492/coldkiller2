@@ -14,7 +14,10 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-var enemyRed = rl.NewColor(150, 20, 25, 255)
+var (
+	enemyRed    = rl.NewColor(150, 20, 25, 255)
+	enemyPurple = rl.NewColor(80, 20, 120, 255)
+)
 
 type Enemy struct {
 	Model         rl.Model
@@ -54,6 +57,8 @@ type Enemy struct {
 
 	IsSelfDestructor  bool
 	SelfDestructRange float32
+
+	Color rl.Color
 }
 
 func (e *Enemy) IsAlive() bool {
@@ -87,15 +92,15 @@ func (e *Enemy) Draw3D(p *killer.Killer) {
 	rl.Rotatef(-30, 1, 0, 0)
 	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
 	if e.IsAlive() {
-		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, enemyRed)
-		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, enemyRed)
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, e.Color)
+		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, e.Color)
 	} else {
 		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, rl.DarkGray)
 	}
 	rl.PopMatrix()
 	if e.AnimationState == animation.StateAiming && e.AimDirection != (rl.Vector3{}) {
 		aimEnd := rl.Vector3Add(e.Position, rl.Vector3Scale(rl.Vector3Normalize(e.AimDirection), e.AttackRange))
-		rl.DrawLine3D(e.Position, aimEnd, enemyRed)
+		rl.DrawLine3D(e.Position, aimEnd, e.Color)
 	}
 }
 
@@ -380,6 +385,7 @@ func Soldier(x, z float32) *Enemy {
 		AiType:                Elite,
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyRed,
 	}
 }
 
@@ -401,6 +407,7 @@ func Sniper(x, z float32) *Enemy {
 		AiType:                Elite,
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyPurple,
 	}
 }
 
@@ -424,5 +431,6 @@ func Robot(x, z float32) *Enemy {
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 		IsSelfDestructor:      true,
 		SelfDestructRange:     3.3,
+		Color:                 enemyRed,
 	}
 }
