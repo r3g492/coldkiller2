@@ -16,7 +16,7 @@ import (
 
 var (
 	enemyRed    = rl.NewColor(150, 20, 25, 255)
-	enemyPurple = rl.NewColor(80, 20, 120, 255)
+	enemyPurple = rl.NewColor(170, 60, 210, 255)
 )
 
 type Enemy struct {
@@ -419,11 +419,11 @@ func Sniper(x, z float32) *Enemy {
 		Animation:             model.SoldierAnimation,
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
-		MoveSpeed:             1,
+		MoveSpeed:             4,
 		Health:                100,
 		AttackRange:           30,
-		AimTimeLeft:           5,
-		AimTimeUnit:           5,
+		AimTimeLeft:           1.2,
+		AimTimeUnit:           1.2,
 		FootstepSoundTimeLeft: 0,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         sound.FootStep,
@@ -466,7 +466,7 @@ func Boss(x, z float32) *Enemy {
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
 		MoveSpeed:             3,
-		Health:                500,
+		Health:                100,
 		AttackRange:           12,
 		AimTimeLeft:           1.2,
 		AimTimeUnit:           1.2,

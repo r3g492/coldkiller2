@@ -63,6 +63,8 @@ type EnemyKind int
 const (
 	KindRobot EnemyKind = iota
 	KindSoldier
+	KindSniper
+	KindBoss
 )
 
 type EnemySpec struct {
@@ -122,8 +124,14 @@ func GetRandomEnemy(radius float32, structures []*structure.Structure, existing 
 	idx := 0
 	for _, s := range specs {
 		factory := enemy.Robot
-		if s.Kind == KindSoldier {
+		switch s.Kind {
+		case KindSoldier:
 			factory = enemy.Soldier
+		case KindSniper:
+			factory = enemy.Sniper
+		case KindBoss:
+			factory = enemy.Boss
+		case KindRobot:
 		}
 		for range s.Count {
 			if idx >= len(indices) {
@@ -272,8 +280,8 @@ func Type9() Data {
 		enemies,
 		GetRandomEnemy(
 			50, structs, enemies,
-			EnemySpec{KindRobot, 3},
-			EnemySpec{KindSoldier, 3},
+			EnemySpec{KindSniper, 3},
+			EnemySpec{KindBoss, 3},
 		)...,
 	)
 
