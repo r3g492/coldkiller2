@@ -1,3 +1,3 @@
 TODO: 
-- new player model 
-- new enemies
+- finish stages
+- add dash cooldown upgrade 
