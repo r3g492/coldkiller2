@@ -143,6 +143,7 @@ func main() {
 		}
 
 		if stageManager.StageLost() {
+			stageManager.Difficulty = 1
 			rl.StopSound(sound.Track)
 			rl.PlaySound(sound.YouLose)
 			player.ResetStats()
