@@ -465,7 +465,7 @@ func Boss(x, z float32) *Enemy {
 		Animation:             model.KillerAnimation,
 		Position:              rl.Vector3{X: x, Y: 0, Z: z},
 		Size:                  killer.CharSize,
-		MoveSpeed:             3,
+		MoveSpeed:             10,
 		Health:                100,
 		AttackRange:           12,
 		AimTimeLeft:           1.2,
@@ -479,6 +479,6 @@ func Boss(x, z float32) *Enemy {
 		Color:                 enemyPurple,
 		DashTimeUnit:          0.4,
 		DashCooldownUnit:      3.0,
-		DashMult:              3.5,
+		DashMult:              6.0,
 	}
 }
