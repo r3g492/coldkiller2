@@ -22,9 +22,9 @@ type Manager struct {
 }
 
 const (
-	penaltyStartDelay   = float32(60)
-	penaltyInterval     = float32(30)
-	penaltyStepSeconds  = float32(60)
+	penaltyStartDelay   = float32(30)
+	penaltyInterval     = float32(20)
+	penaltyStepSeconds  = float32(30)
 	penaltyMaxCount     = 12
 	penaltyCountStep    = 4
 	penaltySpawnRadius  = float32(50)
