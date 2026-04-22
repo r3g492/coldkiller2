@@ -8,7 +8,7 @@ type Input struct {
 	MoveLeft       bool
 	MoveRight      bool
 	MouseLocation  rl.Vector2
-	FireHold       bool
+	FireDown       bool
 	FirePressed    bool
 	FireReleased   bool
 	ReloadPressed  bool
@@ -48,7 +48,7 @@ func ReadInput(keyMap KeyMap) Input {
 		MoveLeft:       rl.IsKeyDown(keyMap.Left),
 		MoveRight:      rl.IsKeyDown(keyMap.Right),
 		MouseLocation:  rl.GetMousePosition(),
-		FireHold:       rl.IsMouseButtonDown(keyMap.Fire),
+		FireDown:       rl.IsMouseButtonDown(keyMap.Fire),
 		FirePressed:    rl.IsMouseButtonPressed(keyMap.Fire),
 		FireReleased:   rl.IsMouseButtonReleased(keyMap.Fire),
 		ReloadPressed:  rl.IsKeyDown(keyMap.Reload),

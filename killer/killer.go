@@ -330,6 +330,9 @@ func (k *Killer) movement(
 	if isMoving {
 		k.MoveDirection = rl.Vector3Normalize(k.MoveDirection)
 	}
+	if input.DashPressed && k.DashTimeLeft > 0 {
+		k.DashTimeLeft = 0
+	}
 	if input.DashPressed && isMoving && k.DashCooldown <= 0 {
 		rl.PlaySound(sound.Dash)
 		k.DashTimeLeft = k.DashTimeUnit
@@ -362,7 +365,7 @@ func (k *Killer) movement(
 
 func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
 	var bulletCmds []BulletCmd
-	if input.FireHold && k.Ammo > 0 && k.DashTimeLeft <= 0 {
+	if input.FireDown && k.Ammo > 0 && k.DashTimeLeft <= 0 {
 		rl.PlaySound(sound.ShotgunSound)
 		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
 		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
