@@ -31,13 +31,13 @@ var intermissionUpgrades [2]intermissionUpgrade
 func upgradeLabel(u intermissionUpgrade) string {
 	switch u {
 	case upgradeDashMult:
-		return "Dash Mult +0.5"
+		return "Dash Mult +0.02"
 	case upgradeAmmoCapacity:
 		return "Ammo Capacity +1"
 	case upgradeRange:
 		return "Range +1"
 	case upgradeDashTime:
-		return "Dash Time +0.1s"
+		return "Dash Time +0.02s"
 	case upgradeReloadTime:
 		return "Reload Time -0.05s"
 	}
@@ -47,14 +47,14 @@ func upgradeLabel(u intermissionUpgrade) string {
 func applyUpgrade(p *killer.Killer, u intermissionUpgrade) {
 	switch u {
 	case upgradeDashMult:
-		p.DashMult += 0.5
+		p.DashMult += 0.02
 	case upgradeAmmoCapacity:
 		p.AmmoCapacity += 1
 		p.Ammo = p.AmmoCapacity
 	case upgradeRange:
 		p.Range += 1
 	case upgradeDashTime:
-		p.DashTimeUnit += 0.1
+		p.DashTimeUnit += 0.02
 	case upgradeReloadTime:
 		p.ReloadTimeUnit -= 0.05
 		if p.ReloadTimeUnit < 0.05 {

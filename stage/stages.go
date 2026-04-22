@@ -18,43 +18,17 @@ type Data struct {
 var Stages []Data
 
 func InitStages() {
-	Stages = []Data{
-		Type1(),
-		Type1(),
-		Type1(),
-		Type1(),
-		Type2(),
-		Type2(),
-		Type2(),
-		Type2(),
-		Type3(),
-		Type3(),
-		Type3(),
-		Type3(),
-		Type4(),
-		Type4(),
-		Type4(),
-		Type4(),
-		Type5(),
-		Type5(),
-		Type5(),
-		Type5(),
-		Type6(),
-		Type6(),
-		Type6(),
-		Type6(),
-		Type7(),
-		Type7(),
-		Type7(),
-		Type7(),
-		Type8(),
-		Type8(),
-		Type8(),
-		Type8(),
-		Type9(),
-		Type9(),
-		Type9(),
-		Type9(),
+	types := []func() Data{
+		Type1, Type2, Type3, Type4, Type5,
+		Type6, Type7, Type8, Type9, Type10,
+		Type11, Type12, Type13,
+	}
+	const repsPerType = 5
+	Stages = make([]Data, 0, len(types)*repsPerType)
+	for _, t := range types {
+		for range repsPerType {
+			Stages = append(Stages, t())
+		}
 	}
 }
 
@@ -288,6 +262,126 @@ func Type9() Data {
 	return Data{
 		Enemies:    enemies,
 		Structures: structs,
+	}
+}
+
+func Type10() Data {
+	structs := WallType6()
+	enemies := GetRandomEnemy(
+		20, structs, nil,
+		EnemySpec{KindRobot, 4},
+		EnemySpec{KindSoldier, 2},
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			28, structs, enemies,
+			EnemySpec{KindRobot, 3},
+			EnemySpec{KindSoldier, 3},
+			EnemySpec{KindSniper, 2},
+		)...,
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			50, structs, enemies,
+			EnemySpec{KindSniper, 3},
+			EnemySpec{KindBoss, 1},
+		)...,
+	)
+	return Data{Enemies: enemies, Structures: structs}
+}
+
+func Type11() Data {
+	structs := WallType7()
+	enemies := GetRandomEnemy(
+		20, structs, nil,
+		EnemySpec{KindRobot, 5},
+		EnemySpec{KindSoldier, 2},
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			30, structs, enemies,
+			EnemySpec{KindSoldier, 3},
+			EnemySpec{KindSniper, 3},
+		)...,
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			50, structs, enemies,
+			EnemySpec{KindSniper, 2},
+			EnemySpec{KindBoss, 2},
+		)...,
+	)
+	return Data{Enemies: enemies, Structures: structs}
+}
+
+func Type12() Data {
+	structs := WallType7()
+	enemies := GetRandomEnemy(
+		20, structs, nil,
+		EnemySpec{KindRobot, 6},
+		EnemySpec{KindSoldier, 3},
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			30, structs, enemies,
+			EnemySpec{KindSoldier, 3},
+			EnemySpec{KindSniper, 4},
+			EnemySpec{KindBoss, 1},
+		)...,
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			50, structs, enemies,
+			EnemySpec{KindSniper, 2},
+			EnemySpec{KindBoss, 2},
+		)...,
+	)
+	return Data{Enemies: enemies, Structures: structs}
+}
+
+func Type13() Data {
+	structs := WallType7()
+	enemies := GetRandomEnemy(
+		20, structs, nil,
+		EnemySpec{KindRobot, 6},
+		EnemySpec{KindSoldier, 4},
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			30, structs, enemies,
+			EnemySpec{KindSoldier, 4},
+			EnemySpec{KindSniper, 4},
+			EnemySpec{KindBoss, 1},
+		)...,
+	)
+	enemies = append(
+		enemies,
+		GetRandomEnemy(
+			50, structs, enemies,
+			EnemySpec{KindSniper, 4},
+			EnemySpec{KindBoss, 3},
+		)...,
+	)
+	return Data{Enemies: enemies, Structures: structs}
+}
+
+func WallType7() []*structure.Structure {
+	return []*structure.Structure{
+		{Position: rl.Vector3{X: -7, Y: 0, Z: -7}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 7, Y: 0, Z: -7}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -7, Y: 0, Z: 7}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 7, Y: 0, Z: 7}, Size: rl.Vector3{X: 2, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: -14, Y: 0, Z: 0}, Size: rl.Vector3{X: 2, Y: 2, Z: 6}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 14, Y: 0, Z: 0}, Size: rl.Vector3{X: 2, Y: 2, Z: 6}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 0, Y: 0, Z: -14}, Size: rl.Vector3{X: 6, Y: 2, Z: 2}, Color: rl.DarkGray},
+		{Position: rl.Vector3{X: 0, Y: 0, Z: 14}, Size: rl.Vector3{X: 6, Y: 2, Z: 2}, Color: rl.DarkGray},
 	}
 }
 
