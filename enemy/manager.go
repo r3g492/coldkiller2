@@ -74,6 +74,20 @@ func (em *Manager) Mutate(
 		}
 	}
 
+	// dash push: dashing enemies push the player
+	for _, e := range em.Enemies {
+		if e.DashTimeLeft <= 0 || !e.IsAlive() {
+			continue
+		}
+		if rl.CheckCollisionSpheres(p.Position, p.Size*1.5, e.Position, e.Size) {
+			dir := rl.Vector3Subtract(p.Position, e.Position)
+			if rl.Vector3LengthSqr(dir) < 0.0001 {
+				dir = e.DashDirection
+			}
+			p.ApplyKnockback(rl.Vector3Scale(rl.Vector3Normalize(dir), 45.0), 0.4)
+		}
+	}
+
 	for i := 0; i < len(em.Enemies); i++ {
 		addBullets := em.Enemies[i].Mutate(dt, p, em, i, structureManager)
 		em.BulletBuffer = append(em.BulletBuffer, addBullets...)

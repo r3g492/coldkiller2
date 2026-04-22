@@ -45,6 +45,9 @@ type Killer struct {
 	DashDirection    rl.Vector3
 	CameraOffset     rl.Vector3
 
+	KnockbackVelocity rl.Vector3
+	KnockbackTimeLeft float32
+
 	MoveSpeed float32
 	// possible level up stats
 	AmmoCapacity   int32
@@ -105,6 +108,11 @@ func (k *Killer) ResetStats() {
 	k.Range = 10
 	k.DashTimeUnit = 0.3
 	k.ReloadTimeUnit = 0.3
+}
+
+func (k *Killer) ApplyKnockback(velocity rl.Vector3, duration float32) {
+	k.KnockbackVelocity = velocity
+	k.KnockbackTimeLeft = duration
 }
 
 func (k *Killer) Unload() {
@@ -241,6 +249,23 @@ func (k *Killer) Mutate(
 			k.AnimationState = animation.StateIdle
 			k.FootstepSoundTimeLeft = 0
 		}
+	}
+
+	if k.KnockbackTimeLeft > 0 {
+		kbMove := rl.Vector3Scale(k.KnockbackVelocity, dt)
+		k.PrevPosition = k.Position
+		oldPos := k.Position
+		collisionSize := rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}
+		k.Position.X += kbMove.X
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, collisionSize) {
+			k.Position.X = oldPos.X
+		}
+		k.Position.Z += kbMove.Z
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, collisionSize) {
+			k.Position.Z = oldPos.Z
+		}
+		k.KnockbackVelocity = rl.Vector3Scale(k.KnockbackVelocity, 1-8*dt)
+		k.KnockbackTimeLeft -= dt
 	}
 
 	camTarget := rl.Vector3Add(k.Position, k.CameraOffset)

@@ -13,6 +13,7 @@ type AiType int
 const (
 	SimpleZombie AiType = iota
 	Elite
+	Charger
 )
 
 func deriveAi(
@@ -32,6 +33,42 @@ func deriveAi(
 	if e.AiType == SimpleZombie {
 		shouldAim := e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange
 		moveDir := rl.Vector3Normalize(rl.Vector3Subtract(p.Position, e.Position))
+		return shouldAim, moveDir
+	}
+	if e.AiType == Charger {
+		aimObstructed := structureManager.RayObstructed(e.Position, p.Position)
+		shouldAim := e.AimTimeLeft > 0 && distToPlayer <= e.AttackRange && !aimObstructed
+
+		moveDir := dirToPlayer
+		lookAheadDist := e.Size * 3.0
+		collisionSize := rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}
+
+		rotateY := func(v rl.Vector3, angleRad float64) rl.Vector3 {
+			cosA := float32(math.Cos(angleRad))
+			sinA := float32(math.Sin(angleRad))
+			return rl.Vector3{
+				X: v.X*cosA - v.Z*sinA,
+				Y: v.Y,
+				Z: v.X*sinA + v.Z*cosA,
+			}
+		}
+
+		probePos := rl.Vector3Add(e.Position, rl.Vector3Scale(moveDir, lookAheadDist))
+		if structureManager.CheckCollision(probePos, e.Position, collisionSize) {
+			dirRight := rotateY(moveDir, math.Pi/4)
+			dirLeft := rotateY(moveDir, -math.Pi/4)
+			if !structureManager.CheckCollision(rl.Vector3Add(e.Position, rl.Vector3Scale(dirRight, lookAheadDist)), e.Position, collisionSize) {
+				moveDir = dirRight
+			} else if !structureManager.CheckCollision(rl.Vector3Add(e.Position, rl.Vector3Scale(dirLeft, lookAheadDist)), e.Position, collisionSize) {
+				moveDir = dirLeft
+			} else {
+				moveDir = rotateY(moveDir, math.Pi/2)
+			}
+		}
+
+		if rl.Vector3Length(moveDir) > 0 {
+			moveDir = rl.Vector3Normalize(moveDir)
+		}
 		return shouldAim, moveDir
 	}
 	if e.AiType == Elite {
@@ -91,6 +128,5 @@ func deriveAi(
 
 		return shouldAim, moveDir
 	}
-	// TODO: 다른 ai type 추가
 	return false, rl.Vector3{}
 }

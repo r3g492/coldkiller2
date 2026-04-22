@@ -59,6 +59,13 @@ type Enemy struct {
 	SelfDestructRange float32
 
 	Color rl.Color
+
+	DashTimeLeft     float32
+	DashCooldown     float32
+	DashTimeUnit     float32
+	DashCooldownUnit float32
+	DashMult         float32
+	DashDirection    rl.Vector3
 }
 
 func (e *Enemy) IsAlive() bool {
@@ -215,7 +222,23 @@ func (e *Enemy) Mutate(
 	e.AimDirection = rl.Vector3{}
 	e.MoveDirection = derivedMovement
 
-	moveAmount := rl.Vector3Scale(e.MoveDirection, e.MoveSpeed*dt)
+	if e.DashTimeLeft > 0 {
+		e.DashTimeLeft -= dt
+	}
+	if e.DashCooldown > 0 {
+		e.DashCooldown -= dt
+	}
+	if e.DashTimeUnit > 0 && e.DashCooldown <= 0 && e.DashTimeLeft <= 0 && rl.Vector3LengthSqr(e.MoveDirection) > 0 {
+		e.DashTimeLeft = e.DashTimeUnit
+		e.DashCooldown = e.DashCooldownUnit
+		e.DashDirection = rl.Vector3Normalize(e.MoveDirection)
+	}
+	speed := e.MoveSpeed
+	if e.DashTimeLeft > 0 {
+		speed = e.MoveSpeed * e.DashMult
+		e.MoveDirection = e.DashDirection
+	}
+	moveAmount := rl.Vector3Scale(e.MoveDirection, speed*dt)
 
 	e.PrevPosition = e.Position
 	oldPos := e.Position
@@ -432,5 +455,30 @@ func Robot(x, z float32) *Enemy {
 		IsSelfDestructor:      true,
 		SelfDestructRange:     3.3,
 		Color:                 enemyRed,
+	}
+}
+
+func Boss(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.KillerModel,
+		ModelRatio:            killer.ModelRatio,
+		Animation:             model.KillerAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             3,
+		Health:                500,
+		AttackRange:           12,
+		AimTimeLeft:           1.2,
+		AimTimeUnit:           1.2,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Charger,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyPurple,
+		DashTimeUnit:          0.4,
+		DashCooldownUnit:      3.0,
+		DashMult:              3.5,
 	}
 }
