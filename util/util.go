@@ -14,8 +14,8 @@ import (
 var resFS embed.FS
 
 const (
-	VirtualWidth  = 1920
-	VirtualHeight = 1080
+	VirtualWidth  = 1600
+	VirtualHeight = 900
 )
 
 func LoadTextureFromEmbedded(filename string) rl.Texture2D {
