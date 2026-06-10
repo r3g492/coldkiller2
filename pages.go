@@ -510,6 +510,21 @@ func doGameWon(w, h int, buttonLabel string, winTex rl.Texture2D) bool {
 	}
 
 	clicked := drawButton(btnRect, buttonLabel, rl.DarkGray, rl.Gray, rl.White)
+
+	creditLines := []string{
+		"Thanks to:",
+		"CaveTroll for the artwork",
+		"Sounds: 1911-reload-6248.mp3, data_pion-st1-footstep-sfx-323053.mp3, shotgun-03-38220.mp3",
+	}
+	creditFontSize := int32(20)
+	creditY := int32(btnRect.Y+btnHeight) + 40
+	for _, line := range creditLines {
+		lineWidth := rl.MeasureText(line, creditFontSize)
+		lineX := int32(float32(w)/2 - float32(lineWidth)/2)
+		rl.DrawText(line, lineX, creditY, creditFontSize, rl.LightGray)
+		creditY += creditFontSize + 8
+	}
+
 	endFrame()
 	return clicked
 }
