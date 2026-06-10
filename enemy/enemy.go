@@ -47,6 +47,8 @@ type Enemy struct {
 	AttackRange           float32
 	AimTimeLeft           float32
 	AimTimeUnit           float32
+	AimTrackTimeLeft      float32
+	AimTrackTimeUnit      float32
 	AimDirection          rl.Vector3
 	FootstepSoundTimeLeft float32
 	FootstepSoundTimeUnit float32
@@ -241,8 +243,18 @@ func (e *Enemy) Mutate(
 		}
 
 		if derivedAimStart {
+			inRange := rl.Vector3LengthSqr(vecToPlayer) <= e.AttackRange*e.AttackRange
 			if e.AimDirection == (rl.Vector3{}) {
+				// Aim just started: lock on and open the tracking window.
 				e.AimDirection = vecToPlayer
+				e.AimTrackTimeLeft = e.AimTrackTimeUnit
+			} else if e.AimTrackTimeLeft > 0 && inRange {
+				// Still tracking: follow the player's movement until the
+				// tracking window closes or the player leaves range.
+				e.AimDirection = vecToPlayer
+			}
+			if e.AimTrackTimeLeft > 0 {
+				e.AimTrackTimeLeft -= dt
 			}
 			e.TargetDirection = e.AimDirection
 			angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
@@ -453,6 +465,7 @@ func Soldier(x, z float32) *Enemy {
 		AttackRange:           10,
 		AimTimeLeft:           0.9,
 		AimTimeUnit:           0.9,
+		AimTrackTimeUnit:      0.6,
 		FootstepSoundTimeLeft: 0,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         sound.FootStep,
@@ -473,8 +486,9 @@ func Sniper(x, z float32) *Enemy {
 		MoveSpeed:             7,
 		Health:                100,
 		AttackRange:           20,
-		AimTimeLeft:           1,
-		AimTimeUnit:           1,
+		AimTimeLeft:           1.5,
+		AimTimeUnit:           1.5,
+		AimTrackTimeUnit:      1.35,
 		FootstepSoundTimeLeft: 0,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         sound.FootStep,
@@ -543,8 +557,9 @@ func ChargerRobot(x, z float32) *Enemy {
 		MoveSpeed:             8,
 		Health:                100,
 		AttackRange:           5,
-		AimTimeLeft:           1,
-		AimTimeUnit:           1,
+		AimTimeLeft:           0.7,
+		AimTimeUnit:           0.7,
+		AimTrackTimeUnit:      0.2,
 		FootstepSoundTimeLeft: 0,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         sound.FootStep,
