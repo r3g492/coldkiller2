@@ -1,0 +1,481 @@
+package killer
+
+import (
+	"coldkiller2/animation"
+	"coldkiller2/input"
+	"coldkiller2/model"
+	"coldkiller2/sound"
+	"coldkiller2/structure"
+	"coldkiller2/util"
+	"fmt"
+	"math"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+type Killer struct {
+	Model         rl.Model
+	ModelAngleDeg float32
+
+	Animation             []rl.ModelAnimation
+	AnimationState        animation.ActionState
+	AnimationIdx          int
+	AnimationCurrentFrame int32
+	AnimationFrameCounter float32
+	AnimationFrameSpeed   float32
+	AnimationReplay       bool
+
+	MoveDirection         rl.Vector3
+	TargetDirection       rl.Vector3
+	Position              rl.Vector3
+	PrevPosition          rl.Vector3
+	Size                  float32
+	Camera                rl.Camera3D
+	ActionTimeLeft        float32
+	MaxActionTime         float32
+	Health                int32
+	Ammo                  int32
+	FootstepSoundTimeLeft float32
+	FootstepSoundTimeUnit float32
+	FootstepSound         rl.Sound
+	HitFlashTimer         float32
+
+	SlowTimeLeft   float32
+	SlowTimeActive bool
+	CameraOffset   rl.Vector3
+
+	KnockbackVelocity rl.Vector3
+	KnockbackTimeLeft float32
+
+	MoveSpeed float32
+	// possible level up stats
+	AmmoCapacity         int32
+	Range                float32
+	SlowTimeDuration     float32
+	SlowTimeRechargeRate float32
+	ReloadTimeUnit       float32
+}
+
+const ModelRatio = 0.3
+const CharSize = 0.72
+
+func Create() *Killer {
+	playerModel := model.PlayerModel
+	playerAnimation := model.PlayerAnimation
+	playerPosition := rl.Vector3{X: 0, Y: 0, Z: 0}
+	k := &Killer{
+		Model:           playerModel,
+		ModelAngleDeg:   0,
+		Animation:       playerAnimation,
+		MoveDirection:   rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection: rl.Vector3{X: 0, Y: 0, Z: 0},
+		Position:        playerPosition,
+		Size:            CharSize,
+		Camera: rl.Camera3D{
+			Position:   rl.Vector3Add(playerPosition, rl.NewVector3(0.0, 10.0, 0.0)),
+			Target:     playerPosition,
+			Up:         rl.NewVector3(0.0, 0.0, -1),
+			Fovy:       30.0,
+			Projection: rl.CameraOrthographic,
+		},
+		ActionTimeLeft:        0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSoundTimeLeft: 0.4,
+		FootstepSound:         rl.LoadSoundAlias(sound.FootStep),
+	}
+	k.ResetStats()
+	return k
+}
+
+func (k *Killer) Init() {
+	k.Position = rl.Vector3{X: 0, Y: 0, Z: 0}
+	k.Health = 100
+	k.Ammo = k.AmmoCapacity
+	k.MoveDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
+	k.TargetDirection = rl.Vector3{X: 0, Y: 0, Z: 0}
+	k.ModelAngleDeg = 0
+	k.ActionTimeLeft = 0
+	k.SlowTimeLeft = k.SlowTimeDuration
+	k.SlowTimeActive = false
+}
+
+func (k *Killer) ResetStats() {
+	k.MoveSpeed = 7.0
+	k.AmmoCapacity = 1
+	k.Range = 100
+	k.SlowTimeDuration = 1.0
+	k.SlowTimeRechargeRate = 0.0
+	k.ReloadTimeUnit = 0.5
+	k.SlowTimeLeft = k.SlowTimeDuration
+}
+
+func (k *Killer) RefillSlowTime() {
+	k.SlowTimeLeft = k.SlowTimeDuration
+}
+
+func (k *Killer) ApplyKnockback(velocity rl.Vector3, duration float32) {
+	k.KnockbackVelocity = velocity
+	k.KnockbackTimeLeft = duration
+}
+
+func (k *Killer) Unload() {
+	rl.UnloadModel(k.Model)
+	if len(k.Animation) > 0 {
+		rl.UnloadModelAnimations(k.Animation)
+	}
+}
+
+func (k *Killer) Draw3D() {
+	rl.DrawCylinder(
+		rl.Vector3{X: k.Position.X, Y: -1, Z: k.Position.Z + CharSize*0.4},
+		CharSize*0.4, CharSize*0.4, 0.01, 16,
+		rl.NewColor(0, 0, 0, 40),
+	)
+
+	rl.PushMatrix()
+	rl.Translatef(
+		k.Position.X,
+		k.Position.Y,
+		k.Position.Z,
+	)
+	rl.Rotatef(-30, 1, 0, 0)
+	rl.Rotatef(k.ModelAngleDeg, 0, 1, 0)
+	rl.DrawModel(k.Model, rl.NewVector3(0, -k.Size, 0), ModelRatio, rl.RayWhite)
+	if k.IsAlive() {
+		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, k.Size*2, k.Size*2, k.Size*2, rl.Green)
+	}
+	rl.PopMatrix()
+
+	rl.PushMatrix()
+	rl.Translatef(
+		k.Position.X,
+		k.Position.Y,
+		k.Position.Z,
+	)
+	rl.PopMatrix()
+}
+
+func (k *Killer) DrawUi() {
+	uiWorldPos := rl.Vector3{X: k.Position.X, Y: k.Position.Y + 3.0, Z: k.Position.Z}
+	screenPos := rl.GetWorldToScreenEx(uiWorldPos, k.Camera, util.VirtualWidth, util.VirtualHeight)
+
+	var _ = int32(20)
+	barWidth := float32(60)
+	barHeight := float32(8)
+	barX := screenPos.X - barWidth/2
+
+	if k.AmmoCapacity > 0 {
+		ammoText := fmt.Sprintf("%d / %d", k.Ammo, k.AmmoCapacity)
+		ammoColor := rl.SkyBlue
+		if k.Ammo == 0 {
+			ammoColor = rl.Red
+		}
+		fontSize := int32(10)
+		textWidth := rl.MeasureText(ammoText, fontSize)
+		rl.DrawText(ammoText, int32(screenPos.X)-textWidth/2, int32(screenPos.Y)+25, fontSize, ammoColor)
+	}
+
+	if k.ActionTimeLeft > 0 && k.MaxActionTime > 0 {
+		pct := k.ActionTimeLeft / k.MaxActionTime
+		fillWidth := pct * barWidth
+		barY := screenPos.Y + 37
+
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.Fade(rl.DarkGray, 0.6))
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, fillWidth, barHeight), rl.Yellow)
+		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
+	}
+
+	{
+		slowPct := k.SlowTimeLeft / k.SlowTimeDuration
+		slowFill := slowPct * barWidth
+		barY := screenPos.Y + 47
+		barColor := rl.Blue
+		if k.SlowTimeActive {
+			barColor = rl.SkyBlue
+		}
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.Fade(rl.DarkGray, 0.6))
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, slowFill, barHeight), barColor)
+		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
+	}
+
+	/*fpsText := fmt.Sprintf("%d", rl.GetFPS())
+	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, 1, rl.Yellow)*/
+}
+
+func (k *Killer) DrawSlowTimeVignette() {
+	if !k.SlowTimeActive {
+		return
+	}
+	rl.DrawRectangle(0, 0, util.VirtualWidth, util.VirtualHeight, rl.NewColor(0, 60, 180, 18))
+}
+func (k *Killer) Mutate(
+	input input.Input,
+	dt float32,
+	realDt float32,
+	obstacles []rl.BoundingBox,
+	structureManager *structure.Manager,
+) []BulletCmd {
+	var bulletCmds []BulletCmd
+
+	if k.IsAlive() {
+		mouseMovement(input, k)
+	}
+	if rl.Vector3LengthSqr(k.TargetDirection) > 0 {
+		aimDir := rl.Vector3Normalize(k.TargetDirection)
+		targetOffset := rl.Vector3Scale(aimDir, 2.5)
+		k.CameraOffset.X += (targetOffset.X - k.CameraOffset.X) * 4.0 * dt
+		k.CameraOffset.Z += (targetOffset.Z - k.CameraOffset.Z) * 4.0 * dt
+	}
+	attack := false
+	if k.ActionTimeLeft <= 0 {
+		bulletCmds, attack = k.attack(input)
+		if attack {
+			var attackTime float32 = 0.1
+			k.ActionTimeLeft = attackTime
+			k.MaxActionTime = attackTime
+			k.AnimationState = animation.StateAttacking
+			k.AnimationCurrentFrame = 0
+		}
+	}
+
+	if input.ReloadPressed && k.ActionTimeLeft <= 0 {
+		rl.PlaySound(sound.ReloadingSound)
+		k.Ammo = k.AmmoCapacity
+		var reloadTime = k.ReloadTimeUnit
+		k.ActionTimeLeft = reloadTime
+		k.MaxActionTime = reloadTime
+		k.AnimationState = animation.StateReloading
+		k.AnimationCurrentFrame = 0
+	}
+
+	if !attack && k.ActionTimeLeft <= 0 {
+		moving := k.movement(input, dt, obstacles, structureManager)
+
+		if k.FootstepSoundTimeLeft > 0 {
+			k.FootstepSoundTimeLeft -= dt
+		}
+
+		if moving {
+			k.AnimationState = animation.StateRunning
+
+			if k.FootstepSoundTimeLeft <= 0 {
+				sound.PlaySound3D(k.FootstepSound, k.Position, k.Position, 0.3)
+				k.FootstepSoundTimeLeft = k.FootstepSoundTimeUnit
+			}
+		} else {
+			k.AnimationState = animation.StateIdle
+			k.FootstepSoundTimeLeft = 0
+		}
+	}
+
+	if k.KnockbackTimeLeft > 0 {
+		kbMove := rl.Vector3Scale(k.KnockbackVelocity, dt)
+		k.PrevPosition = k.Position
+		oldPos := k.Position
+		collisionSize := rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}
+		k.Position.X += kbMove.X
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, collisionSize) {
+			k.Position.X = oldPos.X
+		}
+		k.Position.Z += kbMove.Z
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, collisionSize) {
+			k.Position.Z = oldPos.Z
+		}
+		k.KnockbackVelocity = rl.Vector3Scale(k.KnockbackVelocity, 1-8*dt)
+		k.KnockbackTimeLeft -= dt
+	}
+
+	camTarget := rl.Vector3Add(k.Position, k.CameraOffset)
+	k.Camera = rl.Camera3D{
+		Position:   rl.Vector3Add(camTarget, rl.NewVector3(0.0, 10.0, 0.0)),
+		Target:     camTarget,
+		Up:         rl.NewVector3(0.0, 0.0, -1),
+		Fovy:       30.0,
+		Projection: rl.CameraOrthographic,
+	}
+
+	k.ActionTimeLeft -= realDt
+	if k.HitFlashTimer > 0 {
+		k.HitFlashTimer -= realDt
+	}
+
+	if input.SlowTimeDown && k.SlowTimeLeft > 0 {
+		k.SlowTimeActive = true
+		k.SlowTimeLeft -= realDt
+		if k.SlowTimeLeft < 0 {
+			k.SlowTimeLeft = 0
+		}
+	} else {
+		k.SlowTimeActive = false
+	}
+
+	return bulletCmds
+}
+
+func mouseMovement(input input.Input, k *Killer) {
+	mouseLocation := input.MouseLocation
+	ray := rl.GetScreenToWorldRayEx(mouseLocation, k.Camera, util.VirtualWidth, util.VirtualHeight)
+	targetOnXzPlane := rl.Vector3{
+		X: ray.Position.X,
+		Y: 0,
+		Z: ray.Position.Z,
+	}
+	k.TargetDirection = rl.Vector3Subtract(targetOnXzPlane, k.Position)
+	angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
+	k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+}
+
+func (k *Killer) movement(
+	input input.Input,
+	dt float32,
+	obstacles []rl.BoundingBox,
+	structureManager *structure.Manager,
+) bool {
+	k.PrevPosition = k.Position
+	k.MoveDirection = rl.Vector3{}
+	if input.MoveUp {
+		k.MoveDirection.Z -= 1
+	}
+	if input.MoveDown {
+		k.MoveDirection.Z += 1
+	}
+	if input.MoveLeft {
+		k.MoveDirection.X -= 1
+	}
+	if input.MoveRight {
+		k.MoveDirection.X += 1
+	}
+	isMoving := rl.Vector3LengthSqr(k.MoveDirection) > 0
+	if isMoving {
+		k.MoveDirection = rl.Vector3Normalize(k.MoveDirection)
+	}
+	moveAmount := rl.Vector3Scale(k.MoveDirection, k.MoveSpeed*dt)
+	if rl.Vector3Length(moveAmount) > 0 {
+		oldPos := k.Position
+		k.Position.X += moveAmount.X
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
+			k.Position.X = oldPos.X
+		}
+		k.Position.Z += moveAmount.Z
+		if k.isColliding(obstacles) || structureManager.CheckCollision(k.Position, k.PrevPosition, rl.Vector3{X: k.Size, Y: k.Size, Z: k.Size}) {
+			k.Position.Z = oldPos.Z
+		}
+		return k.Position != oldPos
+	}
+	return false
+}
+
+func (k *Killer) attack(input input.Input) ([]BulletCmd, bool) {
+	var bulletCmds []BulletCmd
+	if input.FireDown && k.Ammo > 0 {
+		rl.PlaySound(sound.ShotgunSound)
+		angleRad := math.Atan2(float64(k.TargetDirection.X), float64(k.TargetDirection.Z))
+		k.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+		dir := rl.Vector3Normalize(k.TargetDirection)
+		spawnPos := rl.Vector3Add(k.Position, rl.Vector3{X: 0, Y: 0, Z: 0})
+		bulletCmds = append(bulletCmds, BulletCmd{spawnPos, dir, 200, k.Range})
+		k.Ammo--
+		return bulletCmds, true
+	}
+	return bulletCmds, false
+}
+
+func (k *Killer) ResolveAnimation() {
+	if len(k.Animation) == 0 {
+		return
+	}
+	switch k.AnimationState {
+	case animation.StateIdle:
+		k.setAnim(0, 24, true)
+	case animation.StateRunning:
+		k.setAnim(1, 180, true)
+	case animation.StateAttacking:
+		k.setAnim(2, 150, false)
+	case animation.StateDying:
+		k.setAnim(3, 300, false)
+	case animation.StateReloading:
+		k.setAnim(2, 45, false)
+	default:
+		panic("unhandled default case")
+	}
+}
+
+func (k *Killer) setAnim(idx int, speed float32, loop bool) {
+	if k.AnimationIdx != idx {
+		k.AnimationIdx = idx
+		k.AnimationCurrentFrame = 0
+		k.AnimationFrameCounter = 0
+	}
+	k.AnimationFrameSpeed = speed
+	k.AnimationReplay = loop
+}
+
+func (k *Killer) PlanAnimate(dt float32) {
+	if len(k.Animation) == 0 {
+		return
+	}
+	k.AnimationFrameCounter += k.AnimationFrameSpeed * dt
+	anim := k.Animation[k.AnimationIdx]
+	for k.AnimationFrameCounter >= 1.0 {
+		k.AnimationCurrentFrame++
+		k.AnimationFrameCounter -= 1.0
+		if k.AnimationReplay == false && k.AnimationCurrentFrame >= anim.FrameCount-5 {
+			k.AnimationCurrentFrame = anim.FrameCount - 5
+			return
+		}
+	}
+}
+
+func (k *Killer) Animate() {
+	if len(k.Animation) == 0 {
+		return
+	}
+	anim := k.Animation[k.AnimationIdx]
+	rl.UpdateModelAnimation(k.Model, anim, k.AnimationCurrentFrame)
+}
+
+func (k *Killer) isColliding(obstacles []rl.BoundingBox) bool {
+	myBox := k.GetBoundingBox()
+	for _, box := range obstacles {
+		if rl.CheckCollisionBoxes(myBox, box) {
+			return true
+		}
+	}
+	return false
+}
+
+func (k *Killer) GetBoundingBox() rl.BoundingBox {
+	return rl.BoundingBox{
+		Min: rl.Vector3{X: k.Position.X - k.Size, Y: k.Position.Y - k.Size, Z: k.Position.Z - k.Size},
+		Max: rl.Vector3{X: k.Position.X + k.Size, Y: k.Position.Y + k.Size, Z: k.Position.Z + k.Size},
+	}
+}
+
+func (k *Killer) Damage(d int32) {
+	k.Health -= d
+	k.HitFlashTimer = 0.35
+	rl.SetSoundVolume(sound.ShotNew, 0.8)
+	rl.PlaySound(sound.ShotNew)
+	k.AnimationState = animation.StateDying
+	var shotTime float32 = 0.1
+	k.ActionTimeLeft = shotTime
+	k.MaxActionTime = shotTime
+	if !k.IsAlive() {
+		k.AnimationState = animation.StateDying
+		var dyingTime float32 = 1
+		k.ActionTimeLeft = dyingTime
+		k.MaxActionTime = dyingTime
+	}
+}
+
+func (k *Killer) DrawHitFlash() {
+	if k.HitFlashTimer <= 0 {
+		return
+	}
+	alpha := uint8(k.HitFlashTimer / 0.35 * 120)
+	rl.DrawRectangle(0, 0, util.VirtualWidth, util.VirtualHeight, rl.NewColor(220, 30, 30, alpha))
+}
+
+func (k *Killer) IsAlive() bool {
+	return k.Health > 0
+}

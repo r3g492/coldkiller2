@@ -1,0 +1,559 @@
+package enemy
+
+import (
+	"coldkiller2/animation"
+	"coldkiller2/blast"
+	"coldkiller2/killer"
+	"coldkiller2/model"
+	"coldkiller2/sound"
+	"coldkiller2/structure"
+	"coldkiller2/util"
+	"math"
+	"time"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+var (
+	enemyNoColor = rl.White
+	enemyPurple  = rl.NewColor(170, 60, 210, 255)
+	enemyRed     = rl.NewColor(225, 60, 60, 255)
+)
+
+type Enemy struct {
+	Model         rl.Model
+	ModelAngleDeg float32
+	ModelRatio    float32
+
+	Animation             []rl.ModelAnimation
+	AnimationState        animation.ActionState
+	AnimationIdx          int
+	AnimationCurrentFrame int32
+	AnimationFrameCounter float32
+	AnimationFrameSpeed   float32
+	AnimationReplay       bool
+
+	MoveDirection         rl.Vector3
+	TargetDirection       rl.Vector3
+	Position              rl.Vector3
+	PrevPosition          rl.Vector3
+	Size                  float32
+	MoveSpeed             float32
+	ActionTimeLeft        float32
+	Health                int32
+	ShouldBeDeleted       bool
+	AttackCooldown        time.Duration
+	LastAttack            time.Time
+	AttackRange           float32
+	AimTimeLeft           float32
+	AimTimeUnit           float32
+	AimDirection          rl.Vector3
+	FootstepSoundTimeLeft float32
+	FootstepSoundTimeUnit float32
+	FootstepSound         rl.Sound
+	IsHiddenFromKiller    bool
+	AiType                AiType
+	KnockbackVelocity     rl.Vector3
+	KnockbackTimeLeft     float32
+
+	IsSelfDestructor  bool
+	SelfDestructRange float32
+	HasSelfDestructed bool
+	JustDied          bool
+	KilledByPlayer    bool
+
+	Color rl.Color
+
+	DashTimeLeft     float32
+	DashCooldown     float32
+	DashTimeUnit     float32
+	DashCooldownUnit float32
+	DashMult         float32
+	DashDirection    rl.Vector3
+}
+
+func (e *Enemy) IsAlive() bool {
+	return e.Health > 0
+}
+
+func (e *Enemy) ApplyKnockback(velocity rl.Vector3, duration float32) {
+	e.KnockbackVelocity = velocity
+	e.KnockbackTimeLeft = duration
+}
+
+func (e *Enemy) Draw3D(p *killer.Killer) {
+	if e.IsHiddenFromKiller {
+		return
+	}
+
+	if e.IsAlive() {
+		rl.DrawCylinder(
+			rl.Vector3{X: e.Position.X, Y: -1, Z: e.Position.Z + e.Size*0.4},
+			e.Size*0.4, e.Size*0.4, 0.01, 16,
+			rl.NewColor(0, 0, 0, 40),
+		)
+	}
+
+	if len(e.Animation) > 0 {
+		anim := e.Animation[e.AnimationIdx]
+		rl.UpdateModelAnimation(e.Model, anim, e.AnimationCurrentFrame)
+	}
+	rl.PushMatrix()
+	rl.Translatef(e.Position.X, e.Position.Y, e.Position.Z)
+	rl.Rotatef(-30, 1, 0, 0)
+	rl.Rotatef(e.ModelAngleDeg, 0, 1, 0)
+	if e.IsAlive() {
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, e.Color)
+		// rl.DrawCubeWires(rl.Vector3{X: 0, Y: 0, Z: 0}, e.Size*2, e.Size*2, e.Size*2, e.Color)
+	} else {
+		rl.DrawModel(e.Model, rl.NewVector3(0, -e.Size, 0), e.ModelRatio, rl.DarkGray)
+	}
+	rl.PopMatrix()
+	if e.AnimationState == animation.StateAiming && e.AimDirection != (rl.Vector3{}) {
+		aimEnd := rl.Vector3Add(e.Position, rl.Vector3Scale(rl.Vector3Normalize(e.AimDirection), e.AttackRange))
+		rl.DrawLine3D(e.Position, aimEnd, e.Color)
+	}
+}
+
+func (e *Enemy) DrawUI(p *killer.Killer) {
+	if e.IsHiddenFromKiller {
+		if e.IsAlive() {
+			alpha := uint8(100 + 100*math.Sin(float64(rl.GetTime())*math.Pi*4))
+			screenPos := rl.GetWorldToScreenEx(e.Position, p.Camera, util.VirtualWidth, util.VirtualHeight)
+			rl.DrawCircle(int32(screenPos.X), int32(screenPos.Y), 4, rl.NewColor(220, 30, 30, alpha))
+		}
+		return
+	}
+
+	uiWorldPos := rl.Vector3{X: e.Position.X, Y: e.Position.Y + 3.0, Z: e.Position.Z}
+	screenPos := rl.GetWorldToScreenEx(uiWorldPos, p.Camera, util.VirtualWidth, util.VirtualHeight)
+
+	if e.AimTimeLeft > 0 && e.AimTimeLeft != e.AimTimeUnit && e.IsAlive() {
+		barWidth := float32(40)
+		barHeight := float32(8)
+		pct := e.AimTimeLeft / e.AimTimeUnit
+		fillWidth := pct * barWidth
+
+		barX := screenPos.X - barWidth/2
+		barY := screenPos.Y + 25
+
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.DarkGray)
+		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, fillWidth, barHeight), rl.Yellow)
+		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
+	}
+}
+
+func (e *Enemy) Mutate(
+	dt float32,
+	p *killer.Killer,
+	em *Manager,
+	myIdx int,
+	structureManager *structure.Manager,
+) []BulletCmd {
+	if !e.IsAlive() && e.IsSelfDestructor && !e.HasSelfDestructed {
+		e.selfDestruct(p, em)
+	}
+	if e.KnockbackTimeLeft > 0 {
+		kbMove := rl.Vector3Scale(e.KnockbackVelocity, dt)
+		e.PrevPosition = e.Position
+		oldPos := e.Position
+		e.Position.X += kbMove.X
+		if structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+			e.Position.X = oldPos.X
+		}
+		e.Position.Z += kbMove.Z
+		if structureManager.CheckCollision(e.Position, e.PrevPosition, rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}) {
+			e.Position.Z = oldPos.Z
+		}
+		if hit := em.findCollidingEnemy(myIdx, e); hit != nil {
+			speed := rl.Vector3Length(e.KnockbackVelocity)
+			if speed > 2 {
+				dir := rl.Vector3Subtract(hit.Position, e.Position)
+				if rl.Vector3LengthSqr(dir) < 0.0001 {
+					dir = e.KnockbackVelocity
+				}
+				hit.ApplyKnockback(rl.Vector3Scale(rl.Vector3Normalize(dir), speed*0.8), e.KnockbackTimeLeft*0.8)
+			}
+		}
+		e.KnockbackVelocity = rl.Vector3Scale(e.KnockbackVelocity, 1-8*dt)
+		e.KnockbackTimeLeft -= dt
+	}
+
+	vecToPlayer := rl.Vector3Subtract(p.Position, e.Position)
+	var bulletCmds []BulletCmd
+	if e.ActionTimeLeft > 0 {
+		e.ActionTimeLeft -= dt
+		return []BulletCmd{}
+	}
+	if e.ActionTimeLeft <= 0 {
+		e.AnimationState = animation.StateIdle
+	}
+	if e.ActionTimeLeft <= 0 && !e.IsAlive() && e.KnockbackTimeLeft <= 0 {
+		e.ShouldBeDeleted = true
+	}
+
+	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, p, structureManager)
+
+	if e.DashTimeLeft > 0 {
+		e.DashTimeLeft -= dt
+	}
+	if e.DashCooldown > 0 {
+		e.DashCooldown -= dt
+	}
+	if e.DashTimeUnit > 0 && e.DashCooldown <= 0 && e.DashTimeLeft <= 0 && rl.Vector3LengthSqr(derivedMovement) > 0 {
+		e.DashTimeLeft = e.DashTimeUnit
+		e.DashCooldown = e.DashCooldownUnit
+		e.DashDirection = rl.Vector3Normalize(derivedMovement)
+		e.AimTimeLeft = e.AimTimeUnit
+		e.AimDirection = rl.Vector3{}
+	}
+	isDashing := e.DashTimeLeft > 0
+
+	if !isDashing {
+		if e.AimDirection != (rl.Vector3{}) {
+			derivedAimStart = true
+		}
+
+		if e.AimTimeLeft <= 0 {
+			dir := rl.Vector3Normalize(e.AimDirection)
+			e.ActionTimeLeft = 1
+			e.AnimationState = animation.StateAttacking
+			e.AnimationCurrentFrame = 0
+			e.AimTimeLeft = e.AimTimeUnit
+			e.AimDirection = rl.Vector3{}
+			rl.PlaySound(sound.ShotgunSound)
+
+			if e.IsSelfDestructor {
+				e.selfDestruct(p, em)
+				return []BulletCmd{}
+			}
+
+			spawnPos := e.Position
+			if e.AiType == Charger {
+				// Fire a 3-bullet cone toward the front, 30 degrees apart.
+				for _, deg := range []float64{-30, 0, 30} {
+					bulletCmds = append(bulletCmds, BulletCmd{Pos: spawnPos, Dir: rotateY(dir, deg), Damage: 200, Range: e.AttackRange, Shooter: e})
+				}
+			} else {
+				bulletCmds = append(bulletCmds, BulletCmd{Pos: spawnPos, Dir: dir, Damage: 200, Range: e.AttackRange, Shooter: e})
+			}
+			return bulletCmds
+		}
+
+		if derivedAimStart {
+			if e.AimDirection == (rl.Vector3{}) {
+				e.AimDirection = vecToPlayer
+			}
+			e.TargetDirection = e.AimDirection
+			angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
+			e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+			e.AimTimeLeft -= dt
+			e.AnimationState = animation.StateAiming
+			e.AnimationCurrentFrame = 0
+			return []BulletCmd{}
+		}
+
+		e.AimTimeLeft = e.AimTimeUnit
+		e.AimDirection = rl.Vector3{}
+	}
+
+	e.MoveDirection = derivedMovement
+	speed := e.MoveSpeed
+	if isDashing {
+		speed = e.MoveSpeed * e.DashMult
+		e.MoveDirection = e.DashDirection
+	}
+	moveAmount := rl.Vector3Scale(e.MoveDirection, speed*dt)
+
+	e.PrevPosition = e.Position
+	oldPos := e.Position
+	collisionSize := rl.Vector3{X: e.Size, Y: e.Size, Z: e.Size}
+	e.Position.X += moveAmount.X
+	blockedX := structureManager.CheckCollision(e.Position, e.PrevPosition, collisionSize)
+	if !isDashing {
+		blockedX = blockedX || e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox())
+	}
+	if blockedX {
+		e.Position.X = oldPos.X
+	}
+	e.Position.Z += moveAmount.Z
+	blockedZ := structureManager.CheckCollision(e.Position, e.PrevPosition, collisionSize)
+	if !isDashing {
+		blockedZ = blockedZ || e.isCollidingWithGrid(myIdx, em, p.GetBoundingBox())
+	}
+	if blockedZ {
+		e.Position.Z = oldPos.Z
+	}
+
+	moving := rl.Vector3LengthSqr(e.MoveDirection) > 0 && rl.Vector3Distance(oldPos, e.Position) > 0.0001
+	if e.FootstepSoundTimeLeft > 0 {
+		e.FootstepSoundTimeLeft -= dt
+	}
+
+	if moving {
+		e.AnimationState = animation.StateRunning
+
+		if e.FootstepSoundTimeLeft <= 0 {
+			sound.PlaySound3D(e.FootstepSound, e.Position, p.Position, 0.5)
+			e.FootstepSoundTimeLeft = e.FootstepSoundTimeUnit
+		}
+	} else {
+		e.FootstepSoundTimeLeft = 0
+	}
+
+	e.TargetDirection = e.MoveDirection
+	angleRad := math.Atan2(float64(e.TargetDirection.X), float64(e.TargetDirection.Z))
+	e.ModelAngleDeg = float32(angleRad * (180.0 / math.Pi))
+	return bulletCmds
+}
+
+// rotateY rotates a direction vector around the vertical (Y) axis by deg degrees.
+func rotateY(v rl.Vector3, deg float64) rl.Vector3 {
+	rad := deg * math.Pi / 180
+	cos := float32(math.Cos(rad))
+	sin := float32(math.Sin(rad))
+	return rl.Vector3{
+		X: v.X*cos + v.Z*sin,
+		Y: v.Y,
+		Z: -v.X*sin + v.Z*cos,
+	}
+}
+
+func (e *Enemy) selfDestruct(p *killer.Killer, em *Manager) {
+	radius := e.SelfDestructRange
+	if radius <= 0 {
+		radius = e.AttackRange
+	}
+
+	if p.IsAlive() && rl.Vector3Distance(e.Position, p.Position) <= radius {
+		p.Damage(200)
+	}
+
+	for _, other := range em.Enemies {
+		if other == e || !other.IsAlive() {
+			continue
+		}
+		if rl.Vector3Distance(e.Position, other.Position) <= radius {
+			dir := rl.Vector3Subtract(other.Position, e.Position)
+			other.Damage(200, dir)
+		}
+	}
+
+	em.BlastBuffer = append(em.BlastBuffer, blast.Blast{
+		Position:    e.Position,
+		Radius:      radius,
+		MaxLifeTime: 0.4,
+		LifeTime:    0.4,
+		Color:       rl.NewColor(255, 140, 20, 220),
+		AlwaysShow:  true,
+	})
+	for k := 0; k < 8; k++ {
+		angle := float64(k) * math.Pi / 4
+		offset := rl.Vector3{
+			X: float32(math.Cos(angle)) * radius * 0.7,
+			Z: float32(math.Sin(angle)) * radius * 0.7,
+		}
+		em.BlastBuffer = append(em.BlastBuffer, blast.CreateDebris(rl.Vector3Add(e.Position, offset)))
+	}
+
+	e.Health = 0
+	e.AnimationState = animation.StateDying
+	e.ActionTimeLeft = 10
+	e.HasSelfDestructed = true
+}
+
+func (e *Enemy) Damage(d int32, bulletDir rl.Vector3) {
+	wasAlive := e.IsAlive()
+	e.Health -= d
+	e.AnimationState = animation.StateDying
+	e.ActionTimeLeft = 0.1
+	if rl.Vector3LengthSqr(bulletDir) > 0 {
+		e.KnockbackVelocity = rl.Vector3Scale(rl.Vector3Normalize(bulletDir), 60.0)
+		e.KnockbackTimeLeft = 0.2
+	}
+	if !e.IsAlive() {
+		e.AnimationState = animation.StateDying
+		e.ActionTimeLeft = 10
+		if wasAlive {
+			e.JustDied = true
+		}
+	}
+}
+
+func (e *Enemy) Unload() {
+	rl.UnloadModel(e.Model)
+	if len(e.Animation) > 0 {
+		rl.UnloadModelAnimations(e.Animation)
+	}
+	rl.UnloadSoundAlias(e.FootstepSound)
+}
+
+func (e *Enemy) ResolveAnimation() {
+	if len(e.Animation) == 0 {
+		return
+	}
+	switch e.AnimationState {
+	case animation.StateIdle:
+		e.setAnim(0, 24, true)
+	case animation.StateRunning:
+		e.setAnim(1, 180, true)
+	case animation.StateAttacking:
+		e.setAnim(2, 150, false)
+	case animation.StateDying:
+		e.setAnim(3, 200, false)
+	case animation.StateAiming:
+		e.setAnim(2, 0, false)
+	default:
+		panic("unhandled default case")
+	}
+}
+
+func (e *Enemy) setAnim(idx int, speed float32, loop bool) {
+	if e.AnimationIdx != idx {
+		e.AnimationIdx = idx
+		e.AnimationCurrentFrame = 0
+		e.AnimationFrameCounter = 0
+	}
+	e.AnimationFrameSpeed = speed
+	e.AnimationReplay = loop
+}
+
+func (e *Enemy) PlanAnimate(dt float32) {
+	if len(e.Animation) == 0 {
+		return
+	}
+	e.AnimationFrameCounter += e.AnimationFrameSpeed * dt
+	anim := e.Animation[e.AnimationIdx]
+	for e.AnimationFrameCounter >= 1.0 {
+		e.AnimationCurrentFrame++
+		e.AnimationFrameCounter -= 1.0
+		if e.AnimationReplay == false && e.AnimationCurrentFrame >= anim.FrameCount-5 {
+			e.AnimationCurrentFrame = anim.FrameCount - 5
+			return
+		}
+	}
+}
+
+func (e *Enemy) GetBoundingBox() rl.BoundingBox {
+	return rl.BoundingBox{
+		Min: rl.Vector3{X: e.Position.X - e.Size, Y: e.Position.Y - e.Size, Z: e.Position.Z - e.Size},
+		Max: rl.Vector3{X: e.Position.X + e.Size, Y: e.Position.Y + e.Size, Z: e.Position.Z + e.Size},
+	}
+}
+
+func Soldier(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.GunRobotModel,
+		ModelRatio:            0.2,
+		Animation:             model.GunRobotAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             4,
+		Health:                100,
+		AttackRange:           10,
+		AimTimeLeft:           0.9,
+		AimTimeUnit:           0.9,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Elite,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyNoColor,
+	}
+}
+
+func Sniper(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.GunRobotModel,
+		ModelRatio:            0.2,
+		Animation:             model.GunRobotAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             7,
+		Health:                100,
+		AttackRange:           20,
+		AimTimeLeft:           1,
+		AimTimeUnit:           1,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Elite,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyRed,
+	}
+}
+
+func Robot(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.BombRobotModel,
+		ModelRatio:            0.3,
+		Animation:             model.BombRobotAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             5,
+		Health:                100,
+		AttackRange:           2.0,
+		AimTimeLeft:           0.25,
+		AimTimeUnit:           0.25,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                SimpleZombie,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		IsSelfDestructor:      true,
+		SelfDestructRange:     4.0,
+		Color:                 enemyNoColor,
+	}
+}
+
+func SuperRobot(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.BombRobotModel,
+		ModelRatio:            0.3,
+		Animation:             model.BombRobotAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             18,
+		Health:                100,
+		AttackRange:           2.0,
+		AimTimeLeft:           0.25,
+		AimTimeUnit:           0.25,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Elite,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		IsSelfDestructor:      true,
+		SelfDestructRange:     4.0,
+		Color:                 enemyRed,
+	}
+}
+
+func ChargerRobot(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.ChargeRobotModel,
+		ModelRatio:            0.2,
+		Animation:             model.ChargeRobotAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             8,
+		Health:                100,
+		AttackRange:           5,
+		AimTimeLeft:           1,
+		AimTimeUnit:           1,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Charger,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyNoColor,
+		DashTimeUnit:          0.4,
+		DashCooldownUnit:      3.0,
+		DashMult:              2.0,
+	}
+}

@@ -1,0 +1,19 @@
+package enemy
+
+import rl "github.com/gen2brain/raylib-go/raylib"
+
+type BulletCmd struct {
+	Pos     rl.Vector3
+	Dir     rl.Vector3
+	Damage  int32
+	Range   float32
+	Shooter *Enemy
+}
+
+type PushCmd struct {
+	Position  rl.Vector3
+	Direction rl.Vector3
+	Radius    float32
+	LifeTime  float32
+	Force     float32
+}
