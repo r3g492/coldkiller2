@@ -787,7 +787,6 @@ func drawHitMarker(mouseLocation rl.Vector2) {
 		length    = 11.0
 		thickness = 3.0
 	)
-	// ease-out so it pops at full strength then fades fast
 	t := hitMarkerTimer / hitMarkerDuration
 	alpha := uint8(t * t * 255)
 	color := rl.NewColor(255, 60, 60, alpha)

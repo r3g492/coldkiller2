@@ -58,6 +58,11 @@ type Enemy struct {
 	KnockbackVelocity     rl.Vector3
 	KnockbackTimeLeft     float32
 
+	MoveMode      MoveMode
+	MoveModeTimer float32
+	StrafeSign    float32
+	WanderPhase   float32
+
 	IsSelfDestructor  bool
 	SelfDestructRange float32
 	HasSelfDestructed bool
@@ -194,7 +199,7 @@ func (e *Enemy) Mutate(
 		e.ShouldBeDeleted = true
 	}
 
-	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, p, structureManager)
+	var derivedAimStart, derivedMovement = deriveAi(e, em, myIdx, p, structureManager, dt)
 
 	if e.DashTimeLeft > 0 {
 		e.DashTimeLeft -= dt
@@ -319,7 +324,6 @@ func (e *Enemy) Mutate(
 	return bulletCmds
 }
 
-// rotateY rotates a direction vector around the vertical (Y) axis by deg degrees.
 func rotateY(v rl.Vector3, deg float64) rl.Vector3 {
 	rad := deg * math.Pi / 180
 	cos := float32(math.Cos(rad))
