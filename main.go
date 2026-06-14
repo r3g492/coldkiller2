@@ -209,6 +209,7 @@ func main() {
 			kpsTimeSec = 0
 			kpsPrevAlive = 0
 			kpsLatest = 0
+			resetCombo()
 			action := doInitMenu(w, h)
 			if action == initMenuExit {
 				break
@@ -342,6 +343,7 @@ func main() {
 			kpsKills += kpsPrevAlive - enemyManager.AliveEnemyCount
 		}
 		kpsPrevAlive = enemyManager.AliveEnemyCount
+		updateCombo(enemyManager.PlayerBulletKillCount+enemyManager.ExplosionKillCount, dt)
 		if !stageManager.StageWon() {
 			kpsTimeSec += worldDt
 		}
@@ -367,6 +369,7 @@ func main() {
 				kpsKills = 0
 				kpsTimeSec = 0
 				kpsPrevAlive = 0
+				resetCombo()
 			}
 		} else {
 			stageWonDelay = -1
@@ -419,6 +422,7 @@ func main() {
 		player.DrawHitFlash()
 		player.DrawSlowTimeVignette()
 		drawKPS(w, 50)
+		drawCombo(w)
 		enemyManager.DrawUi(player)
 		enemyManager.DrawOffscreenIndicators(player)
 		drawEscOverlay()

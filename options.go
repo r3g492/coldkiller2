@@ -47,6 +47,7 @@ type GameConfig struct {
 	ResHeight   int        `json:"res_height"`
 	GameCleared bool       `json:"game_cleared"`
 	BestKps     float32    `json:"best_kps"`
+	BestCombo   int        `json:"best_combo"`
 
 	StageLevel  int         `json:"stage_level"`
 	PlayerStats PlayerStats `json:"player_stats"`

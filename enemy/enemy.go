@@ -352,6 +352,9 @@ func (e *Enemy) selfDestruct(p *killer.Killer, em *Manager) {
 		if rl.Vector3Distance(e.Position, other.Position) <= radius {
 			dir := rl.Vector3Subtract(other.Position, e.Position)
 			other.Damage(200, dir)
+			if !other.IsAlive() {
+				em.ExplosionKillCount++
+			}
 		}
 	}
 

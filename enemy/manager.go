@@ -27,6 +27,7 @@ type Manager struct {
 	BlastBuffer                []blast.Blast
 	DeathPositions             []rl.Vector3
 	PlayerBulletKillCount      int
+	ExplosionKillCount         int
 	Grid                       map[int][]int
 	CellSize                   float32
 	AliveEnemyCount            int
@@ -65,6 +66,7 @@ func (em *Manager) Mutate(
 	em.BlastBuffer = em.BlastBuffer[:0]
 	em.DeathPositions = em.DeathPositions[:0]
 	em.PlayerBulletKillCount = 0
+	em.ExplosionKillCount = 0
 
 	for _, e := range em.Enemies {
 		if e.DashTimeLeft <= 0 || !e.IsAlive() {
