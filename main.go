@@ -12,6 +12,7 @@ import (
 	"coldkiller2/stage"
 	"coldkiller2/structure"
 	"coldkiller2/util"
+	"math"
 	"time"
 	"unsafe"
 
@@ -144,6 +145,8 @@ func main() {
 		stageManager,
 	)
 
+	initAmbient()
+
 	for !rl.WindowShouldClose() {
 		dt := rl.GetFrameTime()
 		mouseLocation := virtualMousePosition()
@@ -210,6 +213,7 @@ func main() {
 			kpsPrevAlive = 0
 			kpsLatest = 0
 			resetCombo()
+			resetDecals()
 			action := doInitMenu(w, h)
 			if action == initMenuExit {
 				break
@@ -344,6 +348,17 @@ func main() {
 		}
 		kpsPrevAlive = enemyManager.AliveEnemyCount
 		updateCombo(enemyManager.PlayerBulletKillCount+enemyManager.ExplosionKillCount, dt, player)
+
+		for _, dp := range enemyManager.DeathPositions {
+			addScuff(dp)
+		}
+		for i := range enemyManager.BlastBuffer {
+			if b := enemyManager.BlastBuffer[i]; b.AlwaysShow && b.Radius >= 2.0 {
+				addScorch(b.Position, b.Radius)
+			}
+		}
+		updateDecals(worldDt)
+		updateAmbient(worldDt, player.Position)
 		if !stageManager.StageWon() {
 			kpsTimeSec += worldDt
 		}
@@ -370,6 +385,7 @@ func main() {
 				kpsTimeSec = 0
 				kpsPrevAlive = 0
 				resetCombo()
+				resetDecals()
 			}
 		} else {
 			stageWonDelay = -1
@@ -409,13 +425,16 @@ func main() {
 		rl.ClearBackground(rl.Gray)
 
 		rl.BeginMode3D(player.Camera)
-		rl.DrawModel(floorModel, rl.Vector3{Y: -2}, 1.0, rl.White)
+		floorPulse := uint8(225 + 25*math.Sin(float64(rl.GetTime())*0.6))
+		rl.DrawModel(floorModel, rl.Vector3{Y: -2}, 1.0, rl.NewColor(floorPulse, floorPulse, floorPulse, 255))
+		drawDecals3D()
 		sight.DrawSolidShadows(player.Position, structureManager)
 		player.Draw3D()
 		enemyManager.Draw3D(player)
 		bulletManager.Draw3D()
 		structureManager.Draw3D(player.Position)
 		blastManager.Draw3D()
+		drawAmbient3D()
 		rl.EndMode3D()
 
 		player.DrawUi()
