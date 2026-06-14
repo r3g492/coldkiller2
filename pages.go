@@ -247,7 +247,6 @@ func doIntermission(
 	rl.DrawText(diffInfoText, int32(w)/2-diffInfoWidth/2, int32(h)/2-40, diffInfoSize, rl.RayWhite)
 
 	drawBestKPS(w, 60)
-	drawBestCombo(w, 120)
 
 	intermissionTimer += dt
 
@@ -539,21 +538,6 @@ func drawKPS(w int, y int32) {
 
 func drawBestKPS(w int, y int32) {
 	drawKpsText(w, y, currentConfig.BestKps, "Best Kills Per Second")
-}
-
-func drawBestCombo(w int, y int32) {
-	text := fmt.Sprintf("Best Combo: %d", currentConfig.BestCombo)
-	fontSize := int32(22)
-	textWidth := rl.MeasureText(text, fontSize)
-	color := comboTierColors[0]
-	if currentConfig.BestCombo >= 20 {
-		color = comboTierColors[3]
-	} else if currentConfig.BestCombo >= 10 {
-		color = comboTierColors[2]
-	} else if currentConfig.BestCombo >= 5 {
-		color = comboTierColors[1]
-	}
-	rl.DrawText(text, int32(w)/2-textWidth/2, y, fontSize, color)
 }
 
 func drawKpsText(w int, y int32, kps float32, label string) {
