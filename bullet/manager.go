@@ -74,9 +74,10 @@ func (bm *Manager) Mutate(
 	p *killer.Killer,
 	el []*enemy.Enemy,
 	structureManager *structure.Manager,
-) []blast.Blast {
+) ([]blast.Blast, int) {
 
 	var blasts []blast.Blast
+	playerHits := 0
 	for i := 0; i < len(bm.Bullets); i++ {
 		bm.Bullets[i].SlowTimeActive = p.SlowTimeActive
 		bm.Bullets[i].Mutate(dt)
@@ -110,6 +111,9 @@ func (bm *Manager) Mutate(
 						}
 						bm.Bullets[i].Active = false
 						bm.PlayerXp++
+						if curBullet.Shooter == Player {
+							playerHits++
+						}
 					}
 				}
 			}
@@ -132,7 +136,7 @@ func (bm *Manager) Mutate(
 			i--
 		}
 	}
-	return blasts
+	return blasts, playerHits
 }
 
 func (bm *Manager) Draw3D() {

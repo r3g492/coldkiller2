@@ -776,3 +776,27 @@ func drawCursor(mouseLocation rl.Vector2, player *killer.Killer) {
 
 	rl.EndMode3D()
 }
+
+func drawHitMarker(mouseLocation rl.Vector2) {
+	if hitMarkerTimer <= 0 {
+		return
+	}
+
+	const (
+		gap       = 6.0
+		length    = 11.0
+		thickness = 3.0
+	)
+	// ease-out so it pops at full strength then fades fast
+	t := hitMarkerTimer / hitMarkerDuration
+	alpha := uint8(t * t * 255)
+	color := rl.NewColor(255, 60, 60, alpha)
+	cx, cy := mouseLocation.X, mouseLocation.Y
+
+	corners := [4][2]float32{{-1, -1}, {1, -1}, {-1, 1}, {1, 1}}
+	for _, c := range corners {
+		inner := rl.Vector2{X: cx + c[0]*gap, Y: cy + c[1]*gap}
+		outer := rl.Vector2{X: cx + c[0]*(gap+length), Y: cy + c[1]*(gap+length)}
+		rl.DrawLineEx(inner, outer, thickness, color)
+	}
+}

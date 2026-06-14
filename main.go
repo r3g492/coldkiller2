@@ -42,6 +42,10 @@ var kpsLatest float32
 
 var audioPitch float32 = 1.0
 
+const hitMarkerDuration = 0.25
+
+var hitMarkerTimer float32
+
 const testMode = false
 
 var testConfig = struct {
@@ -383,7 +387,13 @@ func main() {
 		// bullet
 		muzzleBlasts := bulletManager.KillerBulletCreate(bc)
 		bulletManager.EnemyBulletCreate(ebc)
-		bulletBlasts := bulletManager.Mutate(worldDt, player, enemyManager.Enemies, structureManager)
+		bulletBlasts, playerHits := bulletManager.Mutate(worldDt, player, enemyManager.Enemies, structureManager)
+		if playerHits > 0 {
+			hitMarkerTimer = hitMarkerDuration
+		}
+		if hitMarkerTimer > 0 {
+			hitMarkerTimer -= dt
+		}
 
 		blastManager.AddBlasts(muzzleBlasts)
 		blastManager.AddBlasts(bulletBlasts)
@@ -419,6 +429,7 @@ func main() {
 		enemyManager.DrawOffscreenIndicators(player)
 		drawEscOverlay()
 		drawCursor(mouseLocation, player)
+		drawHitMarker(mouseLocation)
 		rl.DrawFPS(int32(w)-90, 10)
 
 		endFrame()
