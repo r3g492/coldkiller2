@@ -40,9 +40,10 @@ type Killer struct {
 	FootstepSound         rl.Sound
 	HitFlashTimer         float32
 
-	SlowTimeLeft   float32
-	SlowTimeActive bool
-	CameraOffset   rl.Vector3
+	SlowTimeLeft    float32
+	SlowTimeActive  bool
+	SlowRefillFlash float32
+	CameraOffset    rl.Vector3
 
 	KnockbackVelocity rl.Vector3
 	KnockbackTimeLeft float32
@@ -185,21 +186,55 @@ func (k *Killer) DrawUi() {
 		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
 	}
 
-	{
-		slowPct := k.SlowTimeLeft / k.SlowTimeDuration
-		slowFill := slowPct * barWidth
-		barY := screenPos.Y + 47
-		barColor := rl.Blue
-		if k.SlowTimeActive {
-			barColor = rl.SkyBlue
-		}
-		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, barWidth, barHeight), rl.Fade(rl.DarkGray, 0.6))
-		rl.DrawRectangleRec(rl.NewRectangle(barX, barY, slowFill, barHeight), barColor)
-		rl.DrawRectangleLinesEx(rl.NewRectangle(barX, barY, barWidth, barHeight), 1, rl.Black)
-	}
-
 	/*fpsText := fmt.Sprintf("%d", rl.GetFPS())
 	rl.DrawText(fpsText, int32(screenPos.X)-20, int32(screenPos.Y)+60, 1, rl.Yellow)*/
+}
+
+// DrawSlowMeter renders the slow-time resource as a fixed bottom-center HUD bar.
+// It pulses white and grows a glow when the combo refills it, so the reward for
+// chaining kills is unmissable.
+func (k *Killer) DrawSlowMeter() {
+	barWidth := float32(360)
+	barHeight := float32(20)
+	x := float32(util.VirtualWidth)/2 - barWidth/2
+	y := float32(util.VirtualHeight) - 64
+
+	pct := k.SlowTimeLeft / k.SlowTimeDuration
+	if pct < 0 {
+		pct = 0
+	}
+	if pct > 1 {
+		pct = 1
+	}
+
+	rl.DrawRectangleRec(rl.NewRectangle(x, y, barWidth, barHeight), rl.Fade(rl.Black, 0.55))
+
+	fillColor := rl.NewColor(40, 120, 230, 230)
+	if k.SlowTimeActive {
+		fillColor = rl.NewColor(120, 220, 255, 240)
+	}
+	rl.DrawRectangleRec(rl.NewRectangle(x, y, barWidth*pct, barHeight), fillColor)
+
+	if k.SlowRefillFlash > 0 {
+		a := uint8(k.SlowRefillFlash * 200)
+		rl.DrawRectangleRec(rl.NewRectangle(x, y, barWidth*pct, barHeight), rl.NewColor(255, 255, 255, a))
+		grow := k.SlowRefillFlash * 7
+		rl.DrawRectangleLinesEx(
+			rl.NewRectangle(x-grow, y-grow, barWidth+grow*2, barHeight+grow*2),
+			2, rl.NewColor(180, 240, 255, a),
+		)
+	}
+
+	rl.DrawRectangleLinesEx(rl.NewRectangle(x, y, barWidth, barHeight), 2, rl.Black)
+
+	label := "SLOW-MO"
+	labelSize := int32(15)
+	lw := rl.MeasureText(label, labelSize)
+	labelColor := rl.RayWhite
+	if k.SlowRefillFlash > 0 {
+		labelColor = rl.NewColor(180, 240, 255, 255)
+	}
+	rl.DrawText(label, int32(x+barWidth/2)-lw/2, int32(y)-labelSize-4, labelSize, labelColor)
 }
 
 func (k *Killer) DrawSlowTimeVignette() {
@@ -297,6 +332,12 @@ func (k *Killer) Mutate(
 	k.ActionTimeLeft -= realDt
 	if k.HitFlashTimer > 0 {
 		k.HitFlashTimer -= realDt
+	}
+	if k.SlowRefillFlash > 0 {
+		k.SlowRefillFlash -= realDt * 3
+		if k.SlowRefillFlash < 0 {
+			k.SlowRefillFlash = 0
+		}
 	}
 
 	if input.SlowTimeDown && k.SlowTimeLeft > 0 {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"coldkiller2/killer"
 	"fmt"
 	"math/rand"
 
@@ -10,6 +11,11 @@ import (
 // comboWindow is the real-time grace period (in seconds) after a kill before
 // the streak breaks. It is measured in real time so slow-time doesn't drain it.
 const comboWindow = 2.5
+
+// comboSlowRefill is how much slow-time (seconds) each kill restores, indexed
+// by combo tier. Longer streaks pour the meter back faster, so staying
+// aggressive sustains slow-mo.
+var comboSlowRefill = []float32{0.10, 0.18, 0.30, 0.45}
 
 var (
 	comboCount int     // enemies killed in the current uninterrupted streak
@@ -26,13 +32,24 @@ func resetCombo() {
 // updateCombo advances streak state. kills is the number of enemies the player
 // killed this frame; dt is real (unscaled) time so the window and punch animate
 // at normal speed regardless of slow-time.
-func updateCombo(kills int, dt float32) {
+func updateCombo(kills int, dt float32, player *killer.Killer) {
 	if kills > 0 {
 		comboCount += kills
 		comboTimer = comboWindow
 		comboPunch = 1.0
 		if comboCount > currentConfig.BestCombo {
 			currentConfig.BestCombo = comboCount
+		}
+		// A real streak (2+) starts feeding the slow-time meter, scaled by tier.
+		if comboCount >= 2 {
+			refill := comboSlowRefill[comboTier()] * float32(kills)
+			if player.SlowTimeLeft < player.SlowTimeDuration {
+				player.SlowTimeLeft += refill
+				if player.SlowTimeLeft > player.SlowTimeDuration {
+					player.SlowTimeLeft = player.SlowTimeDuration
+				}
+				player.SlowRefillFlash = 1.0
+			}
 		}
 	} else if comboTimer > 0 {
 		comboTimer -= dt

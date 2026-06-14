@@ -343,7 +343,7 @@ func main() {
 			kpsKills += kpsPrevAlive - enemyManager.AliveEnemyCount
 		}
 		kpsPrevAlive = enemyManager.AliveEnemyCount
-		updateCombo(enemyManager.PlayerBulletKillCount+enemyManager.ExplosionKillCount, dt)
+		updateCombo(enemyManager.PlayerBulletKillCount+enemyManager.ExplosionKillCount, dt, player)
 		if !stageManager.StageWon() {
 			kpsTimeSec += worldDt
 		}
@@ -419,6 +419,7 @@ func main() {
 		rl.EndMode3D()
 
 		player.DrawUi()
+		player.DrawSlowMeter()
 		player.DrawHitFlash()
 		player.DrawSlowTimeVignette()
 		drawKPS(w, 50)
