@@ -37,7 +37,6 @@ var keyMap input.KeyMap
 var kpsKills int
 var kpsTimeSec float32
 var kpsPrevAlive int
-var kpsBest float32
 var kpsLatest float32
 
 var audioPitch float32 = 1.0
@@ -209,7 +208,6 @@ func main() {
 			kpsKills = 0
 			kpsTimeSec = 0
 			kpsPrevAlive = 0
-			kpsBest = 0
 			kpsLatest = 0
 			action := doInitMenu(w, h)
 			if action == initMenuExit {
@@ -245,7 +243,6 @@ func main() {
 				showInitMenu = false
 				showOptions = true
 			} else if action == initMenuShowCleared {
-				kpsBest = currentConfig.BestKps
 				showInitMenu = false
 				showCleared = true
 				rl.PlaySound(sound.Win)
@@ -362,9 +359,6 @@ func main() {
 					stageKps = float32(kpsKills) / kpsTimeSec
 				}
 				kpsLatest = stageKps
-				if stageKps > kpsBest {
-					kpsBest = stageKps
-				}
 				if stageKps > currentConfig.BestKps {
 					currentConfig.BestKps = stageKps
 				}

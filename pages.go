@@ -538,7 +538,7 @@ func drawKPS(w int, y int32) {
 }
 
 func drawBestKPS(w int, y int32) {
-	drawKpsText(w, y, kpsBest, "Best Kills Per Second")
+	drawKpsText(w, y, currentConfig.BestKps, "Best Kills Per Second")
 }
 
 func drawLatestKPS(w int, y int32) {
