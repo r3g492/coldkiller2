@@ -15,6 +15,7 @@ const (
 	SimpleZombie AiType = iota
 	Elite
 	Charger
+	Human
 )
 
 type MoveMode int
@@ -83,6 +84,8 @@ func deriveAi(
 		return deriveCharger(e, ctx, structureManager)
 	case Elite:
 		return deriveElite(e, ctx, structureManager)
+	case Human:
+		return deriveHuman(e, ctx, structureManager)
 	}
 	return false, rl.Vector3{}
 }
@@ -118,6 +121,43 @@ func deriveElite(e *Enemy, ctx aiContext, sm *structure.Manager) (bool, rl.Vecto
 		}
 	}
 
+	moveDir = steerAroundObstacles(e, sm, moveDir)
+	return ctx.shouldAim, moveDir
+}
+
+const (
+	humanJukeMinTime = 0.5
+	humanJukeMaxTime = 1.5
+)
+
+func deriveHuman(e *Enemy, ctx aiContext, sm *structure.Manager) (bool, rl.Vector3) {
+	optimalRange := e.AttackRange * 0.7
+	tooCloseRange := e.AttackRange * 0.45
+
+	e.MoveModeTimer -= ctx.dt
+	if e.MoveModeTimer <= 0 || e.StrafeSign == 0 {
+		e.StrafeSign = 1
+		if rand.Intn(2) == 0 {
+			e.StrafeSign = -1
+		}
+		e.MoveModeTimer = humanJukeMinTime + rand.Float32()*(humanJukeMaxTime-humanJukeMinTime)
+	}
+
+	up := rl.Vector3{X: 0, Y: 1, Z: 0}
+	strafe := rl.Vector3Scale(rl.Vector3CrossProduct(ctx.dirToPlayer, up), e.StrafeSign)
+
+	var moveDir rl.Vector3
+	switch {
+	case ctx.distToPlayer > optimalRange || ctx.aimObstructed:
+		moveDir = rl.Vector3Add(rl.Vector3Scale(ctx.dirToPlayer, 0.8), rl.Vector3Scale(strafe, 0.6))
+	case ctx.distToPlayer < tooCloseRange:
+		moveDir = rl.Vector3Add(rl.Vector3Scale(ctx.dirToPlayer, -0.7), rl.Vector3Scale(strafe, 0.7))
+	default:
+		moveDir = strafe
+	}
+	if rl.Vector3Length(moveDir) > 0 {
+		moveDir = rl.Vector3Normalize(moveDir)
+	}
 	moveDir = steerAroundObstacles(e, sm, moveDir)
 	return ctx.shouldAim, moveDir
 }

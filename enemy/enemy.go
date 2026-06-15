@@ -554,10 +554,6 @@ func SuperRobot(x, z float32) *Enemy {
 	}
 }
 
-// Rival fights like the player: a mid-range duelist that strafes with Elite AI
-// and dashes to close gaps or dodge. Built on the player model so it reads as a
-// clone of the killer. Tougher than the rank-and-file and meant to make the
-// player actually spend slow-mo to win the exchange.
 func Rival(x, z float32) *Enemy {
 	return &Enemy{
 		Model:                 model.PlayerModel,
@@ -567,14 +563,14 @@ func Rival(x, z float32) *Enemy {
 		Size:                  killer.CharSize,
 		MoveSpeed:             6,
 		Health:                120,
-		AttackRange:           12,
-		AimTimeLeft:           0.8,
-		AimTimeUnit:           0.8,
-		AimTrackTimeUnit:      0.7,
+		AttackRange:           14,
+		AimTimeLeft:           0.12,
+		AimTimeUnit:           0.12,
+		AimTrackTimeUnit:      0.12,
 		FootstepSoundTimeLeft: 0,
 		FootstepSoundTimeUnit: 0.4,
 		FootstepSound:         sound.FootStep,
-		AiType:                Elite,
+		AiType:                Human,
 		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
 		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
 		Color:                 enemyPurple,
