@@ -554,6 +554,36 @@ func SuperRobot(x, z float32) *Enemy {
 	}
 }
 
+// Rival fights like the player: a mid-range duelist that strafes with Elite AI
+// and dashes to close gaps or dodge. Built on the player model so it reads as a
+// clone of the killer. Tougher than the rank-and-file and meant to make the
+// player actually spend slow-mo to win the exchange.
+func Rival(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.PlayerModel,
+		ModelRatio:            0.3,
+		Animation:             model.PlayerAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             6,
+		Health:                120,
+		AttackRange:           12,
+		AimTimeLeft:           0.8,
+		AimTimeUnit:           0.8,
+		AimTrackTimeUnit:      0.7,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Elite,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyPurple,
+		DashTimeUnit:          0.35,
+		DashCooldownUnit:      2.5,
+		DashMult:              2.2,
+	}
+}
+
 func ChargerRobot(x, z float32) *Enemy {
 	return &Enemy{
 		Model:                 model.ChargeRobotModel,

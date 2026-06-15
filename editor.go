@@ -51,6 +51,7 @@ var editorKindColors = map[stage.EnemyKind]rl.Color{
 	stage.KindSniper:     rl.Red,
 	stage.KindCharger:    rl.Orange,
 	stage.KindSuperRobot: rl.Purple,
+	stage.KindRival:      rl.Blue,
 }
 
 const editorPanelWidth = 360
