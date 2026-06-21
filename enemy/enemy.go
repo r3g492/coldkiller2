@@ -580,6 +580,32 @@ func Rival(x, z float32) *Enemy {
 	}
 }
 
+func RedRival(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.PlayerModel,
+		ModelRatio:            0.3,
+		Animation:             model.PlayerAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             9,
+		Health:                120,
+		AttackRange:           22,
+		AimTimeLeft:           0.12,
+		AimTimeUnit:           0.12,
+		AimTrackTimeUnit:      0.12,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Human,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyRed,
+		DashTimeUnit:          0.35,
+		DashCooldownUnit:      2.5,
+		DashMult:              2.2,
+	}
+}
+
 func ChargerRobot(x, z float32) *Enemy {
 	return &Enemy{
 		Model:                 model.ChargeRobotModel,
