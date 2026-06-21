@@ -291,6 +291,7 @@ func doIntermission(
 		}
 
 		var chosen *upgradeInfo
+		allCapped := true
 		for i := range allUpgrades {
 			u := &allUpgrades[i]
 			col := i % 2
@@ -305,8 +306,25 @@ func doIntermission(
 				drawFullyUpgradedButton(rect, u.name)
 				continue
 			}
+			allCapped = false
 			if drawUpgradeButton(rect, player, u, rl.Maroon, rl.Red) {
 				chosen = u
+			}
+		}
+
+		if allCapped {
+			rows := (len(allUpgrades) + 1) / 2
+			nextRect := rl.Rectangle{
+				X:      startX,
+				Y:      startY + float32(rows)*(btnHeight+spacing),
+				Width:  btnWidth,
+				Height: btnHeight,
+			}
+			if drawButton(nextRect, "Next", rl.DarkGreen, rl.Green, rl.White) {
+				player.RefillSlowTime()
+				intermission = false
+				intermissionTimer = 0
+				intermissionLoadStep = 0
 			}
 		}
 
