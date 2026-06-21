@@ -38,11 +38,11 @@ type upgradeInfo struct {
 }
 
 const (
-	slowDurationStep = 0.5
-	slowDurationMax  = 15
+	slowDurationStep = 0.25
+	slowDurationMax  = 10
 
-	ammoCapacityStep = 3
-	ammoCapacityMax  = 1000
+	ammoCapacityStep = 2
+	ammoCapacityMax  = 100
 
 	moveSpeedStep = 0.25
 	moveSpeedMax  = 12
