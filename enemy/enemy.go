@@ -18,6 +18,7 @@ var (
 	enemyNoColor = rl.White
 	enemyPurple  = rl.NewColor(170, 60, 210, 255)
 	enemyRed     = rl.NewColor(225, 60, 60, 255)
+	enemyGold    = rl.NewColor(235, 190, 40, 255)
 )
 
 type Enemy struct {
@@ -77,6 +78,10 @@ type Enemy struct {
 	DashCooldownUnit float32
 	DashMult         float32
 	DashDirection    rl.Vector3
+
+	ShotCount    int32
+	ShotInterval float32
+	BurstLeft    int32
 }
 
 func (e *Enemy) IsAlive() bool {
@@ -223,7 +228,6 @@ func (e *Enemy) Mutate(
 
 		if e.AimTimeLeft <= 0 {
 			dir := rl.Vector3Normalize(e.AimDirection)
-			e.ActionTimeLeft = 1
 			e.AnimationState = animation.StateAttacking
 			e.AnimationCurrentFrame = 0
 			e.AimTimeLeft = e.AimTimeUnit
@@ -243,6 +247,20 @@ func (e *Enemy) Mutate(
 				}
 			} else {
 				bulletCmds = append(bulletCmds, BulletCmd{Pos: spawnPos, Dir: dir, Damage: 200, Range: e.AttackRange, Shooter: e})
+			}
+
+			if e.ShotCount > 1 {
+				if e.BurstLeft == 0 {
+					e.BurstLeft = e.ShotCount
+				}
+				e.BurstLeft--
+				if e.BurstLeft > 0 {
+					e.ActionTimeLeft = e.ShotInterval
+				} else {
+					e.ActionTimeLeft = 1
+				}
+			} else {
+				e.ActionTimeLeft = 1
 			}
 			return bulletCmds
 		}
@@ -603,6 +621,34 @@ func RedRival(x, z float32) *Enemy {
 		DashTimeUnit:          0.35,
 		DashCooldownUnit:      2.5,
 		DashMult:              2.2,
+	}
+}
+
+func GoldRival(x, z float32) *Enemy {
+	return &Enemy{
+		Model:                 model.PlayerModel,
+		ModelRatio:            0.3,
+		Animation:             model.PlayerAnimation,
+		Position:              rl.Vector3{X: x, Y: 0, Z: z},
+		Size:                  killer.CharSize,
+		MoveSpeed:             9,
+		Health:                120,
+		AttackRange:           22,
+		AimTimeLeft:           0.12,
+		AimTimeUnit:           0.12,
+		AimTrackTimeUnit:      0.12,
+		FootstepSoundTimeLeft: 0,
+		FootstepSoundTimeUnit: 0.4,
+		FootstepSound:         sound.FootStep,
+		AiType:                Human,
+		MoveDirection:         rl.Vector3{X: 0, Y: 0, Z: 0},
+		TargetDirection:       rl.Vector3{X: 0, Y: 0, Z: 0},
+		Color:                 enemyGold,
+		DashTimeUnit:          0.35,
+		DashCooldownUnit:      2.5,
+		DashMult:              2.2,
+		ShotCount:             5,
+		ShotInterval:          0.08,
 	}
 }
 

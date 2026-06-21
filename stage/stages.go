@@ -29,10 +29,11 @@ const (
 	KindSuperRobot EnemyKind = "super_robot"
 	KindRival      EnemyKind = "rival"
 	KindRedRival   EnemyKind = "red_rival"
+	KindGoldRival  EnemyKind = "gold_rival"
 )
 
 // EnemyKinds lists every placeable kind in a stable order (used by the editor).
-var EnemyKinds = []EnemyKind{KindRobot, KindSoldier, KindSniper, KindCharger, KindSuperRobot, KindRival, KindRedRival}
+var EnemyKinds = []EnemyKind{KindRobot, KindSoldier, KindSniper, KindCharger, KindSuperRobot, KindRival, KindRedRival, KindGoldRival}
 
 var enemyFactories = map[EnemyKind]func(x, z float32) *enemy.Enemy{
 	KindRobot:      enemy.Robot,
@@ -42,6 +43,7 @@ var enemyFactories = map[EnemyKind]func(x, z float32) *enemy.Enemy{
 	KindSuperRobot: enemy.SuperRobot,
 	KindRival:      enemy.Rival,
 	KindRedRival:   enemy.RedRival,
+	KindGoldRival:  enemy.GoldRival,
 }
 
 // Point is an XZ position on the ground plane.

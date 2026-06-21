@@ -53,6 +53,7 @@ var editorKindColors = map[stage.EnemyKind]rl.Color{
 	stage.KindSuperRobot: rl.Purple,
 	stage.KindRival:      rl.Blue,
 	stage.KindRedRival:   rl.Maroon,
+	stage.KindGoldRival:  rl.Gold,
 }
 
 const editorPanelWidth = 360
