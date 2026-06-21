@@ -46,7 +46,7 @@ const hitMarkerDuration = 0.25
 
 var hitMarkerTimer float32
 
-const testMode = true
+const testMode = false
 
 var testConfig = struct {
 	SlowDuration float32
