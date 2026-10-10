@@ -18,3 +18,9 @@ windows (requires mingw-w64):
 GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -ldflags "-H=windowsgui" -o coldkiller2.exe .
 ```
 `-H=windowsgui` builds a GUI exe so no console window opens alongside the game.
+
+steam builds add `-tags steam` (enables achievements). on windows, `steam_api64.dll` from the Steamworks SDK (`redistributable_bin/win64/`) must be placed next to `coldkiller2.exe`; it is not in this repo.
+```
+go build -tags steam -o coldkiller2 .
+GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -tags steam -ldflags "-H=windowsgui" -o coldkiller2.exe .
+```

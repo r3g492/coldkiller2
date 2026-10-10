@@ -61,7 +61,12 @@ var testConfig = struct {
 }
 
 func main() {
+	steamInit()
 	loadConfig()
+	if currentConfig.GameCleared {
+		// Grant retroactively to players who cleared before achievements existed.
+		steamUnlock(achievementGameCleared)
+	}
 
 	initFlags := uint32(rl.FlagWindowResizable)
 	switch currentConfig.WindowMode {
@@ -148,6 +153,7 @@ func main() {
 	initAmbient()
 
 	for !rl.WindowShouldClose() {
+		steamUpdate()
 		dt := rl.GetFrameTime()
 		mouseLocation := virtualMousePosition()
 		ip := input.ReadInput(keyMap)
@@ -186,6 +192,7 @@ func main() {
 			if !currentConfig.GameCleared {
 				currentConfig.GameCleared = true
 				saveConfig()
+				steamUnlock(achievementGameCleared)
 			}
 			if !winSoundPlayed {
 				rl.StopSound(sound.Track)
