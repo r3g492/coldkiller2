@@ -46,7 +46,7 @@ lipo -create -output coldkiller2 coldkiller2_arm64 coldkiller2_amd64
 ```
 
 depot contents:
-- windows: `coldkiller2.exe` + `steam_api64.dll` (from Steamworks SDK `redistributable_bin/win64/`, not in this repo)
+- windows: `coldkiller2.exe` + `steam_api64.dll` (from Steamworks SDK **1.65** `redistributable_bin/win64/`, not in this repo; must match the SDK version go-steamworks targets, or the game crashes on start)
 - linux: `coldkiller2` (steam library is embedded)
 - macos: `coldkiller2` (steam library is embedded)
 

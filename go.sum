@@ -1,9 +1,9 @@
-github.com/ebitengine/purego v0.10.2 h1:W809HbnvzAxgdm+aOvlSekrM16wGCdT/e76+9tS7gzE=
-github.com/ebitengine/purego v0.10.2/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
+github.com/ebitengine/purego v0.11.1 h1:2zpWRSQNVKN4eKsKO9eM1ILDgWfYMY9GwqRmK6XeQ/0=
+github.com/ebitengine/purego v0.11.1/go.mod h1:DCHPP08djqhNSoTfImcnHYQRZmd0qhakvrozqaEYhGQ=
 github.com/gen2brain/raylib-go/raylib v0.55.1 h1:1rdc10WvvYjtj7qijHnV9T38/WuvlT6IIL+PaZ6cNA8=
 github.com/gen2brain/raylib-go/raylib v0.55.1/go.mod h1:BaY76bZk7nw1/kVOSQObPY1v1iwVE1KHAGMfvI6oK1Q=
-github.com/hajimehoshi/go-steamworks v0.0.0-20260807140925-2ee11408fcd7 h1:P5GNkEBs4M1yvQLxvuSUt4wbIj8wkXRQwWN3ClEor+k=
-github.com/hajimehoshi/go-steamworks v0.0.0-20260807140925-2ee11408fcd7/go.mod h1:c650F8ENJBeuyb+42ZXpWSLor7BV3ELVoj4Fj53NYOM=
+github.com/hajimehoshi/go-steamworks v0.0.0-20261002164236-7de8cacc371c h1:O84Zl0j7+RdavY4Y9tgHuzX03yR6sazWwTmHevGA6M0=
+github.com/hajimehoshi/go-steamworks v0.0.0-20261002164236-7de8cacc371c/go.mod h1:Jpuw4HYlxbR8Kt4VAmO6m3YuamsW21YD79Dlx1gw2WY=
 golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f h1:W3F4c+6OLc6H2lb//N1q4WpJkhzJCK5J6kUi1NTVXfM=
 golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f/go.mod h1:J1xhfL/vlindoeF/aINzNzt2Bket5bjo9sdOYzOsU80=
 golang.org/x/sys v0.43.0 h1:Rlag2XtaFTxp19wS8MXlJwTvoh8ArU6ezoyFsMyCTNI=
