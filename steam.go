@@ -5,6 +5,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/hajimehoshi/go-steamworks"
 )
@@ -29,23 +30,40 @@ func steamInit() {
 		return
 	}
 	steamReady = true
+	fmt.Println("steam: initialized")
 }
 
+// Unlocks are queued and retried from steamUpdate: right after Init the
+// user's stats are still being fetched, and SetAchievement fails until then.
+var (
+	pendingUnlocks = map[string]bool{}
+	nextUnlockTry  time.Time
+)
+
 func steamUpdate() {
-	if steamReady {
-		steamworks.RunCallbacks()
+	if !steamReady {
+		return
+	}
+	steamworks.RunCallbacks()
+	if len(pendingUnlocks) == 0 || time.Now().Before(nextUnlockTry) {
+		return
+	}
+	nextUnlockTry = time.Now().Add(time.Second)
+	stats := steamworks.SteamUserStats()
+	for name := range pendingUnlocks {
+		if achieved, ok := stats.GetAchievement(name); ok && achieved {
+			delete(pendingUnlocks, name)
+			continue
+		}
+		if stats.SetAchievement(name) && stats.StoreStats() {
+			fmt.Println("steam: unlocked", name)
+			delete(pendingUnlocks, name)
+		}
 	}
 }
 
 func steamUnlock(name string) {
-	if !steamReady {
-		return
-	}
-	stats := steamworks.SteamUserStats()
-	if achieved, ok := stats.GetAchievement(name); ok && achieved {
-		return
-	}
-	if stats.SetAchievement(name) {
-		stats.StoreStats()
+	if steamReady {
+		pendingUnlocks[name] = true
 	}
 }

@@ -192,9 +192,9 @@ func main() {
 			if !currentConfig.GameCleared {
 				currentConfig.GameCleared = true
 				saveConfig()
-				steamUnlock(achievementGameCleared)
 			}
 			if !winSoundPlayed {
+				steamUnlock(achievementGameCleared)
 				rl.StopSound(sound.Track)
 				rl.PlaySound(sound.Win)
 				winSoundPlayed = true
