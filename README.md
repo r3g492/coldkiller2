@@ -5,3 +5,16 @@ supports windows, macos, linux
 
 
 steam page: https://store.steampowered.com/app/4690070/Kill_Per_Second/
+
+## build (on linux)
+
+linux:
+```
+go build -o coldkiller2 .
+```
+
+windows (requires mingw-w64):
+```
+GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -ldflags "-H=windowsgui" -o coldkiller2.exe .
+```
+`-H=windowsgui` builds a GUI exe so no console window opens alongside the game.
