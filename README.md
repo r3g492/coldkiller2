@@ -57,4 +57,5 @@ source code is licensed under the [MIT License](LICENSE).
 
 assets in `util/images/`, `util/models/` and `util/sounds/` are **not** covered by the MIT License. they are © their respective owners and included only so the game builds. do not reuse or redistribute them separately.
 - artwork: CaveTroll, used with permission
-- sounds and music: from [Pixabay](https://pixabay.com), used under the [Pixabay Content License](https://pixabay.com/service/license-summary/)
+- sounds from [Pixabay](https://pixabay.com), used under the [Pixabay Content License](https://pixabay.com/service/license-summary/): `1911-reload-6248.mp3`, `data_pion-st1-footstep-sfx-323053.mp3`, `shot_new_trimmed.mp3`, `shotgun-03-38220.mp3`
+- original music by r3g492: `song2.mp3`, `win.mp3`, `lost.mp3`
