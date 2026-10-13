@@ -50,4 +50,3 @@ depot contents:
 - linux: `coldkiller2` (steam library is embedded)
 - macos: `coldkiller2` (steam library is embedded)
 
-do not ship `steam_appid.txt`; it is only for local testing.
