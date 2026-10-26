@@ -1,10 +1,62 @@
-hardcore action shooter in raylib-go  
-supports windows, macos, linux  
+# Kill Per Second
+
+top-down action shooter written in Go with raylib-go. released on Steam for windows, macos and linux.
 
 <img width="720" height="405" alt="output" src="https://github.com/user-attachments/assets/6102b293-1c82-4626-b714-2db04ed721b4" />
 
-
 steam page: https://store.steampowered.com/app/4690070/Kill_Per_Second/
+
+- ~6k lines of Go, 2 direct dependencies (`raylib-go`, `go-steamworks`)
+- 100 stages, 8 enemy types, 4 AI behaviours
+- single binary per platform with all assets embedded
+
+## design notes
+
+this is a game, not a backend service, but these are the structural choices I made while building it.
+
+### packages and the frame loop
+
+each gameplay area (`enemy`, `bullet`, `blast`, `structure`, `stage`, `killer`) is a package with a `Manager` that owns its state and has `Init / Mutate / Draw3D / Unload`. `main.go` calls them in a fixed order every frame: input → stage → enemies → player → bullets → blasts → visibility → render.
+
+the player and enemies don't create bullets directly. they return `[]BulletCmd` values and `bullet.Manager` creates the bullets. this keeps `enemy` from importing `bullet`, so the package dependencies only go one way.
+
+### world time vs real time
+
+slow-motion runs the world at 0.1× speed. enemies, bullets and blasts use the scaled `worldDt`. the combo timer, the slow-mo meter and UI animations use real `dt`, so slow-mo doesn't stretch the combo window. both values are passed in explicitly (`player.Mutate(ip, worldDt, dt, ...)`).
+
+### per-frame performance
+
+- per-frame buffers are reset with `buf[:0]` and reused instead of reallocated
+- dead bullets and blasts are removed by swapping with the last element
+- structures and enemies are stored in spatial grids, so collision checks only look at nearby cells
+- bullets move more than an enemy's width per frame, so hits are checked against the segment from the previous position to the current one. movement is resolved one axis at a time so characters slide along walls
+
+### stages as data
+
+the 100 stages are stored in `stage/data/stages.json` and embedded with `go:embed`. enemy and structure kinds are strings mapped to factory functions, and unknown kinds are skipped. there's an in-game stage editor (test mode only) that edits the same data and writes it back to the JSON file.
+
+### save file
+
+one JSON file in the user config directory. missing fields fall back to zero values, so older saves still load. the save stores the last cleared stage, and the menu works out whether to show *Retry* or *GAME CLEARED* by comparing it to the number of stages, without a separate flag. progress is saved when a stage is cleared.
+
+### steam and platform code
+
+Steam support is behind a build tag: `steam.go` has the real implementation and `steam_stub.go` has empty functions, so the rest of the code doesn't check for Steam. platform-specific window handling uses the same approach (`platform_darwin.go`, `platform_linux.go`, `console_windows.go`).
+
+achievement unlocks are queued and retried once a second, because Steam rejects them until user stats have loaded. players who cleared the game before achievements were added get the achievement the next time they launch the game. if Steam fails to start, the game runs without achievements.
+
+### smaller things
+
+- the game renders at 1600×900 and is letterboxed to the window. mouse input is converted back to those coordinates
+- stage loading is split across frames so the loading screen keeps drawing
+- if a stage drags on, extra robots start spawning after 30s, capped at 12 per wave
+- upgrades and rebindable keys are defined as tables, so adding one is a single entry
+
+### known shortcuts
+
+- screen state (`showInitMenu`, `intermission`, `paused`, ...) is a set of package-level booleans rather than a proper state machine
+- no automated tests. I tested by playing, with a test-mode panel for jumping to any stage
+- embedded models and sounds are written to temp files for raylib to load and never cleaned up
 
 ## build
 
