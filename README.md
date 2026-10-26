@@ -12,7 +12,7 @@ steam page: https://store.steampowered.com/app/4690070/Kill_Per_Second/
 
 ## design notes
 
-this is a game, not a backend service, but these are the structural choices I made while building it.
+these are the structural choices I made while building it.
 
 ### packages and the frame loop
 
